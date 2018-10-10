@@ -96,7 +96,7 @@
         <v-icon>menu</v-icon>
       </v-toolbar-side-icon>
       <v-toolbar-title class="mr-5 align-center">
-        <span class="title">VueBudget</span>
+        <span class="title">raBudget</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-menu v-if="account.status.loggedIn">

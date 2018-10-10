@@ -74,7 +74,8 @@
         "optional": "opcjonalne",
         "fromDate": "Od daty",
         "toDate": "Do daty",
-        "foundData": "Znalezione dane"
+        "foundData": "Znalezione dane",
+        "search": "Szukaj"
     },
     "forms": {
         "requiredField": "Pole jest wymagane.",
@@ -133,5 +134,11 @@
         "addOrDelete": "Dodaj lub odejmij od kwoty",
         "finalAmount": "Kwota ostateczna",
         "deleteConfirm": "Czy napewno chcesz usunąć transakcję? Operacji nie można cofnąć!"
+    },
+    "allocations": {
+        "recentAllocations": "Ostatnie alokacje",
+        "date": "Data alokacji",
+        "editing": "Edycja alokacji",
+        "deleteConfirm": "Czy napewno chcesz usunąć alokację? Operacji nie można cofnąć!"
     }
 }

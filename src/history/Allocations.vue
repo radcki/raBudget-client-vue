@@ -4,7 +4,7 @@
 
       <v-flex xs12>
          <v-subheader class="headline">
-            {{$t('transactions.recentTransactions')}}
+            {{$t('allocations.recentAllocations')}}
         </v-subheader>  
       </v-flex>
 
@@ -13,42 +13,27 @@
           <v-card-text>
             <v-container fluid grid-list-sm class="pa-0">
                 <v-layout row wrap> 
-                  <v-flex xs12 md6>
-                    <v-container fluid grid-list-sm class="pa-0">
-                      <v-layout row wrap> 
-                        <v-flex xs6>
-                          <v-radio-group light v-model="categoryType" :mandatory="true" column>
-                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.spendings')" value="spendings"></v-radio>
-                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.incomes')" value="incomes"></v-radio>
-                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.savings')" value="savings"></v-radio>
-                          </v-radio-group>
-                        </v-flex>
-                        <v-flex xs6>
-                          <v-select
-                            :items="categories[categoryType]"
-                            v-model="filters.categories"
-                            v-if="filters.categories"
-                            multiple                            
-                            item-text="name"
-                            return-object
-                            single-line
-                            class="caption"
-                            :rules="requiredRule"
-                            persistent-hint
-                            :hint="$t('general.category')">
+                  <v-flex xs12 md6>                    
+                    <v-select
+                      :items="categories['spendings']"
+                      v-model="filters.categories"
+                      v-if="filters.categories"
+                      multiple                            
+                      item-text="name"
+                      return-object
+                      single-line
+                      class="caption"
+                      :rules="requiredRule"
+                      persistent-hint
+                      :hint="$t('general.category')">
 
-                            <template slot="item" slot-scope="data">
-                              <v-list-tile-action v-if="data.item">
-                                <v-icon>{{ data.item.icon }}</v-icon>
-                              </v-list-tile-action>                      
-                              <span>{{ data.item.name }}</span>
-                            </template>
-                          </v-select>
-
-                        </v-flex>
-                        
-                      </v-layout>
-                    </v-container>
+                      <template slot="item" slot-scope="data">
+                        <v-list-tile-action v-if="data.item">
+                          <v-icon>{{ data.item.icon }}</v-icon>
+                        </v-list-tile-action>                      
+                        <span>{{ data.item.name }}</span>
+                      </template>
+                    </v-select>
                   </v-flex>
 
                   <v-flex xs12 md6>
@@ -130,12 +115,12 @@
           <v-card-actions>
             <v-spacer>              
             </v-spacer>
-            <v-btn color="primary" @click="fetchTransactions()">Wyszukaj</v-btn>
+            <v-btn color="primary" @click="fetchAllocations()">Wyszukaj</v-btn>
           </v-card-actions>
         </v-card> 
       </v-flex>
 
-       <v-flex xs12 v-if="transactions || loading">
+       <v-flex xs12 v-if="allocations || loading">
          <v-subheader class="headline">
             {{$t('general.foundData')}}
         </v-subheader>
@@ -155,37 +140,50 @@
       </v-flex>
 
 
-      <v-flex xs12 v-if="transactions">
+      <v-flex xs12 class="elevation-1 white" v-if="allocations">
+        <v-layout row justify-end>
+          <v-flex xs4>
+            <v-text-field
+              v-if="$vuetify.breakpoint.smAndUp"
+              v-model="search"
+              append-icon="search"               
+              :label="$t('general.search')"
+              single-line 
+              hide-details></v-text-field>
+          </v-flex>
+        </v-layout>
+        
         <v-data-table
           v-if="$vuetify.breakpoint.smAndUp"
           :headers="headers"
-          :items="transactions[categoryType]"
+          :items="allocations"
           :loading="loading"
+          :search="search"
           must-sort
-          class="elevation-1"
+          
           disable-initial-sort
-          :rows-per-page-items="[10,15,25,50,{text: $t('general.all'), value: -1}]"
+          :rows-per-page-items="[15,25,50,{text: $t('general.all'), value: -1}]"
         >
           <template slot="items" slot-scope="props">
             <td>
-              <v-icon class="px-2">{{ props.item.category.icon }}</v-icon>
-              {{ props.item.category.name }}
+              <v-icon class="px-2">{{ props.item.destinationCategory.icon }}</v-icon>
+              {{ props.item.destinationCategory.name }}
             </td>
             <td>{{ props.item.date | moment("dddd, D.MM.YYYY") }}</td>
             <td>{{ props.item.description }}</td>
             <td>{{ props.item.amount | currency($currencies[budget.currency]) }}</td>
             <td>            
-              <v-icon color="primary" @click="editTransaction(props.item.transactionId)">edit</v-icon>
-              <v-icon color="red darken-3" @click="deleteTransaction(props.item.transactionId)">delete</v-icon>            
+              <v-icon color="primary" @click="editAllocation(props.item.allocationId)">edit</v-icon>
+              <v-icon color="red darken-1" @click="deleteAllocation(props.item.allocationId)">delete</v-icon>            
             </td>
           </template>
         </v-data-table>
 
         <v-list class="py-0 elevation-1" v-if="!$vuetify.breakpoint.smAndUp" dense subheader>     
-        <template  v-for="(transaction, index) in transactions[categoryType]">
+        <template  v-for="(transaction, index) in allocations[categoryType]">
           <v-list-tile :key="index" avatar class="pb-1">
             <v-list-tile-avatar>
-              <v-icon>{{ transaction.category.icon }}</v-icon>
+              <v-icon>{{ transaction.destinationCategory.icon }}</v-icon>
             </v-list-tile-avatar>
 
             <v-list-tile-content>
@@ -202,10 +200,10 @@
             </v-list-tile-content>
 
             <v-list-tile-action>
-              <v-icon @click="editTransaction(transaction.transactionId)">edit</v-icon>
+              <v-icon @click="editAllocation(transaction.allocationId)">edit</v-icon>
             </v-list-tile-action>
             <v-list-tile-action>
-              <v-icon @click="deleteTransaction(transaction.transactionId)">delete</v-icon>
+              <v-icon @click="deleteAllocation(transaction.allocationId)">delete</v-icon>
             </v-list-tile-action>
           </v-list-tile>
         </template>
@@ -214,23 +212,24 @@
  
     </v-layout>
     
-    <transaction-editor ref="transactionEditor"></transaction-editor>
+    <allocation-editor ref="allocationEditor"></allocation-editor>
 </v-container>
 </template>
 
 <script>
-import { transactionsService } from "../_services/transactions.service";
+import { allocationsService } from "../_services/allocations.service";
 import { budgetService } from "../_services/budget.service";
 import { mapState, mapActions } from "vuex";
 
   export default {
     components: {
-      "transaction-editor": () => import('../components/TransactionEditor')
+      "allocation-editor": () => import('../components/AllocationEditor')
     },
     data () {
       return {
         loading: false,
         error: false,
+        search: null,
         dateMenuStart: false,
         dateMenuEnd: false,
         categoryType: "spendings",
@@ -278,7 +277,7 @@ import { mapState, mapActions } from "vuex";
         ],
         sliderValue: [null,null],
         sliderMax: null,
-        transactions: null,
+        allocations: null,
         tab: 0,
         color: ['amber darken-1', 'green darken-1', 'blue darken-1', 'purple darken-1'],
         requiredRule: [v => !!v || this.$t('forms.requiredField'),],
@@ -295,18 +294,16 @@ import { mapState, mapActions } from "vuex";
       $route(to, from) {
         this.loadBudget(this.$route.params.id);
         this.refreshFields();
-        this.fetchTransactions();
+        this.fetchAllocations();
       },
       'budget.startDate': function(date) {
         if(date!= null){
           this.sliderMax = this.$moment().diff(this.$moment(date), 'days');
           var daysSinceStart = this.daysSinceStart(this.$moment().format("YYYY-MM-DD"));
           this.sliderValue[1] = daysSinceStart;
-          this.sliderValue[0] = (this.$moment().subtract(1, 'months') < this.$moment(this.budget.startDate) < 0 
-                                  ? this.budget.startDate 
-                                  : this.daysSinceStart(this.$moment().subtract(1, 'months').format("YYYY-MM-DD")));          
+          this.sliderValue[0] = this.budget.startDate;          
           this.refreshFields()
-          this.fetchTransactions();
+          this.fetchAllocations();
         }        
       },
       'sliderValue.0': function(minDays) {
@@ -322,9 +319,9 @@ import { mapState, mapActions } from "vuex";
         this.refreshSlider();
       },
       categoryType: function(value){ 
-        this.transactions = null;        
+        this.allocations = null;        
         this.filters.categories = this.categories[value] 
-        this.fetchTransactions();
+        this.fetchAllocations();
         },
     },
     methods: {
@@ -365,20 +362,20 @@ import { mapState, mapActions } from "vuex";
             }
           });
       },
-      fetchTransactions() {
+      fetchAllocations() {
         this.loading = true;
-        transactionsService.listTransactions(this.$route.params.id, null, this.filters.startDate, this.filters.endDate, this.filters.categories)
+        allocationsService.listAllocations(this.$route.params.id, null, this.filters.startDate, this.filters.endDate, this.filters.categories)
           .then(
             response => {            
             if (response.ok) {
               response.json().then(data=>{
                 this.loading = false;
-                this.transactions = data;
+                this.allocations = data;
               });
             } else {
               this.loading = false;
               this.error = true;
-              this.transactions = null
+              this.allocations = null
               response.json().then( data=> {
                 this.dispatchError(data.message);
               });
@@ -386,10 +383,10 @@ import { mapState, mapActions } from "vuex";
             }
           );
       },
-      editTransaction(id) {
-        this.$refs.transactionEditor.open(id).then(response => {
+      editAllocation(id) {
+        this.$refs.allocationEditor.open(id).then(response => {
           if (response && response.ok){
-            this.fetchTransactions();
+            this.fetchAllocations();
           } else if (response){
             response.json().then( data=> {
                 this.dispatchError(data.message);
@@ -397,14 +394,14 @@ import { mapState, mapActions } from "vuex";
           }
         });
       },
-      deleteTransaction(id) {
-        this.$root.$confirm('general.remove', 'transactions.deleteConfirm', { color: 'red', buttons: { yes: true, no: true, cancel: false,ok: false }})
+      deleteAllocation(id) {
+        this.$root.$confirm('general.remove', 'allocations.deleteConfirm', { color: 'red', buttons: { yes: true, no: true, cancel: false,ok: false }})
             .then( (confirm) => {
               if (confirm){
-                transactionsService.deleteTransaction(id)
+                allocationsService.deleteAllocation(id)
                     .then( response => {
                       if (response.ok) {
-                        this.refresh(this.$route.params.id);
+                        this.fetchAllocations();
                       } else {
                         response.json()
                           .then( data => {

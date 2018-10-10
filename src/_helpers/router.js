@@ -9,7 +9,8 @@ import NewBudget from '../budgets/NewBudget';
 import BudgetCategories from '../budgets/BudgetCategories.vue';
 import EditBudget from '../budgets/EditBudget.vue';
 import Overview from '../overview/Overview.vue';
-import History from '../history/History.vue';
+import Transactions from '../history/Transactions.vue';
+import Allocations from '../history/Allocations.vue';
 
 Vue.use(Router);
 
@@ -22,12 +23,11 @@ export const router = new Router({
     { path: '/profile', component: ProfilePage },
     { path: '/budget/new', name:'newBudget', component: NewBudget },
     { path: '/budget/:id/overview', name: 'overview', component: Overview },
-    { path: '/budget/:id/history', name: 'history', component: History },
-    { path: '/budget/:id/allocations', name: 'allocations' , component: NewBudget },
+    { path: '/budget/:id/history', name: 'history', component: Transactions },
+    { path: '/budget/:id/allocations', name: 'allocations' , component: Allocations },
     { path: '/budget/:id/categories', name: 'budgetCategories', component: BudgetCategories },
     { path: '/budget/:id/edit', name: 'editBudget',  component: EditBudget },
 
-    // otherwise redirect to home
     { path: '*', redirect: '/' }
   ]
 });

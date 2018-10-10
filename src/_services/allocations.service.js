@@ -54,7 +54,7 @@ function updateAllocation(allocationData) {
     return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/${allocationData.allocationId}/update`, requestOptions);
 }
 
-function listAllocations(budgetId, limitCount, startDate, endDate){
+function listAllocations(budgetId, limitCount, startDate, endDate, categories){
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,6 +63,7 @@ function listAllocations(budgetId, limitCount, startDate, endDate){
             groupCount: limitCount,
             startDate: startDate,
             endDate: endDate,
+            categories: categories
         })
     };
     return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/list`, requestOptions);
