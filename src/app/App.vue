@@ -1,0 +1,226 @@
+<template>
+ <v-app>
+   
+    <v-navigation-drawer
+      v-if="account.status.loggedIn"
+      v-model="drawer"
+      width="260"      
+      enable-resize-watcher
+      mobile-break-point="960"
+      fixed
+      clipped
+      app
+    >
+      <v-list>
+
+        <v-list-tile>
+          <v-list-tile-title class="grey--text text--darken-1">
+            Budżety:
+          </v-list-tile-title>
+          <v-list-tile-action class="justify-end">
+            <v-btn :to="{ name: 'newBudget'}" icon class="grey--text text--darken-1">
+                <v-icon >add_circle_outline</v-icon>
+              </v-btn>
+          </v-list-tile-action>
+        </v-list-tile>      
+        
+        <v-list-group       
+          v-for="(budget, i) in this.budgets"
+          v-bind:data="budget"
+          v-bind:key="i"
+          :value="$route.params.id == budget.id"
+          no-action
+          prepend-icon="expand_more" >
+
+          <v-list-tile slot="activator">
+            <v-list-tile-content>
+              <v-list-tile-title >{{ budget.name }}</v-list-tile-title>
+              <v-list-tile-sub-title  >
+                <small>Środki: {{ budget.balance | currency($currencies[budget.currency])  }}</small>
+              </v-list-tile-sub-title>
+            </v-list-tile-content>
+             
+            <v-list-tile-action>
+              <v-btn icon class="grey--text text--darken-1" :to="{ name: 'editBudget', params: { id: budget.id }}">
+                <v-icon small>edit</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+
+          <v-list-tile class="grey--text text--darken-1" :to="{ name: 'overview', params: { id: budget.id }}">
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t("budgets.overview") }}</v-list-tile-title>
+            </v-list-tile-content>
+
+            <v-list-tile-action>
+              <v-icon>home</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+
+          <v-list-tile class="grey--text text--darken-1" :to="{ name: 'history', params: { id: budget.id }}">
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t("budgets.history") }}</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon>list</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+
+          <v-list-tile class="grey--text text--darken-1" :to="{ name: 'budgetCategories', params: { id: budget.id }}">
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t("budgets.categories") }}</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon>tune</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+
+          <v-list-tile class="grey--text text--darken-1" :to="{ name: 'allocations', params: { id: budget.id }}">
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t("budgets.allocations") }}</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon>directions</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+
+        </v-list-group>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-toolbar
+      :color="account.status.loggedIn ? 'blue-grey darken-2' : 'blue-grey lighten-2'"
+      dark dense fixed clipped-left app>
+      
+      <v-toolbar-side-icon v-if="account.status.loggedIn" @click.stop="drawer = !drawer">
+        <v-icon>menu</v-icon>
+      </v-toolbar-side-icon>
+      <v-toolbar-title class="mr-5 align-center">
+        <span class="title">VueBudget</span>
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-menu v-if="account.status.loggedIn">
+        <v-btn slot="activator" icon>
+          <v-icon>more_vert</v-icon>
+        </v-btn>
+        
+        <v-list light two-line subheader>
+          <v-subheader>{{ $t("account.logged") }}: {{ account.user.username }}</v-subheader>
+
+          <v-list-tile to="/profile">
+            <v-list-tile-action>
+                <v-icon-fa class="fa-lg" icon="user-circle"/>
+            </v-list-tile-action>
+            <v-list-tile-title>{{ $t("account.account") }}</v-list-tile-title>            
+          </v-list-tile>
+
+          <v-list-tile to="/login">
+            <v-list-tile-action>
+                <v-icon-fa class="fa-lg" icon="sign-out-alt"/>
+            </v-list-tile-action>
+            <v-list-tile-title>{{ $t("account.signOut") }}</v-list-tile-title>            
+          </v-list-tile>
+
+        </v-list>
+      </v-menu>
+    </v-toolbar>
+    <v-snackbar
+      v-if="alert.message"                    
+      right
+      top
+      v-model="alert.message"  
+      :color="alert.type">
+        {{$t(alert.message)}}
+        <v-btn dark flat @click="alert.message = false">
+          <v-icon>close</v-icon>
+        </v-btn>
+    </v-snackbar>   
+    <confirm ref="confirm"></confirm>
+    <v-content>                          
+        <router-view></router-view>
+    </v-content>    
+ </v-app>
+</template>
+
+<script>
+import { mapState, mapActions } from "vuex";
+import { budgetService } from "../_services/budget.service";
+import { newBudget } from "../budgets/NewBudget";
+import Confirm from "../components/Confirm.vue";
+
+export default {
+  name: "app",
+  components: {
+    "confirm": Confirm
+  },
+  data: () => ({
+    drawer: null,
+    test: true,
+    budgets: [],
+  }),
+  computed: {
+    ...mapState({
+      alert: state => state.alert,
+      account: state => state.account
+    }),
+  },
+  mounted() {
+    this.drawer = this.$vuetify.breakpoint.lgAndUp;
+    this.$root.$confirm = this.$refs.confirm.open
+    this.budgetsFetch().then(
+      result => {
+        if (result) {
+          for(var i = 0;i<this.budgets.length;i++){
+            if (this.budgets[i].default){              
+              this.budgets[i].active = true;
+              if (this.$route.name == "home"){
+                this.$router.push({name: "overview", params: {id: this.budgets[i].id}})
+              }
+            } else {
+              this.budgets[i].active = false;
+            }
+          }
+        }
+      }
+    );
+    
+    this.$moment.locale('pl');
+  }, 
+  created() {
+    this.$root.$on('reloadBudgets', this.budgetsFetch);
+  },
+  methods: {
+    ...mapActions({
+      clearAlert: "alert/clear"
+    }),
+    budgetsFetch() {
+      return new Promise((resolve, reject) => {
+        budgetService.userBudgets()
+        .then(response => {
+          if (response.ok) {
+            response.json().then(
+              data => {
+                this.budgets = data;
+                resolve(true);
+              }
+            );
+          } else {
+            if (response.status == 404) {
+              this.budgets = [];
+              resolve(false);
+              this.$route.push("newBudget");
+            }
+          }
+        }
+      );
+      })      
+    }
+  },
+  watch: {
+    $route(to, from) {
+      // clear alert on location change
+      this.clearAlert();
+    }
+  }
+};
+</script>
