@@ -29,8 +29,7 @@
           v-bind:data="budget"
           v-bind:key="i"
           :value="$route.params.id == budget.id"
-          no-action
-          prepend-icon="expand_more" >
+          no-action >
 
           <v-list-tile slot="activator">
             <v-list-tile-content>
@@ -99,6 +98,35 @@
         <span class="title">raBudget</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      <v-menu left>
+        <v-btn slot="activator" icon>
+          <v-icon class="mr-2">language</v-icon>{{locale}}
+        </v-btn>
+        
+        <v-list light dense subheader>
+          <v-list-tile @click="switchLocale('pl')">
+            <v-list-tile-avatar>
+              <v-icon v-if="locale=='pl'">check_circle</v-icon>
+              <v-icon v-else>radio_button_unchecked</v-icon>
+            </v-list-tile-avatar>
+            <v-list-tile-title>              
+              PL
+              </v-list-tile-title>            
+          </v-list-tile>
+
+          <v-list-tile @click="switchLocale('en')">
+            <v-list-tile-avatar>
+              <v-icon v-if="locale=='en'">check_circle</v-icon>
+              <v-icon v-else>radio_button_unchecked</v-icon>
+            </v-list-tile-avatar>
+            <v-list-tile-title>              
+              EN
+              </v-list-tile-title>            
+          </v-list-tile>
+
+        </v-list>
+      </v-menu>
+
       <v-menu v-if="account.status.loggedIn">
         <v-btn slot="activator" icon>
           <v-icon>more_vert</v-icon>
@@ -154,6 +182,7 @@ export default {
     "confirm": Confirm
   },
   data: () => ({
+    locale: 'pl',
     drawer: null,
     test: true,
     budgets: [],
@@ -183,8 +212,13 @@ export default {
         }
       }
     );
+    var savedLocale = localStorage.getItem('locale');
+    if (savedLocale){
+      this.switchLocale(savedLocale);
+    } else {
+      this.switchLocale(navigator.language);
+    }
     
-    this.$moment.locale('pl');
   }, 
   created() {
     this.$root.$on('reloadBudgets', this.budgetsFetch);
@@ -193,6 +227,13 @@ export default {
     ...mapActions({
       clearAlert: "alert/clear"
     }),
+    switchLocale(locale) {      
+      locale = locale.substring(0, 2);
+      this.locale = locale;
+      localStorage.setItem('locale', locale);
+      this.$i18n.locale = locale
+      this.$moment.locale(locale);  
+    },
     budgetsFetch() {
       return new Promise((resolve, reject) => {
         budgetService.userBudgets()
@@ -220,7 +261,7 @@ export default {
     $route(to, from) {
       // clear alert on location change
       this.clearAlert();
-    }
+    },
   }
 };
 </script>

@@ -134,7 +134,8 @@ var messages = {
     en: require('./i18n/en.json')
 };
 const i18n = new VueI18n({
-    locale: 'pl',
+    locale: 'en',
+    fallbackLocale: 'en',
     messages,
   })
 
