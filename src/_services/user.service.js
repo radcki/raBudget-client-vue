@@ -73,6 +73,13 @@ function changePassword(oldpassword, newpassword) {
 }
 
 // prefixed function name with underscore because delete is a reserved word in javascript
-function _delete(id) {
-    return apiHandler.fethAuthorized(`${config.apiUrl}/users/${id}`, {method: 'DELETE'})
+function _delete(id, password) {
+    const requestOptions = {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            password: password
+        })
+    };
+    return apiHandler.fetchAuthorized(`${config.apiUrl}/users/${id}`, requestOptions)
 }

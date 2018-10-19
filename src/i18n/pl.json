@@ -3,6 +3,7 @@
         "logged": "Zalogowano",
         "logging": "Logowanie",
         "account": "Konto",
+        "deleteAccount": "Usuń konto",
         "user": "Użytkownik",
         "users": "Użytkownicy",
         "username": "Nazwa użytkownika",
@@ -28,7 +29,8 @@
         "userData": "Dane użytkownika",
         "passwordChange": "Zmiana hasła",
         "changePassword": "Zmień hasło",
-        "userNotFound": "Nie znaleziono użytkownika."
+        "userNotFound": "Nie znaleziono użytkownika.",
+        "confirmRemove": "Podaj hasło by usunąć konto"
     },
     "general": {
         "create": "Stwórz",
@@ -61,6 +63,8 @@
         "saving": "Oszczędność",
         "savings": "Oszczędności",
         "category": "Kategoria",
+        "allocation": "Alokacja",
+        "allocations": "Alokacje",
         "any": "Dowolne",
         "all": "Wszystkie",
         "load": "Wczytaj",
@@ -73,7 +77,8 @@
         "fromDate": "Od daty",
         "toDate": "Do daty",
         "foundData": "Znalezione dane",
-        "search": "Szukaj"
+        "search": "Szukaj",
+        "budgets": "Budżety"
     },
     "forms": {
         "requiredField": "Pole jest wymagane.",
@@ -90,14 +95,14 @@
         "overview": "Przegląd",
         "categories": "Kategorie",
         "history": "Historia",
-        "allocations": "Alokacje",
         "startDate": "Data początku",
         "currency": "Waluta",
         "basicData": "Informacje podstawowe",
         "notFound": "Nie znaleziono budżetu.",
         "unassignedFunds": "Niezagospodarowane środki",
         "availablefunds": "Środki w portfelu",
-        "savingsStatus": "Status oszczędności"
+        "savingsStatus": "Status oszczędności",
+        "new": "Nowy budżet"
     },
     "categories": {
         "budgetCategories": "Kategorie budżetowe",
@@ -138,5 +143,11 @@
         "date": "Data alokacji",
         "editing": "Edycja alokacji",
         "deleteConfirm": "Czy napewno chcesz usunąć alokację? Operacji nie można cofnąć!"
+    },
+    "admin": {
+        "users": "Użytkownicy",
+        "logs": "Logi",
+        "userDeleted": "Użytkownik został usunięty.",
+        "deletionFailure": "Niepowodzenie! Użytkownik nie został usunięty."
     }
 }

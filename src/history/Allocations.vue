@@ -115,7 +115,7 @@
           <v-card-actions>
             <v-spacer>              
             </v-spacer>
-            <v-btn color="primary" @click="fetchAllocations()">Wyszukaj</v-btn>
+            <v-btn color="primary" @click="fetchAllocations()">{{ $t('general.search') }}</v-btn>
           </v-card-actions>
         </v-card> 
       </v-flex>

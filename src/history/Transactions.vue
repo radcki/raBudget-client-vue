@@ -130,7 +130,7 @@
           <v-card-actions>
             <v-spacer>              
             </v-spacer>
-            <v-btn color="primary" @click="fetchTransactions()">Wyszukaj</v-btn>
+            <v-btn color="primary" @click="fetchTransactions()">{{ $t('general.search') }}</v-btn>
           </v-card-actions>
         </v-card> 
       </v-flex>

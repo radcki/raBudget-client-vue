@@ -16,10 +16,12 @@
                             :label="$t('account.email')"
                             required>
                         </v-text-field>                    
-                    </v-form>                
+                    </v-form>                   
+                    
                 </v-card-text>
 
                 <v-card-actions>
+                    <v-btn flat color="red" @click="accountDelete">{{$t('account.deleteAccount')}}</v-btn>
                     <v-spacer></v-spacer>
                     <v-btn 
                         color="primary"                         
@@ -84,6 +86,7 @@
                 </v-card-actions>
             </v-card>
         </v-flex>
+        
     </v-layout>
 </v-container>
 </template>
@@ -101,6 +104,7 @@ export default {
             show2: false,
             show3: false,
             user: {
+                id: null,
                 email: null,
                 username: null,
             },
@@ -136,11 +140,12 @@ export default {
         ...mapActions('users', {
             deleteUser: 'delete'
         }),
-        ...mapActions('account', ['updateProfile', 'changePassword']),
+        ...mapActions('account', ['updateProfile', 'changePassword', 'logout']),
         fetchProfile () {
             userService.getProfile().then( data => {
-                this.user.email = data.email
-                this.user.username = data.username
+                this.user.id = data.id
+                this.user.email = data.email;
+                this.user.username = data.username;
             });
         },
         handleProfileUpdate () {
@@ -156,6 +161,19 @@ export default {
                     }
                 });                
             };
+        },
+        accountDelete () {
+            this.$root.$confirm('account.deleteAccount', 'account.confirmRemove', { color: 'red', input: "password", width: 400, buttons: { yes: false, no: false, cancel: true,ok: true }})
+                .then( (input) => {
+                    if (input) {
+                        userService.delete(this.user.id, input).then(response => {
+                            if (response.ok) {
+                                this.logout();
+                                this.$router.push({name: "login"});
+                            }
+                        });
+                    }             
+                });
         }
     }
 };

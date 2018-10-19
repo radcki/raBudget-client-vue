@@ -3,6 +3,7 @@
         "logged": "Logged in",
         "logging": "Logging in",
         "account": "Account",
+        "deleteAccount": "Delete account",
         "user": "User",
         "users": "Users",
         "username": "Username",
@@ -28,7 +29,8 @@
         "userData": "User data",
         "passwordChange": "Password change",
         "changePassword": "Change password",
-        "userNotFound": "User not found."
+        "userNotFound": "User not found.",
+        "confirmRemove": "Enter your password to remove account"
     },
     "general": {
         "create": "Create",
@@ -55,25 +57,28 @@
         "save": "Save",
         "edit": "Edit",
         "spending": "Spending",
-        "spendings": "Spending",
+        "spendings": "Spendings",
         "income": "Income",
         "incomes": "Incomes",
         "saving": "Saving",
         "savings": "Savings",
         "category": "Category",
+        "allocation": "Allocation",
+        "allocations": "Allocations",
         "any": "Any",
         "all": "All",
         "load": "Load",
         "summary": "Summary",
         "changesSaved": "Changes saved.",
-        "changesNotSaved": "Changes saving failure.",
+        "changesNotSaved": "Failed to save changes.",
         "stepBack": "Step back",
         "stepForward": "Step forward",
         "optional": "optional",
         "fromDate": "From date",
         "toDate": "To date",
         "foundData": "Found data",
-        "search": "Search"
+        "search": "Search",
+        "budgets": "Budgets"
     },
     "forms": {
         "requiredField": "Field is required.",
@@ -90,14 +95,14 @@
         "overview": "Overview",
         "categories": "Categories",
         "history": "History",
-        "allocations": "Allocations",
         "startDate": "Start date",
         "currency": "Currency",
         "basicData": "Basic informations",
         "notFound": "Budget not found.",
         "unassignedFunds": "Unassigned funds",
         "availablefunds": "Available funds",
-        "savingsStatus": "Status of savings"
+        "savingsStatus": "Status of savings",
+        "new": "New budget"
     },
     "categories": {
         "budgetCategories": "Budget Categories",
@@ -138,5 +143,11 @@
         "date": "Allocation date",
         "editing": "Allocation editing",
         "deleteConfirm": "Are you sure to remove allocation? Operation cannot be undone!"
+    },
+    "admin": {
+        "users": "Users",
+        "logs": "Logs",
+        "userDeleted": "User was deleted.",
+        "deletionFailure": "Failire! User was not deleted."
     }
 }

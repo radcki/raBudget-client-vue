@@ -2,6 +2,11 @@
 <v-container >     
     <v-layout wrap align-center justify-center>
       <v-flex xs12>
+        <v-subheader class="headline">
+            {{ $t('budgets.new') }}
+        </v-subheader>
+      </v-flex>
+      <v-flex xs12>
         <v-stepper v-model="step">
           <v-stepper-header>
             <v-stepper-step :complete="step > 1" step="1">{{ $t('budgets.budget') }}</v-stepper-step>
@@ -20,7 +25,7 @@
 
             <v-divider></v-divider>
 
-            <v-stepper-step step="5">Podsumowanie</v-stepper-step>
+            <v-stepper-step step="5">{{ $t('general.summary') }}</v-stepper-step>
           </v-stepper-header>
 
           <v-stepper-items>

@@ -18,16 +18,16 @@
               grow>
               <v-tabs-slider></v-tabs-slider>
               <v-tab class="subheading white--text" ripple>
-                Wydatki
+                {{ $t('general.spending') }}
               </v-tab>
               <v-tab class="subheading white--text" ripple>
-                Wpływy
+                {{ $t('general.income') }}
               </v-tab>
               <v-tab class="subheading white--text" ripple>
-                Oszczędzności
+                {{ $t('general.saving') }}
               </v-tab>
               <v-tab class="subheading white--text" ripple>
-                Alokacje
+                {{ $t('general.allocation') }}
               </v-tab>
             </v-tabs>
 

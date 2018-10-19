@@ -7,7 +7,7 @@
       <v-card-text v-if="!options.input && !options.select" v-html="$t(message)" v-show="!!message"></v-card-text>
       <v-card-text v-if="options.input">
         <v-text-field 
-          v-model="input" :label="$t(message)"></v-text-field>
+          v-model="input" :type="options.input" :label="$t(message)"></v-text-field>
       </v-card-text>
       <v-card-text v-if="options.select">        
         <v-select
@@ -37,6 +37,7 @@ export default {
     selection: null,
     dialog: false,
     input: null,
+    inputType: "text",
     resolve: null,
     reject: null,
     message: null,
@@ -58,6 +59,7 @@ export default {
   methods: {
     open(title, message, options) {
       this.input= null;
+      this.inputType= "text"
       this.resolve= null;
       this.reject= null;
       this.message= null;

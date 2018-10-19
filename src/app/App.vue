@@ -15,7 +15,7 @@
 
         <v-list-tile>
           <v-list-tile-title class="grey--text text--darken-1">
-            Budżety:
+            {{ $t("general.budgets") }}:
           </v-list-tile-title>
           <v-list-tile-action class="justify-end">
             <v-btn :to="{ name: 'newBudget'}" icon class="grey--text text--darken-1">
@@ -35,7 +35,7 @@
             <v-list-tile-content>
               <v-list-tile-title >{{ budget.name }}</v-list-tile-title>
               <v-list-tile-sub-title  >
-                <small>Środki: {{ budget.balance | currency($currencies[budget.currency])  }}</small>
+                <small>{{ $t("general.funds") }}: {{ budget.balance | currency($currencies[budget.currency])  }}</small>
               </v-list-tile-sub-title>
             </v-list-tile-content>
              
@@ -76,7 +76,7 @@
 
           <v-list-tile class="grey--text text--darken-1" :to="{ name: 'allocations', params: { id: budget.id }}">
             <v-list-tile-content>
-              <v-list-tile-title>{{ $t("budgets.allocations") }}</v-list-tile-title>
+              <v-list-tile-title>{{ $t("general.allocations") }}</v-list-tile-title>
             </v-list-tile-content>
             <v-list-tile-action>
               <v-icon>directions</v-icon>
@@ -98,8 +98,32 @@
         <span class="title">raBudget</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
+      
+      <v-menu v-if="isAdmin">
+        <v-btn slot="activator" flat>
+          ADMIN
+        </v-btn>
+        
+        <v-list light subheader>
+          <v-list-tile to="/admin/users">
+            <v-list-tile-action>
+                <v-icon>supervised_user_circle</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-title>{{ $t("admin.users") }}</v-list-tile-title>            
+          </v-list-tile>
+
+          <v-list-tile to="/admin/logs">
+            <v-list-tile-action>
+                <v-icon>list</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-title>{{ $t("admin.logs") }}</v-list-tile-title>            
+          </v-list-tile>
+
+        </v-list>
+      </v-menu>
+
       <v-menu left>
-        <v-btn slot="activator" icon>
+        <v-btn slot="activator" flat>
           <v-icon class="mr-2">language</v-icon>{{locale}}
         </v-btn>
         
@@ -132,7 +156,7 @@
           <v-icon>more_vert</v-icon>
         </v-btn>
         
-        <v-list light two-line subheader>
+        <v-list light subheader>
           <v-subheader>{{ $t("account.logged") }}: {{ account.user.username }}</v-subheader>
 
           <v-list-tile to="/profile">
@@ -192,6 +216,9 @@ export default {
       alert: state => state.alert,
       account: state => state.account
     }),
+    isAdmin: function() {
+      return this.account.user && this.account.user.roles && this.account.user.roles.filter(function(v){return v == 1}).length > 0;
+    }
   },
   mounted() {
     this.drawer = this.$vuetify.breakpoint.lgAndUp;
@@ -209,6 +236,8 @@ export default {
               this.budgets[i].active = false;
             }
           }
+        } else {
+          this.$router.push({name: "newBudget"});
         }
       }
     );
@@ -248,8 +277,7 @@ export default {
           } else {
             if (response.status == 404) {
               this.budgets = [];
-              resolve(false);
-              this.$route.push("newBudget");
+              resolve(false);            
             }
           }
         }
