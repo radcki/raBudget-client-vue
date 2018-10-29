@@ -194,7 +194,7 @@
           </template>
         </v-data-table>
 
-        <v-list class="py-0 elevation-1" v-if="!$vuetify.breakpoint.smAndUp" dense subheader>     
+        <v-list  v-if="!$vuetify.breakpoint.smAndUp" dense subheader>     
         <template  v-for="(transaction, index) in transactions[categoryType]">
           <v-list-tile :key="index" avatar class="pb-1">
             <v-list-tile-avatar>

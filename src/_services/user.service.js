@@ -9,6 +9,7 @@ export const userService = {
     getAll,
     getById,
     update,
+    adminUpdate,
     changePassword,
     delete: _delete
 };
@@ -57,6 +58,16 @@ function update(user) {
     };
 
     return apiHandler.fetchAuthorized(`${config.apiUrl}/users/updateprofile`, requestOptions);
+}
+
+function adminUpdate(user) {
+    const requestOptions = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user)
+    };
+
+    return apiHandler.fetchAuthorized(`${config.apiUrl}/users/admin-updateprofile`, requestOptions);
 }
 
 function changePassword(oldpassword, newpassword) {

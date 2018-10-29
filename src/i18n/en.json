@@ -5,6 +5,8 @@
         "account": "Account",
         "deleteAccount": "Delete account",
         "user": "User",
+        "admin": "Administrator",
+        "adminshort": "Admin",
         "users": "Users",
         "username": "Username",
         "signIn": "Sign in",
@@ -30,7 +32,8 @@
         "passwordChange": "Password change",
         "changePassword": "Change password",
         "userNotFound": "User not found.",
-        "confirmRemove": "Enter your password to remove account"
+        "confirmRemove": "Enter your password to remove account",
+        "creationDate": "Creation date"
     },
     "general": {
         "create": "Create",
@@ -148,6 +151,7 @@
         "users": "Users",
         "logs": "Logs",
         "userDeleted": "User was deleted.",
-        "deletionFailure": "Failire! User was not deleted."
+        "deletionFailure": "Failire! User was not deleted.",
+        "userId": "Id"
     }
 }

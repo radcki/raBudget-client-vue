@@ -5,6 +5,8 @@
         "account": "Konto",
         "deleteAccount": "Usuń konto",
         "user": "Użytkownik",
+        "admin": "Administrator",
+        "adminshort": "Admin",
         "users": "Użytkownicy",
         "username": "Nazwa użytkownika",
         "signIn": "Zaloguj",
@@ -30,7 +32,9 @@
         "passwordChange": "Zmiana hasła",
         "changePassword": "Zmień hasło",
         "userNotFound": "Nie znaleziono użytkownika.",
-        "confirmRemove": "Podaj hasło by usunąć konto"
+        "confirmRemove": "Podaj hasło by usunąć konto",
+        "creationDate": "Data utworzenia",
+        "roles": "Role"
     },
     "general": {
         "create": "Stwórz",
@@ -148,6 +152,7 @@
         "users": "Użytkownicy",
         "logs": "Logi",
         "userDeleted": "Użytkownik został usunięty.",
-        "deletionFailure": "Niepowodzenie! Użytkownik nie został usunięty."
+        "deletionFailure": "Niepowodzenie! Użytkownik nie został usunięty.",
+        "userId": "Id"
     }
 }
