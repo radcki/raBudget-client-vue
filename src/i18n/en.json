@@ -33,7 +33,8 @@
         "changePassword": "Change password",
         "userNotFound": "User not found.",
         "confirmRemove": "Enter your password to remove account",
-        "creationDate": "Creation date"
+        "creationDate": "Creation date",
+        "roles": "Roles"
     },
     "general": {
         "create": "Create",

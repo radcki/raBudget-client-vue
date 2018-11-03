@@ -57,6 +57,9 @@
                 disable-initial-sort
                 :rows-per-page-items="[15,25,50,{text: $t('general.all'), value: -1}]"
                 >
+                <template slot="headerCell" slot-scope="props">
+                {{$t(props.header.text)}}
+                </template>
                 <template slot="items" slot-scope="props">
                     <td>
                         <span>{{props.item.id}}</span>
@@ -79,10 +82,17 @@
 
         <v-dialog v-model="userEditDialog" max-width="700">
             <v-card>
+                <v-toolbar dark color="primary" dense flat>
+                    <v-toolbar-title class="white--text">{{$t('account.editProfile')}}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-btn flat icon @click="userEditDialog = false">
+                        <v-icon light>close</v-icon>
+                    </v-btn>
+                </v-toolbar>
                 <v-card-text>
                     <v-text-field v-model="userEdit.username" :label="$t('account.username')"></v-text-field>
                     <v-text-field v-model="userEdit.email" :label="$t('account.email')"></v-text-field>
-                    <v-select :items="roles" v-model="userEdit.roles" multiple></v-select>
+                    <v-select :items="roles" v-model="userEdit.roles" :label="$t('account.roles')" multiple></v-select>
                 </v-card-text>
                 <v-card-actions>
                     <v-spacer></v-spacer>
@@ -116,27 +126,27 @@ export default {
             ],
             headers: [
                 {
-                    text: this.$t("admin.userId"),
+                    text: "admin.userId",
                     sortable: true,
                     value: 'id'
                 },
                 {
-                    text: this.$t("account.username"),
+                    text: "account.username",
                     sortable: true,
                     value: 'username'
                 },                
                 {
-                    text: this.$t("account.email"),
+                    text: "account.email",
                     sortable: true,
-                    value: 'username'
+                    value: 'email'
                 },
                 {
-                    text: this.$t("account.creationDate"),
+                    text: "account.creationDate",
                     sortable: true,
                     value: 'creationDate'
                 },          
                 {
-                    text: this.$t("general.actions"),
+                    text: "general.actions",
                     sortable: false
                 }
                 ],
@@ -197,7 +207,8 @@ export default {
                             }); 
                     }
                 });
-        }
+        },
+      
     }
 };
 </script>
