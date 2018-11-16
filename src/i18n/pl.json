@@ -153,6 +153,17 @@
         "logs": "Logi",
         "userDeleted": "Użytkownik został usunięty.",
         "deletionFailure": "Niepowodzenie! Użytkownik nie został usunięty.",
-        "userId": "Id"
+        "userId": "Id",
+        "level": "Poziom",
+        "message": "Komunikat",
+        "name": "Nazwa modułu",
+        "timestamp": "Czas",
+        "trace": "Trace",
+        "debug": "Debug",
+        "information": "Informacja",
+        "warning": "Ostrzeżenie",
+        "error": "Błąd",
+        "critical": "Krytyczny",
+        "none": "Brak"
     }
 }

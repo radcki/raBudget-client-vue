@@ -13,6 +13,7 @@ import Overview from '../overview/Overview.vue';
 import Transactions from '../history/Transactions.vue';
 import Allocations from '../history/Allocations.vue';
 import Users from '../admin/Users.vue';
+import Logs from '../admin/Logs.vue';
 
 Vue.use(Router);
 
@@ -27,7 +28,14 @@ export const router = new Router({
       if (store.state.account.user && store.state.account.user.roles.filter(function(v){return v == 1}).length > 0){
         next();
       } else {
-        next(false)
+        next(false);
+      }
+    } },
+    { path: '/admin/logs', component: Logs, beforeEnter: (to, from, next) => {
+      if (store.state.account.user && store.state.account.user.roles.filter(function(v){return v == 1}).length > 0){
+        next();
+      } else {
+        next(false);
       }
     } },
     { path: '/budget/new', name:'newBudget', component: NewBudget },
