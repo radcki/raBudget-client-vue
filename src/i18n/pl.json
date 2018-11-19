@@ -82,7 +82,9 @@
         "toDate": "Do daty",
         "foundData": "Znalezione dane",
         "search": "Szukaj",
-        "budgets": "Budżety"
+        "budgets": "Budżety",
+        "sum": "Suma",
+        "refresh": "Odśwież"
     },
     "forms": {
         "requiredField": "Pole jest wymagane.",
@@ -125,7 +127,8 @@
         "spendingThisMonth": "Wydatki w tym miesiącu",
         "yearBalance": "Pozostałe środki w roku",
         "sourceCategory": "Kategoria źródłowa",
-        "destinationCategory": "Kategoria docelowa"
+        "destinationCategory": "Kategoria docelowa",
+        "categoryType": "Typ kategorii"
     },
     "transactions": {
         "categoryTransfer": "Transfer transakcji",
@@ -165,5 +168,19 @@
         "error": "Błąd",
         "critical": "Krytyczny",
         "none": "Brak"
+    },
+    "reports": {
+        "reports": "Raporty",
+        "periodFull": "Cały okres",
+        "period6m": "Ostatnie 6 miesięcy",
+        "period1m": "Miesiąc wstecz",
+        "budgetSum": "Zabudżetowano",
+        "transactionsSum": "Suma transakcji",
+        "allocationsSum": "Suma alokacji",
+        "averagePerDay": "Średnia dziennia",
+        "averagePerMonth": "Średnia miesięczna",
+        "selectCategory": "Wybierz co najmniej jedną kategorie aby pokazać wykres",
+        "periodSummary": "Podsumowanie okresu",
+        "monthByMonth": "Miesiąc po miesiącu"
     }
 }

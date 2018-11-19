@@ -575,310 +575,308 @@ import { transactionsService } from "../_services/transactions.service";
 import { allocationsService } from "../_services/allocations.service";
 import { mapState, mapActions } from "vuex";
 
-  export default {
-    components: {
-      "transaction-editor": () => import('../components/TransactionEditor')
+export default {
+  components: {
+    "transaction-editor": () => import("../components/TransactionEditor")
+  },
+  data() {
+    return {
+      editorDialog: false,
+      valid: true,
+      budget: {
+        name: null,
+        startDate: null,
+        currency: null,
+        balance: null,
+        unassignedFunds: null
+      },
+      dateMenu: false,
+      categories: {
+        incomes: [],
+        spendings: [],
+        savings: []
+      },
+      transactions: {
+        incomes: null,
+        spendings: null,
+        savings: null
+      },
+      categoriesBalance: null,
+      savingBalance: null,
+      editor: {
+        category: null,
+        sourceCategory: null,
+        date: null,
+        description: null,
+        amount: null
+      },
+      tab: 0,
+      color: [
+        "amber darken-1",
+        "green darken-1",
+        "blue darken-1",
+        "purple darken-1"
+      ],
+      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+    };
+  },
+  computed: {
+    currencies: function() {
+      return Object.keys(this.$currencies);
     },
-    data () {
-      return {
-        editorDialog: false,
-        valid: true,
-        budget: {
-          name: null,
-          startDate: null,
-          currency: null,
-          balance: null,
-          unassignedFunds: null,
-        },
-        dateMenu: false,
-        categories: {
-          incomes: [],
-          spendings: [],
-          savings: []
-        },
-        transactions: {
-          incomes: null,
-          spendings: null,
-          savings: null
-        },
-        categoriesBalance: null,
-        savingBalance: null,
-        editor: {
-          category: null,
-          sourceCategory: null,
-          date: null,
-          description: null,
-          amount: null
-        },
-        tab: 0,
-        color: ['amber darken-1', 'green darken-1', 'blue darken-1', 'purple darken-1'],
-        requiredRule: [v => !!v || this.$t('forms.requiredField'),],
+    selectedType: function() {
+      this.editor.category = null;
+      return this.tab == 0 || this.tab == 3
+        ? "spendings"
+        : this.tab == 1
+          ? "incomes"
+          : this.tab == 2
+            ? "savings"
+            : "allocations";
+    },
+    spendingsByDate: function() {
+      if (this.transactions.spendings) {
+        return this.transactions.spendings.reduce((acc, transaction) => {
+          (acc[transaction.date] = acc[transaction.date] || []).push(
+            transaction
+          );
+          return acc;
+        }, {});
       }
     },
-    computed: {
-      currencies: function() { return Object.keys(this.$currencies); },
-      selectedType: function() { this.editor.category = null;      
-       return (
-        this.tab == 0 || this.tab == 3
-          ? 'spendings' 
-          : (this.tab == 1
-            ? 'incomes' 
-            : (this.tab == 2 ? 'savings' : 'allocations'))) 
-      },
-      spendingsByDate: function() {
-        if (this.transactions.spendings){
-          return this.transactions.spendings.reduce((acc, transaction) => {
-            (acc[transaction.date] = acc[transaction.date] || []).push(transaction)
-            return acc
-          }, {})
-        }
-        
-      },
-      incomesByDate: function() {
-        if (this.transactions.incomes) {
-          return this.transactions.incomes.reduce((acc, transaction) => {
-            (acc[transaction.date] = acc[transaction.date] || []).push(transaction)
-            return acc
-          }, {})
-        }
-        
-      },
-      savingsByDate: function() {
-        if (this.transactions.savings) {
-          return this.transactions.savings.reduce((acc, transaction) => {
-            (acc[transaction.date] = acc[transaction.date] || []).push(transaction)
-            return acc
-          }, {})
-        }
-        
-      },      
-    },
-    mounted: function() {
-      this.editor.date = this.getDate();
-      this.refresh(this.$route.params.id);
-    },
-    watch : {
-      $route(to, from) {
-        this.clear();
-        this.refresh(to.params.id)        
-      },
-      tab: function(value){
-        this.$refs.editorForm.resetValidation()
+    incomesByDate: function() {
+      if (this.transactions.incomes) {
+        return this.transactions.incomes.reduce((acc, transaction) => {
+          (acc[transaction.date] = acc[transaction.date] || []).push(
+            transaction
+          );
+          return acc;
+        }, {});
       }
     },
-    methods: {
-      ...mapActions({
-        dispatchError: "alert/error",
-        dispatchSuccess: "alert/success"
-      }),
-      refresh(id) {
-        this.loadBudget(id);
-        this.fetchLeatestTransactions(id);
-        this.fetchSpendingCategoriesBalance(id);
-        this.fetchSavingCategoriesBalance(id);
-        this.unassignedFunds(id);
-      },
-      clear() {     
-        this.budget = {
-          name: null,
-          startDate: null,
-          currency: null,
-          balance: null,
-          unassignedFunds: null,
-        };
-        this.categories = {
-          incomes: [],
-          spendings: [],
-          savings: []
-        };
-        this.transactions = {
-          incomes: null,
-          spendings: null,
-          savings: null
-        };
-        this.categoriesBalance = null;
-      },
-      loadBudget(id) {
-        budgetService.getBudget(id).then(
-          response => {
-            if (response.ok) {
-              response.json().then(data=>{
-                this.budget.balance = data.balance;
-                this.budget.currency = data.currency;
-                this.categories = {
-                  spendings: data.spendingCategories,
-                  savings: data.savingCategories,
-                  incomes: data.incomeCategories
-                };
-
-              });
-            } else {
-              reponse.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
+    savingsByDate: function() {
+      if (this.transactions.savings) {
+        return this.transactions.savings.reduce((acc, transaction) => {
+          (acc[transaction.date] = acc[transaction.date] || []).push(
+            transaction
+          );
+          return acc;
+        }, {});
+      }
+    }
+  },
+  mounted: function() {
+    this.editor.date = this.getDate();
+    this.refresh(this.$route.params.id);
+  },
+  watch: {
+    $route(to, from) {
+      this.clear();
+      this.refresh(to.params.id);
+    },
+    tab: function(value) {
+      this.$refs.editorForm.resetValidation();
+    }
+  },
+  methods: {
+    ...mapActions({
+      dispatchError: "alert/error",
+      dispatchSuccess: "alert/success"
+    }),
+    refresh(id) {
+      this.loadBudget(id);
+      this.fetchLeatestTransactions(id);
+      this.fetchSpendingCategoriesBalance(id);
+      this.fetchSavingCategoriesBalance(id);
+      this.unassignedFunds(id);
+    },
+    clear() {
+      this.budget = {
+        name: null,
+        startDate: null,
+        currency: null,
+        balance: null,
+        unassignedFunds: null
+      };
+      this.categories = {
+        incomes: [],
+        spendings: [],
+        savings: []
+      };
+      this.transactions = {
+        incomes: null,
+        spendings: null,
+        savings: null
+      };
+      this.categoriesBalance = null;
+    },
+    loadBudget(id) {
+      budgetService.getBudget(id).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.budget.balance = data.balance;
+            this.budget.currency = data.currency;
+            this.categories = {
+              spendings: data.spendingCategories,
+              savings: data.savingCategories,
+              incomes: data.incomeCategories
+            };
           });
-      },
-      fetchLeatestTransactions(budgetId) {
-        transactionsService.listTransactions(budgetId, 8, null, null)
-          .then(
-            response => {
-            if (response.ok) {
-              response.json().then(data=>{
-                this.transactions = data;
-              });
-            } else {
-              reponse.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
-            }
-          );
-      },
-      fetchSpendingCategoriesBalance(budgetId) {
-        budgetService.getSpendingCategoriesBalance(budgetId)
-          .then(
-            response => {
-            if (response.ok) {
-              response.json().then(data=>{
-                this.categoriesBalance = data;
-              });
-            } else {
-              response.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
-            }
-          );
-      },
-      fetchSavingCategoriesBalance(budgetId) {
-        budgetService.getSavingCategoriesBalance(budgetId)
-          .then(
-            response => {
-            if (response.ok) {
-              response.json().then(data=>{
-                this.savingBalance = data;
-              });
-            } else {
-              response.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
-            }
-          );
-      },
-      createTransaction() {
-        if (this.$refs.editorForm.validate()){
-          transactionsService.createTransaction(this.editor).then(        
-            response => {
-              if (response.ok) {
-                this.refresh(this.$route.params.id);
-                editorDialog = false
-                this.editor = {
-                  category: null,
-                  date: this.getDate(),
-                  description: null,
-                  amount: null
-                };
-                this.$refs.editorForm.resetValidation()
-              } else {
-                reponse.json().then( data=> {
-                  this.dispatchError(data.message);
-                });
-              }
-            });
+        } else {
+          reponse.json().then(data => {
+            this.dispatchError(data.message);
+          });
         }
-      },
-      createAllocation() {
-        if (this.$refs.editorForm.validate()){
-          allocationsService.createAllocation(this.editor).then(
-            response => {
-              if (response.ok) {
-                this.refresh(this.$route.params.id);
-                this.editorDialog = false
-                this.editor = {
-                  category: null,
-                  date: this.getDate(),
-                  description: null,
-                  amount: null
-                };
-                this.$refs.editorForm.resetValidation()
-              } else {
-                reponse.json().then( data=> {
-                  this.dispatchError(data.message);
-                });
-              }
+      });
+    },
+    fetchLeatestTransactions(budgetId) {
+      transactionsService
+        .listTransactions(budgetId, 8, null, null)
+        .then(response => {
+          if (response.ok) {
+            response.json().then(data => {
+              this.transactions = data;
             });
-        }        
-      },
-      editTransaction(id) {
-        this.$refs.transactionEditor.open(id).then(response => {
-          if (response && response.ok){
-            this.refresh(this.$route.params.id)
-          } else if (response){
-            response.json().then( data=> {
-                this.dispatchError(data.message);
-              });
+          } else {
+            reponse.json().then(data => {
+              this.dispatchError(data.message);
+            });
           }
         });
-      },
-      deleteTransaction(id) {
-        this.$root.$confirm('general.remove', 'transactions.deleteConfirm', { color: 'red', buttons: { yes: true, no: true, cancel: false,ok: false }})
-            .then( (confirm) => {
-              if (confirm){
-                transactionsService.deleteTransaction(id)
-                    .then( response => {
-                      if (response.ok) {
-                        this.refresh(this.$route.params.id);
-                      } else {
-                        response.json()
-                          .then( data => {
-                            this.dispatchError(data.message);
-                          });
-                      }
-                    });
-                }              
-            });
-      },
-      getDate () {
-        const toTwoDigits = num => num < 10 ? '0' + num : num;
-        let today = new Date();
-        let year = today.getFullYear();
-        let month = toTwoDigits(today.getMonth() + 1);
-        let day = toTwoDigits(today.getDate());
-        return `${year}-${month}-${day}`;
-      },
-      unassignedFunds(id) {
-        budgetService.getUnassigned(id).then(
-          response => {
-            if (response.ok){
-              response.json().then(
-                data => {
-                  this.budget.unassignedFunds = data.funds;
-                }
-              ); 
-            } else {
-              response.json().then(
-                error => {
-                  this.budget.unassignedFunds = "?";
-                })
-            }
-          }
-        );
-      },
-      conditionalColor (percentValue) {
-        if (percentValue > 90){
-          return "green darken-3"
-        } else if (percentValue > 60){
-          return "light-green darken-1"
-        } else if (percentValue > 30){
-          return "yellow darken-1"
-        } else if (percentValue >= -1){
-          return "orange lighten-1"
-        } else if (percentValue < -1){
-          return "deep-orange darken-4"
+    },
+    fetchSpendingCategoriesBalance(budgetId) {
+      budgetService.getSpendingCategoriesBalance(budgetId).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.categoriesBalance = data;
+          });
+        } else {
+          response.json().then(data => {
+            this.dispatchError(data.message);
+          });
         }
+      });
+    },
+    fetchSavingCategoriesBalance(budgetId) {
+      budgetService.getSavingCategoriesBalance(budgetId).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.savingBalance = data;
+          });
+        } else {
+          response.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
+    },
+    createTransaction() {
+      if (this.$refs.editorForm.validate()) {
+        transactionsService.createTransaction(this.editor).then(response => {
+          if (response.ok) {
+            this.refresh(this.$route.params.id);
+            this.editorDialog = false;
+            this.editor = {
+              category: null,
+              date: this.getDate(),
+              description: null,
+              amount: null
+            };
+            this.$refs.editorForm.resetValidation();
+          } else {
+            reponse.json().then(data => {
+              this.dispatchError(data.message);
+            });
+          }
+        });
+      }
+    },
+    createAllocation() {
+      if (this.$refs.editorForm.validate()) {
+        allocationsService.createAllocation(this.editor).then(response => {
+          if (response.ok) {
+            this.refresh(this.$route.params.id);
+            this.editorDialog = false;
+            this.editor = {
+              category: null,
+              date: this.getDate(),
+              description: null,
+              amount: null
+            };
+            this.$refs.editorForm.resetValidation();
+          } else {
+            reponse.json().then(data => {
+              this.dispatchError(data.message);
+            });
+          }
+        });
+      }
+    },
+    editTransaction(id) {
+      this.$refs.transactionEditor.open(id).then(response => {
+        if (response && response.ok) {
+          this.refresh(this.$route.params.id);
+        } else if (response) {
+          response.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
+    },
+    deleteTransaction(id) {
+      this.$root
+        .$confirm("general.remove", "transactions.deleteConfirm", {
+          color: "red",
+          buttons: { yes: true, no: true, cancel: false, ok: false }
+        })
+        .then(confirm => {
+          if (confirm) {
+            transactionsService.deleteTransaction(id).then(response => {
+              if (response.ok) {
+                this.refresh(this.$route.params.id);
+              } else {
+                response.json().then(data => {
+                  this.dispatchError(data.message);
+                });
+              }
+            });
+          }
+        });
+    },
+    getDate() {
+      const toTwoDigits = num => (num < 10 ? "0" + num : num);
+      let today = new Date();
+      let year = today.getFullYear();
+      let month = toTwoDigits(today.getMonth() + 1);
+      let day = toTwoDigits(today.getDate());
+      return `${year}-${month}-${day}`;
+    },
+    unassignedFunds(id) {
+      budgetService.getUnassigned(id).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.budget.unassignedFunds = data.funds;
+          });
+        } else {
+          response.json().then(error => {
+            this.budget.unassignedFunds = "?";
+          });
+        }
+      });
+    },
+    conditionalColor(percentValue) {
+      if (percentValue > 90) {
+        return "green darken-3";
+      } else if (percentValue > 60) {
+        return "light-green darken-1";
+      } else if (percentValue > 30) {
+        return "yellow darken-1";
+      } else if (percentValue >= -1) {
+        return "orange lighten-1";
+      } else if (percentValue < -1) {
+        return "deep-orange darken-4";
       }
     }
   }
+};
 </script>

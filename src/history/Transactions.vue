@@ -236,199 +236,232 @@ import { transactionsService } from "../_services/transactions.service";
 import { budgetService } from "../_services/budget.service";
 import { mapState, mapActions } from "vuex";
 
-  export default {
-    components: {
-      "transaction-editor": () => import('../components/TransactionEditor')
-    },
-    data () {
-      return {
-        loading: false,
-        error: false,
-        search: null,
-        dateMenuStart: false,
-        dateMenuEnd: false,
-        categoryType: "spendings",
-        budget: {
-          name: null,
-          startDate: null,
-          currency: null,
-          balance: null,
+export default {
+  components: {
+    "transaction-editor": () => import("../components/TransactionEditor")
+  },
+  data() {
+    return {
+      loading: false,
+      error: false,
+      search: null,
+      dateMenuStart: false,
+      dateMenuEnd: false,
+      categoryType: "spendings",
+      budget: {
+        name: null,
+        startDate: null,
+        currency: null,
+        balance: null
+      },
+      filters: {
+        startDate: null,
+        endDate: null,
+        categories: null
+      },
+      categories: {
+        incomes: null,
+        spendings: null,
+        savings: null
+      },
+      headers: [
+        {
+          text: this.$t("general.category"),
+          sortable: true,
+          value: "category"
         },
-        filters: {
-          startDate: null,
-          endDate: null,
-          categories: null
+        {
+          text: this.$t("general.date"),
+          sortable: true,
+          value: "date"
         },
-        categories: {
-          incomes: null,
-          spendings: null,
-          savings: null
+        {
+          text: this.$t("general.description"),
+          sortable: true,
+          value: "description"
         },
-        headers: [
-          {
-            text: this.$t("general.category"),
-            sortable: true,
-            value: 'category'
-          },
-          {
-            text: this.$t("general.date"),
-            sortable: true,
-            value: 'date'
-          },
-          {
-            text: this.$t("general.description"),
-            sortable: true,
-            value: 'description'
-          },          
-          {
-            text: this.$t("general.amount"),
-            sortable: true,
-            value: 'amount'
-          },          
-          {
-            text: this.$t("general.actions"),
-            sortable: false
-          }
-        ],
-        sliderValue: [null,null],
-        sliderMax: null,
-        transactions: null,
-        tab: 0,
-        color: ['amber darken-1', 'green darken-1', 'blue darken-1', 'purple darken-1'],
-        requiredRule: [v => !!v || this.$t('forms.requiredField'),],
-      }
+        {
+          text: this.$t("general.amount"),
+          sortable: true,
+          value: "amount"
+        },
+        {
+          text: this.$t("general.actions"),
+          sortable: false
+        }
+      ],
+      sliderValue: [null, null],
+      sliderMax: null,
+      transactions: null,
+      tab: 0,
+      color: [
+        "amber darken-1",
+        "green darken-1",
+        "blue darken-1",
+        "purple darken-1"
+      ],
+      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+    };
+  },
+  computed: {
+    currencies: function() {
+      return Object.keys(this.$currencies);
     },
-    computed: {
-      currencies: function() { return Object.keys(this.$currencies); },
-      today: function() {return this.$moment().format("YYYY-MM-DD")}
-    },
-    mounted: function() {
+    today: function() {
+      return this.$moment().format("YYYY-MM-DD");
+    }
+  },
+  mounted: function() {
+    this.loadBudget(this.$route.params.id);
+  },
+  watch: {
+    $route(to, from) {
       this.loadBudget(this.$route.params.id);
+      this.refreshFields();
+      this.fetchTransactions();
     },
-    watch : {
-      $route(to, from) {
-        this.loadBudget(this.$route.params.id);
+    "budget.startDate": function(date) {
+      if (date != null) {
+        this.sliderMax = this.$moment().diff(this.$moment(date), "days");
+        var daysSinceStart = this.daysSinceStart(
+          this.$moment().format("YYYY-MM-DD")
+        );
+        this.sliderValue[1] = daysSinceStart;
+        this.sliderValue[0] =
+          this.$moment().subtract(1, "months") <
+          this.$moment(this.budget.startDate) <
+          0
+            ? this.budget.startDate
+            : this.daysSinceStart(
+                this.$moment()
+                  .subtract(1, "months")
+                  .format("YYYY-MM-DD")
+              );
         this.refreshFields();
         this.fetchTransactions();
-      },
-      'budget.startDate': function(date) {
-        if(date!= null){
-          this.sliderMax = this.$moment().diff(this.$moment(date), 'days');
-          var daysSinceStart = this.daysSinceStart(this.$moment().format("YYYY-MM-DD"));
-          this.sliderValue[1] = daysSinceStart;
-          this.sliderValue[0] = (this.$moment().subtract(1, 'months') < this.$moment(this.budget.startDate) < 0 
-                                  ? this.budget.startDate 
-                                  : this.daysSinceStart(this.$moment().subtract(1, 'months').format("YYYY-MM-DD")));          
-          this.refreshFields()
-          this.fetchTransactions();
-        }        
-      },
-      'sliderValue.0': function(minDays) {
-        this.refreshFields()
-      },
-      'sliderValue.1': function(maxDays) {
-        this.refreshFields()
-      },
-      'filters.startDate' : function(){
-        this.refreshSlider();
-      },
-      'filters.endDate' : function(){
-        this.refreshSlider();
-      },
-      categoryType: function(value){ 
-        this.transactions = null;        
-        this.filters.categories = this.categories[value] 
-        this.fetchTransactions();
-        },
+      }
     },
-    methods: {
-      ...mapActions({
-        dispatchError: "alert/error",
-        dispatchSuccess: "alert/success"
-      }),
-      daysSinceStart(date){
-        return this.$moment(date).diff(this.$moment(this.budget.startDate), 'days')
-      },
-      refreshSlider(){
-        this.sliderValue = [this.daysSinceStart(this.filters.startDate), this.daysSinceStart(this.filters.endDate)];
-      },
-      refreshFields(){
-        this.filters.startDate  = this.$moment(this.budget.startDate).add(this.sliderValue[0], 'days').format("YYYY-MM-DD");
-        this.filters.endDate  = this.$moment(this.budget.startDate).add(this.sliderValue[1], 'days').format("YYYY-MM-DD");
-      },
-      loadBudget(id) {
-        budgetService.getBudget(id).then(
-          response => {
-            if (response.ok) {
-              response.json().then(data=>{
-                this.budget.balance = data.balance;
-                this.budget.currency = data.currency;
-                this.budget.startDate = data.startingDate;
-                this.categories = {
-                  spendings: data.spendingCategories,
-                  savings: data.savingCategories,
-                  incomes: data.incomeCategories
-                };
-                this.filters.categories = data.spendingCategories;
-
-              });
-            } else {
-              reponse.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
+    "sliderValue.0": function(minDays) {
+      this.refreshFields();
+    },
+    "sliderValue.1": function(maxDays) {
+      this.refreshFields();
+    },
+    "filters.startDate": function() {
+      this.refreshSlider();
+    },
+    "filters.endDate": function() {
+      this.refreshSlider();
+    },
+    categoryType: function(value) {
+      this.transactions = null;
+      this.filters.categories = this.categories[value];
+      this.fetchTransactions();
+    }
+  },
+  methods: {
+    ...mapActions({
+      dispatchError: "alert/error",
+      dispatchSuccess: "alert/success"
+    }),
+    daysSinceStart(date) {
+      return this.$moment(date).diff(
+        this.$moment(this.budget.startDate),
+        "days"
+      );
+    },
+    refreshSlider() {
+      this.sliderValue = [
+        this.daysSinceStart(this.filters.startDate),
+        this.daysSinceStart(this.filters.endDate)
+      ];
+    },
+    refreshFields() {
+      this.filters.startDate = this.$moment(this.budget.startDate)
+        .add(this.sliderValue[0], "days")
+        .format("YYYY-MM-DD");
+      this.filters.endDate = this.$moment(this.budget.startDate)
+        .add(this.sliderValue[1], "days")
+        .format("YYYY-MM-DD");
+    },
+    loadBudget(id) {
+      budgetService.getBudget(id).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.budget.balance = data.balance;
+            this.budget.currency = data.currency;
+            this.budget.startDate = data.startingDate;
+            this.categories = {
+              spendings: data.spendingCategories,
+              savings: data.savingCategories,
+              incomes: data.incomeCategories
+            };
+            this.filters.categories = data.spendingCategories;
           });
-      },
-      fetchTransactions() {
-        this.loading = true;
-        transactionsService.listTransactions(this.$route.params.id, null, this.filters.startDate, this.filters.endDate, this.filters.categories)
-          .then(
-            response => {            
-            if (response.ok) {
-              response.json().then(data=>{
-                this.loading = false;
-                this.transactions = data;
-              });
-            } else {
+        } else {
+          reponse.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
+    },
+    fetchTransactions() {
+      this.loading = true;
+      transactionsService
+        .listTransactions(
+          this.$route.params.id,
+          null,
+          this.filters.startDate,
+          this.filters.endDate,
+          this.filters.categories
+        )
+        .then(response => {
+          if (response.ok) {
+            response.json().then(data => {
               this.loading = false;
-              this.error = true;
-              this.transactions = null
-              response.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
-            }
-          );
-      },
-      editTransaction(id) {
-        this.$refs.transactionEditor.open(id).then(response => {
-          if (response && response.ok){
-            this.fetchTransactions();
-          } else if (response){
-            response.json().then( data=> {
-                this.dispatchError(data.message);
-              });
+              this.transactions = data;
+            });
+          } else {
+            this.loading = false;
+            this.error = true;
+            this.transactions = null;
+            response.json().then(data => {
+              this.dispatchError(data.message);
+            });
           }
         });
-      },
-      deleteTransaction(id) {
-        this.$root.$confirm('general.remove', 'transactions.deleteConfirm', { color: 'red', buttons: { yes: true, no: true, cancel: false,ok: false }})
-            .then( (confirm) => {
-              if (confirm){
-                transactionsService.deleteTransaction(id)
-                    .then( response => {
-                      if (response.ok) {
-                        this.fetchTransactions();
-                      } else {
-                        response.json()
-                          .then( data => {
-                            this.dispatchError(data.message);
-                          });
-                      }
-                    });
-                }              
+    },
+    editTransaction(id) {
+      this.$refs.transactionEditor.open(id).then(response => {
+        if (response && response.ok) {
+          this.fetchTransactions();
+        } else if (response) {
+          response.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
+    },
+    deleteTransaction(id) {
+      this.$root
+        .$confirm("general.remove", "transactions.deleteConfirm", {
+          color: "red",
+          buttons: { yes: true, no: true, cancel: false, ok: false }
+        })
+        .then(confirm => {
+          if (confirm) {
+            transactionsService.deleteTransaction(id).then(response => {
+              if (response.ok) {
+                this.fetchTransactions();
+              } else {
+                response.json().then(data => {
+                  this.dispatchError(data.message);
+                });
+              }
             });
-      }
+          }
+        });
     }
   }
+};
 </script>

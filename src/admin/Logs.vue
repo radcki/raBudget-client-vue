@@ -114,93 +114,116 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import { logsService } from '../_services/logs.service';
+import { mapState, mapActions } from "vuex";
+import { logsService } from "../_services/logs.service";
 
 export default {
-    data () {
-        return {
-            logs: [],
-            loading: false,
-            search: null,
-            minDate: this.$moment().subtract(1, 'month').format("YYYY-MM-DD"),
-            minDateMenu: false,
-            maxDate: this.$moment().format("YYYY-MM-DD"),
-            maxDateMenu: false,
-            levels: ["Critical","Error","Warning", "None"],
-            headers: [
-                {
-                    text: "admin.userId",
-                    sortable: true,
-                    value: 'id'
-                },
-                {
-                    text: "admin.level",
-                    sortable: true,
-                    value: 'level'
-                },                
-                {
-                    text: "admin.message",
-                    sortable: true,
-                    value: 'message'
-                },
-                {
-                    text: "admin.name",
-                    sortable: true,
-                    value: 'name'
-                },          
-                {
-                    text: "admin.timestamp",
-                    value: 'timeStamp',
-                    sortable: true
-                }
-                ],
-        }
-    },
-    computed: {
-        ...mapState({
-            account: state => state.account
-        }),
-        today: function(){return this.$moment().format("YYYY-MM-DD")}
-    },
-    created () {
-        this.fetchLogs()
-    },
-    watch:{
-        minDate: function(){this.fetchLogs()},
-        maxDate: function(){this.fetchLogs()},
-    },
-    methods: {
-        ...mapActions({
-            dispatchError: "alert/error",
-            dispatchSuccess: "alert/success",
-        }),
-        fetchLogs: function () {
-            this.loading = true;
-            logsService.getPeriod(this.minDate, this.maxDate).then(response=>{
-                if (response.ok) {
-                    response.json().then(data=>{                        
-                        this.logs = data;
-                        this.loading = false;
-                    })
-                }
-                this.loading = false;
-            });
+  data() {
+    return {
+      logs: [],
+      loading: false,
+      search: null,
+      minDate: this.$moment()
+        .subtract(1, "month")
+        .format("YYYY-MM-DD"),
+      minDateMenu: false,
+      maxDate: this.$moment().format("YYYY-MM-DD"),
+      maxDateMenu: false,
+      levels: ["Critical", "Error", "Warning", "None"],
+      headers: [
+        {
+          text: "admin.userId",
+          sortable: true,
+          value: "id"
         },
-        conditionalColor: function(value) {
-            var v = value.toLowerCase()
-            if (v === "none")           {return "white"}
-            if (v === "critical")       {return "red white--text"}
-            if (v === "error")          {return "red white--text"}
-            if (v === "warning")        {return "amber white--text"}
-            if (v === "information")    {return "blue white--text"}
-            if (v === "debug")          {return "white"}
-            if (v === "trace")          {return "white"}            
+        {
+          text: "admin.level",
+          sortable: true,
+          value: "level"
         },
-        customFilter(items, search, filter) {
-            return items.filter( v => {return this.levels.includes(v.level)} )
+        {
+          text: "admin.message",
+          sortable: true,
+          value: "message"
+        },
+        {
+          text: "admin.name",
+          sortable: true,
+          value: "name"
+        },
+        {
+          text: "admin.timestamp",
+          value: "timeStamp",
+          sortable: true
         }
-      
+      ]
+    };
+  },
+  computed: {
+    ...mapState({
+      account: state => state.account
+    }),
+    today: function() {
+      return this.$moment().format("YYYY-MM-DD");
     }
+  },
+  created() {
+    this.fetchLogs();
+  },
+  watch: {
+    minDate: function() {
+      this.fetchLogs();
+    },
+    maxDate: function() {
+      this.fetchLogs();
+    }
+  },
+  methods: {
+    ...mapActions({
+      dispatchError: "alert/error",
+      dispatchSuccess: "alert/success"
+    }),
+    fetchLogs: function() {
+      this.loading = true;
+      logsService.getPeriod(this.minDate, this.maxDate).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.logs = data;
+            this.loading = false;
+          });
+        }
+        this.loading = false;
+      });
+    },
+    conditionalColor: function(value) {
+      var v = value.toLowerCase();
+      if (v === "none") {
+        return "white";
+      }
+      if (v === "critical") {
+        return "red white--text";
+      }
+      if (v === "error") {
+        return "red white--text";
+      }
+      if (v === "warning") {
+        return "amber white--text";
+      }
+      if (v === "information") {
+        return "blue white--text";
+      }
+      if (v === "debug") {
+        return "white";
+      }
+      if (v === "trace") {
+        return "white";
+      }
+    },
+    customFilter(items, search, filter) {
+      return items.filter(v => {
+        return this.levels.includes(v.level);
+      });
+    }
+  }
 };
 </script>

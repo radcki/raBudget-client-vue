@@ -43,7 +43,7 @@ export default {
     message: null,
     title: null,
     options: {
-      color: 'primary',
+      color: "primary",
       selectList: null,
       select: false,
       width: 290,
@@ -52,55 +52,55 @@ export default {
         yes: false,
         no: false,
         cancel: true,
-        ok: true,
+        ok: true
       }
     }
   }),
   methods: {
     open(title, message, options) {
-      this.input= null;
-      this.inputType= "text"
-      this.resolve= null;
-      this.reject= null;
-      this.message= null;
-      this.title= null;
-      this.options= {
-          color: 'primary',
-          selectList: null,
-          select: false,
-          width: 290,
-          input: false,
-          buttons: {
-            yes: false,
-            no: false,
-            cancel: true,
-            ok: true,
-          }
-        };
+      this.input = null;
+      this.inputType = "text";
+      this.resolve = null;
+      this.reject = null;
+      this.message = null;
+      this.title = null;
+      this.options = {
+        color: "primary",
+        selectList: null,
+        select: false,
+        width: 290,
+        input: false,
+        buttons: {
+          yes: false,
+          no: false,
+          cancel: true,
+          ok: true
+        }
+      };
 
       this.dialog = true;
       this.title = title;
       this.message = message;
-      this.options = Object.assign(this.options, options)
+      this.options = Object.assign(this.options, options);
       return new Promise((resolve, reject) => {
-        this.resolve = resolve
-        this.reject = reject
-      })
+        this.resolve = resolve;
+        this.reject = reject;
+      });
     },
     agree() {
       if (this.options.input) {
-        this.resolve(this.input)
+        this.resolve(this.input);
       } else if (this.options.select) {
-        this.resolve(this.selection)
+        this.resolve(this.selection);
       } else {
-        this.resolve(true)
-      }      
-      this.dialog = false
+        this.resolve(true);
+      }
+      this.dialog = false;
     },
     cancel() {
-      this.resolve(false)
-      this.dialog = false
+      this.resolve(false);
+      this.dialog = false;
     }
   }
-}
+};
 </script>

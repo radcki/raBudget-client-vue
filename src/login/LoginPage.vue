@@ -48,45 +48,40 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions } from "vuex";
 
 export default {
-    data () {
-        return {
-            valid: true,
-            show: false,
-            username: null,
-            password: null,
-            submitted: false,
-            requiredRule: [v => !!v || this.$t('forms.requiredField'),]
-        }
-    },
-    computed: {
-        ...mapState('account', ['status'])
-    },
-    created () {
-        // reset login status
-        this.logout();
-    },
-    beforeRouteUpdate (to, from, next) {
-        console.log('beforeRouteUpdate')
-    },
-    methods: {
-        ...mapActions('account', ['login', 'logout']),
-        handleSubmit (e) {
-            this.submitted = true;
-            const { username, password } = this;
-            if (username && password) {
-                this.login({ username, password }).then(
-                   ok => {
-                       if (ok) {
-                            this.$router.push('home');
-                            this.$root.$emit('reloadBudgets');                            
-                       }
-                   } 
-                );
-            }
-        }
+  data() {
+    return {
+      valid: true,
+      show: false,
+      username: null,
+      password: null,
+      submitted: false,
+      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+    };
+  },
+  computed: {
+    ...mapState("account", ["status"])
+  },
+  created() {
+    // reset login status
+    this.logout();
+  },
+  methods: {
+    ...mapActions("account", ["login", "logout"]),
+    handleSubmit(e) {
+      this.submitted = true;
+      const { username, password } = this;
+      if (username && password) {
+        this.login({ username, password }).then(ok => {
+          if (ok) {
+            this.$router.push("home");
+            this.$root.$emit("reloadBudgets");
+          }
+        });
+      }
     }
+  }
 };
 </script>

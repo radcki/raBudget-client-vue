@@ -82,7 +82,9 @@
         "toDate": "To date",
         "foundData": "Found data",
         "search": "Search",
-        "budgets": "Budgets"
+        "budgets": "Budgets",
+        "sum": "Sum",
+        "refresh": "Refresh"
     },
     "forms": {
         "requiredField": "Field is required.",
@@ -125,7 +127,8 @@
         "spendingThisMonth": "Spent this month",
         "yearBalance": "Balance to end of year",
         "sourceCategory": "Source category",
-        "destinationCategory": "Destination docelowa"
+        "destinationCategory": "Destination docelowa",
+        "categoryType": "Category type"
     },
     "transactions": {
         "categoryTransfer": "Transactions transfer",
@@ -165,5 +168,19 @@
         "error": "Error",
         "critical": "Critical",
         "none": "None"
+    },
+    "reports": {
+        "reports": "Reports",
+        "periodFull": "All time",
+        "period6m": "Last 6 months",
+        "period1m": "To previous month",
+        "budgetSum": "Budgeted",
+        "transactionsSum": "Transactions sum",
+        "allocationsSum": "Allocations sum",
+        "averagePerDay": "Daily average",
+        "averagePerMonth": "Monthly average",
+        "selectCategory": "Select at least one category to view chart",
+        "periodSummary": "Period summary",
+        "monthByMonth": "Month by month"
     }
 }

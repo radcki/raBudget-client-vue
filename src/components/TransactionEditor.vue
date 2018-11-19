@@ -105,10 +105,10 @@
 </template>
 
 <script>
-import {transactionsService} from "../_services/transactions.service.js"
+import { transactionsService } from "../_services/transactions.service.js";
 export default {
   data: () => ({
-    budget: {currency: "PLN"},
+    budget: { currency: "PLN" },
     dateMenu: false,
     requiredRule: [v => !!v],
     categories: {
@@ -127,31 +127,40 @@ export default {
       date: null,
       description: null,
       enteredAmount: null,
-      modifyAmount: 0.00,
-    },
+      modifyAmount: 0.0
+    }
   }),
   computed: {
-    amount: function() {return 1*this.editor.modifyAmount + 1*this.editor.enteredAmount}
+    amount: function() {
+      return 1 * this.editor.modifyAmount + 1 * this.editor.enteredAmount;
+    }
   },
   mounted: function() {
-    this.requiredRule = [v => !!v || this.$t('forms.requiredField')]
+    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
   },
   methods: {
     open(transactionId) {
       this.transactionId = transactionId;
-      this.editor.modifyAmount = 0.00;
-      transactionsService.getTransaction(transactionId).then( response => {
+      this.editor.modifyAmount = 0.0;
+      transactionsService.getTransaction(transactionId).then(response => {
         if (response.ok) {
           this.dialog = true;
           response.json().then(transaction => {
             this.editor.category = transaction.category.categoryId;
-            this.transactionType = transaction.category.type == 0 ? "spendings" : (transaction.category.type == 1 ? "incomes" : "savings");
+            this.transactionType =
+              transaction.category.type == 0
+                ? "spendings"
+                : transaction.category.type == 1
+                  ? "incomes"
+                  : "savings";
             this.categories = {
-                  spendings: transaction.budget.spendingCategories,
-                  savings: transaction.budget.savingCategories,
-                  incomes: transaction.budget.incomeCategories
-                };
-            this.editor.date = this.$moment(transaction.date).format("YYYY-MM-DD");
+              spendings: transaction.budget.spendingCategories,
+              savings: transaction.budget.savingCategories,
+              incomes: transaction.budget.incomeCategories
+            };
+            this.editor.date = this.$moment(transaction.date).format(
+              "YYYY-MM-DD"
+            );
             this.editor.description = transaction.description;
             this.editor.enteredAmount = transaction.amount;
             this.budget = transaction.budget;
@@ -159,12 +168,12 @@ export default {
         }
       });
       return new Promise((resolve, reject) => {
-        this.resolve = resolve
-        this.reject = reject
-      })
+        this.resolve = resolve;
+        this.reject = reject;
+      });
     },
     save() {
-      if (this.$refs.editorForm.validate()){
+      if (this.$refs.editorForm.validate()) {
         var transaction = {
           transactionId: this.transactionId,
           category: this.editor.category,
@@ -172,18 +181,16 @@ export default {
           description: this.editor.description,
           amount: this.amount
         };
-        transactionsService.updateTransaction(transaction).then(
-          response => {
-            this.resolve(response)
-          }
-        );
-        this.dialog = false
-      }      
+        transactionsService.updateTransaction(transaction).then(response => {
+          this.resolve(response);
+        });
+        this.dialog = false;
+      }
     },
     cancel() {
-      this.resolve(false)
-      this.dialog = false
+      this.resolve(false);
+      this.dialog = false;
     }
   }
-}
+};
 </script>

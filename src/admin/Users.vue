@@ -106,109 +106,112 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import { userService } from '../_services/user.service';
+import { mapState, mapActions } from "vuex";
+import { userService } from "../_services/user.service";
 
 export default {
-    data () {
-        return {
-            users: [],
-            search: null,
-            userEditDialog: false,
-            userEdit: {
-                username: null,
-                email: null,
-                roles: []
-            },
-            roles:[
-                {value: 0, text: this.$t('account.user')},
-                {value: 1, text: this.$t('account.admin')},
-            ],
-            headers: [
-                {
-                    text: "admin.userId",
-                    sortable: true,
-                    value: 'id'
-                },
-                {
-                    text: "account.username",
-                    sortable: true,
-                    value: 'username'
-                },                
-                {
-                    text: "account.email",
-                    sortable: true,
-                    value: 'email'
-                },
-                {
-                    text: "account.creationDate",
-                    sortable: true,
-                    value: 'creationDate'
-                },          
-                {
-                    text: "general.actions",
-                    sortable: false
-                }
-                ],
+  data() {
+    return {
+      users: [],
+      search: null,
+      userEditDialog: false,
+      userEdit: {
+        username: null,
+        email: null,
+        roles: []
+      },
+      roles: [
+        { value: 0, text: this.$t("account.user") },
+        { value: 1, text: this.$t("account.admin") }
+      ],
+      headers: [
+        {
+          text: "admin.userId",
+          sortable: true,
+          value: "id"
+        },
+        {
+          text: "account.username",
+          sortable: true,
+          value: "username"
+        },
+        {
+          text: "account.email",
+          sortable: true,
+          value: "email"
+        },
+        {
+          text: "account.creationDate",
+          sortable: true,
+          value: "creationDate"
+        },
+        {
+          text: "general.actions",
+          sortable: false
         }
+      ]
+    };
+  },
+  computed: {
+    ...mapState({
+      account: state => state.account
+    })
+  },
+  created() {
+    this.fetchUsers();
+  },
+  methods: {
+    ...mapActions({
+      dispatchError: "alert/error",
+      dispatchSuccess: "alert/success"
+    }),
+    fetchUsers: function() {
+      userService.getAll().then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.users = data;
+          });
+        }
+      });
     },
-    computed: {
-        ...mapState({
-            account: state => state.account
-        })       
-    },
-    created () {
-        this.fetchUsers()
-    },
-    methods: {
-        ...mapActions({
-            dispatchError: "alert/error",
-            dispatchSuccess: "alert/success",
-        }),
-        fetchUsers: function () {
-            userService.getAll().then(response=>{
-                if (response.ok) {
-                    response.json().then(data=>{                        
-                        this.users = data;
-                    })
-                }
+    accountDelete: function(user) {
+      this.$root
+        .$confirm("account.deleteAccount", "account.confirmRemove", {
+          color: "red",
+          input: "password",
+          width: 400,
+          buttons: { yes: false, no: false, cancel: true, ok: true }
+        })
+        .then(input => {
+          if (input) {
+            userService.delete(user.id, input).then(response => {
+              if (response.ok) {
+                this.dispatchSuccess("admin.userDeleted");
+                this.fetchUsers();
+              } else {
+                this.dispatchError("admin.deletionFailure");
+              }
             });
-        },
-        accountDelete: function (user) {
-            this.$root.$confirm('account.deleteAccount', 'account.confirmRemove', { color: 'red', input: "password", width: 400, buttons: { yes: false, no: false, cancel: true,ok: true }})
-                .then( (input) => {
-                    if (input) {
-                        userService.delete(user.id, input).then(response => {
-                            if (response.ok) {
-                                this.dispatchSuccess("admin.userDeleted")
-                                this.fetchUsers();
-                            } else {
-                                this.dispatchError("admin.deletionFailure")
-                            }
-                        });
-                    }             
-                });
-        },
-        openEditDialog: function (user) {
-            this.userEdit = user;
-            this.userEditDialog = true;
-        },
-        updateProfile: function () {
-            userService.adminUpdate(this.userEdit)
-                .then( response => {
-                    if (response.ok){
-                        this.dispatchSuccess('general.changesSaved')
-                        this.userEditDialog = false;
-                    } else {
-                        this.dispatchError('general.changesNotSaved')
-                        response.json()
-                            .then( error => {
-                                this.dispatchError(error.message)                  
-                            }); 
-                    }
-                });
-        },
-      
+          }
+        });
+    },
+    openEditDialog: function(user) {
+      this.userEdit = user;
+      this.userEditDialog = true;
+    },
+    updateProfile: function() {
+      userService.adminUpdate(this.userEdit).then(response => {
+        if (response.ok) {
+          this.dispatchSuccess("general.changesSaved");
+          this.userEditDialog = false;
+        } else {
+          this.dispatchError("general.changesNotSaved");
+          response.json().then(error => {
+            this.dispatchError(error.message);
+          });
+        }
+      });
     }
+  }
 };
 </script>

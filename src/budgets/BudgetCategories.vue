@@ -321,206 +321,252 @@ import { budgetService } from "../_services/budget.service";
 import { transactionsService } from "../_services/transactions.service";
 import { mapState, mapActions } from "vuex";
 
-  export default {
-    data () {
-      return {
-        step: 1,
-        budget: {
-          name: null,
-          startDate: null,
-          currency: "pln"
-        },
-        categories: {
-          income: [],
-          spending: [],
-          savings: []
-        },
-        categoryEditor: {
-          categoryId: null,
-          name: null,
-          amount: null,
-          icon: null,
-          type: null
-        },
-        editor: false,
-        icons: this.$categoryIcons,
-        dateMenu: false,
-        validStep1: true,
-        validStep2: true,
-        validStep3: true,
-        validStep4: true,        
-        requiredRule: [v => !!v || this.$t('forms.requiredField'),],
+export default {
+  data() {
+    return {
+      step: 1,
+      budget: {
+        name: null,
+        startDate: null,
+        currency: "pln"
+      },
+      categories: {
+        income: [],
+        spending: [],
+        savings: []
+      },
+      categoryEditor: {
+        categoryId: null,
+        name: null,
+        amount: null,
+        icon: null,
+        type: null
+      },
+      editor: false,
+      icons: this.$categoryIcons,
+      dateMenu: false,
+      validStep1: true,
+      validStep2: true,
+      validStep3: true,
+      validStep4: true,
+      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+    };
+  },
+  computed: {
+    incomeCategoriesSum: function() {
+      var sum = 0;
+      for (var i = 0; i < this.categories.income.length; i++) {
+        sum += this.categories.income[i].amount * 1;
+      }
+      return sum;
+    },
+    spendingCategoriesSum: function() {
+      var sum = 0;
+      for (var i = 0; i < this.categories.spending.length; i++) {
+        sum += this.categories.spending[i].amount * 1;
+      }
+      return sum;
+    },
+    savingsCategoriesSum: function() {
+      var sum = 0;
+      for (var i = 0; i < this.categories.savings.length; i++) {
+        sum += this.categories.savings[i].amount * 1;
+      }
+      return sum;
+    },
+    categoriesBalance: function() {
+      return (
+        this.incomeCategoriesSum -
+        this.spendingCategoriesSum -
+        this.savingsCategoriesSum
+      );
+    },
+    currencies: function() {
+      return Object.keys(this.$currencies);
+    }
+  },
+  mounted: function() {
+    this.loadBudget(this.$route.params.id);
+  },
+  watch: {
+    editor: function() {
+      if (this.editor == false) {
+        this.closeEditor();
       }
     },
-    computed: {
-      incomeCategoriesSum: function() {
-        var sum = 0;
-        for(var i=0;i<this.categories.income.length;i++){
-          sum += this.categories.income[i].amount*1;
-        }
-        return sum
-      },
-      spendingCategoriesSum: function() {
-        var sum = 0;
-        for(var i=0;i<this.categories.spending.length;i++){
-          sum += this.categories.spending[i].amount*1;
-        }
-        return sum
-      },
-      savingsCategoriesSum: function() {
-        var sum = 0;
-        for(var i=0;i<this.categories.savings.length;i++){
-          sum += this.categories.savings[i].amount*1;
-        }
-        return sum
-      },
-      categoriesBalance: function() {return (this.incomeCategoriesSum - this.spendingCategoriesSum - this.savingsCategoriesSum)},
-      currencies: function() { return Object.keys(this.$currencies); }
+    $route(to, from) {
+      this.loadBudget(to.params.id);
+    }
+  },
+  methods: {
+    ...mapActions({
+      dispatchError: "alert/error",
+      dispatchSuccess: "alert/success"
+    }),
+    closeEditor() {
+      this.categoryEditor.type = null;
+      this.categoryEditor.categoryId = null;
+      this.$refs.editor.reset();
+      this.editor = false;
     },
-    mounted: function() {
-      this.loadBudget(this.$route.params.id);      
+    openEditor(type) {
+      this.editor = true;
+      this.categoryEditor.type = type;
     },
-    watch : {
-      editor: function () {
-        if (this.editor == false){
-          this.closeEditor();
-        }
-      },
-      $route(to, from) {
-        this.loadBudget(to.params.id);
-      }
+    editCategory(category, type) {
+      this.categoryEditor.categoryId = category.categoryId;
+      this.categoryEditor.icon = category.icon;
+      this.categoryEditor.amount = category.amount;
+      this.categoryEditor.name = category.name;
+      this.categoryEditor.type = category.type;
+      this.editor = true;
     },
-    methods: {
-      ...mapActions({
-        dispatchError: "alert/error",
-        dispatchSuccess: "alert/success"
-      }),
-      closeEditor() {
-        this.categoryEditor.type = null;
-        this.categoryEditor.categoryId = null;
-        this.$refs.editor.reset();
-        this.editor = false;
-      },
-      openEditor(type) {
-        this.editor = true;
-        this.categoryEditor.type = type;
-      },
-      editCategory(category, type) {
-        this.categoryEditor.categoryId = category.categoryId
-        this.categoryEditor.icon = category.icon
-        this.categoryEditor.amount = category.amount
-        this.categoryEditor.name = category.name
-        this.categoryEditor.type = category.type
-        this.editor = true;
-      },
-      saveCategory() {
-        var category = {};
-        budgetService.saveCategory(this.$route.params.id, this.categoryEditor)
-            .then( response => {
-              if (response.ok){
-                response.json()
-                  .then( data => {
-                    var type = (data.type == 0 ? "spending" : (data.type == 1 ? "income" : "savings"));
+    saveCategory() {
+      var category = {};
+      budgetService
+        .saveCategory(this.$route.params.id, this.categoryEditor)
+        .then(response => {
+          if (response.ok) {
+            response.json().then(data => {
+              var type =
+                data.type == 0
+                  ? "spending"
+                  : data.type == 1
+                    ? "income"
+                    : "savings";
 
-                    category = this.categories[type].find(function(element){
-                      return element.categoryId == data.categoryId;
-                    });
+              category = this.categories[type].find(function(element) {
+                return element.categoryId == data.categoryId;
+              });
 
-                    if (category){
-                      category.name = this.categoryEditor.name;
-                      category.amount = this.categoryEditor.amount;
-                      category.icon = this.categoryEditor.icon;
-                    } else {
-                      this.categories[type].push(data);
-                    }
-                    this.closeEditor();
-                  });
+              if (category) {
+                category.name = this.categoryEditor.name;
+                category.amount = this.categoryEditor.amount;
+                category.icon = this.categoryEditor.icon;
               } else {
-                response.json()
-                  .then( data => {
+                this.categories[type].push(data);
+              }
+              this.closeEditor();
+            });
+          } else {
+            response.json().then(data => {
+              this.dispatchError(data.message);
+            });
+          }
+        });
+    },
+    deleteCategory(category) {
+      this.$root
+        .$confirm("general.remove", "categories.deleteConfirm", {
+          color: "red",
+          buttons: { yes: true, no: true, cancel: false, ok: false }
+        })
+        .then(confirm => {
+          if (confirm) {
+            var type =
+              category.type == 0
+                ? "spending"
+                : category.type == 1
+                  ? "income"
+                  : "savings";
+            if (this.categories[type].length == 1) {
+              this.dispatchError("categories.oneRequired");
+              return;
+            }
+            budgetService
+              .deleteCategory(this.$route.params.id, category.categoryId)
+              .then(response => {
+                if (response.ok) {
+                  var type =
+                    category.type == 0
+                      ? "spending"
+                      : category.type == 1
+                        ? "income"
+                        : "savings";
+
+                  for (var i = 0; i < this.categories[type].length; i++)
+                    if (this.categories[type][i].name === category.name) {
+                      this.categories[type].splice(i, 1);
+                      break;
+                    }
+                } else {
+                  response.json().then(data => {
                     this.dispatchError(data.message);
                   });
-              }
-            });        
-      },
-      deleteCategory(category) {
-        this.$root.$confirm('general.remove', 'categories.deleteConfirm', { color: 'red', buttons: { yes: true, no: true, cancel: false,ok: false }})
-            .then( (confirm) => {
-              if (confirm){
-                var type = (category.type == 0 ? "spending" : (category.type == 1 ? "income" : "savings"));
-                if (this.categories[type].length == 1) {
-                  this.dispatchError("categories.oneRequired");
-                  return
                 }
-                budgetService.deleteCategory(this.$route.params.id, category.categoryId)
-                    .then( response => {
-                      if (response.ok) {
-
-                        var type = (category.type == 0 ? "spending" : (category.type == 1 ? "income" : "savings"));
-                        
-                        for (var i =0; i < this.categories[type].length; i++)
-                        if (this.categories[type][i].name === category.name) {
-                            this.categories[type].splice(i,1);
-                            break;
-                        }
-                      } else {
-                        response.json()
-                          .then( data => {
-                            this.dispatchError(data.message);
-                          });
-                      }
-                    });
-                }              
-            });
-      },
-      transferTransactions(category) {
-
-        var type = (category.type == 0 ? "spending" : (category.type == 1 ? "income" : "savings"));
-
-        var categories = this.categories[type].map(function(value,index) {
-          return {text: value['name'], value: value['categoryId']}; 
+              });
+          }
         });
+    },
+    transferTransactions(category) {
+      var type =
+        category.type == 0
+          ? "spending"
+          : category.type == 1
+            ? "income"
+            : "savings";
 
-        this.$root.$confirm('transactions.categoryTransfer', 'categories.selectCategory', { color: 'primary', selectList: categories, select: true, buttons: { yes: false, no: false, cancel: true, ok: true }})
-            .then( (selection) => {
-              if (selection) {
-                var type = (category.type == 0 ? "spending" : (category.type == 1 ? "income" : "savings"));
-                if (this.categories[type].length == 1) {
-                  this.dispatchError("categories.oneRequired");
-                  return
-                }
-                transactionsService.transferTransactions(this.$route.params.id, category.categoryId, selection.value)
-                    .then( response => {
-                      if (response.ok) {
-                        this.dispatchSuccess("general.changesSaved");
-                      } else {
-                        response.json()
-                          .then( data => {
-                            this.dispatchError(data.message);
-                          });
-                      }
-                    });
-                }              
-            });
-      },
-      loadBudget(id) {
-        budgetService.getBudget(id).then(
-          response => {
-            if (response.ok) {
-              response.json().then(data=>{
-                this.budget.currency = data.currency
-                this.categories.spending = data.spendingCategories;
-                this.categories.savings = data.savingCategories;
-                this.categories.income = data.incomeCategories;
-              });
-            } else {
-              reponse.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
+      var categories = this.categories[type].map(function(value, index) {
+        return { text: value["name"], value: value["categoryId"] };
+      });
+
+      this.$root
+        .$confirm(
+          "transactions.categoryTransfer",
+          "categories.selectCategory",
+          {
+            color: "primary",
+            selectList: categories,
+            select: true,
+            buttons: { yes: false, no: false, cancel: true, ok: true }
           }
         )
-      }
+        .then(selection => {
+          if (selection) {
+            var type =
+              category.type == 0
+                ? "spending"
+                : category.type == 1
+                  ? "income"
+                  : "savings";
+            if (this.categories[type].length == 1) {
+              this.dispatchError("categories.oneRequired");
+              return;
+            }
+            transactionsService
+              .transferTransactions(
+                this.$route.params.id,
+                category.categoryId,
+                selection.value
+              )
+              .then(response => {
+                if (response.ok) {
+                  this.dispatchSuccess("general.changesSaved");
+                } else {
+                  response.json().then(data => {
+                    this.dispatchError(data.message);
+                  });
+                }
+              });
+          }
+        });
+    },
+    loadBudget(id) {
+      budgetService.getBudget(id).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.budget.currency = data.currency;
+            this.categories.spending = data.spendingCategories;
+            this.categories.savings = data.savingCategories;
+            this.categories.income = data.incomeCategories;
+          });
+        } else {
+          reponse.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
     }
   }
+};
 </script>

@@ -91,98 +91,98 @@
 import { budgetService } from "../_services/budget.service";
 import { mapState, mapActions } from "vuex";
 
-  export default {
-    data () {
-      return {
-        step: 1,
-        budget: {
-          name: null,
-          startDate: null,
-          currency: "pln",
-          default: null
-        },
-        dateMenu: false,
-        valid: true,      
-        requiredRule: [v => !!v || this.$t('forms.requiredField'),],
-      }
-    },
-    computed: {
-      currencies: function() { return Object.keys(this.$currencies); }
-    },
-    mounted: function() {
-      this.loadBudget(this.$route.params.id);      
-    },
-    watch: {
-      $route(to, from) {
-          this.loadBudget(this.$route.params.id); 
-      }
-    },    
-    methods: {
-      ...mapActions({
-        dispatchError: "alert/error",
-        dispatchSuccess: "alert/success",
-      }),
-      saveBudget() {
-        var category = {};
-        budgetService.saveBudget(this.$route.params.id, this.budget)
-            .then( response => {
-              if (response.ok){
-                this.$root.$emit('reloadBudgets');
-                this.dispatchSuccess("general.changesSaved");
-              } else {
-                response.json()
-                  .then( data => {
-                    this.dispatchError(data.message);
-                  });
-              }
-            });        
+export default {
+  data() {
+    return {
+      step: 1,
+      budget: {
+        name: null,
+        startDate: null,
+        currency: "pln",
+        default: null
       },
-      setDefault() {
-        budgetService.setDefault(this.$route.params.id, this.budget)
-        .then( response => {
-              if (response.ok){
-                this.dispatchSuccess("general.changesSaved");
-                this.loadBudget(this.$route.params.id); 
-              } else {
-                response.json()
-                  .then( data => {
-                    this.dispatchError(data.message);
-                  });
-              }
-            });   
-      },
-      deleteBudget() {
-        budgetService.deleteBudget(this.$route.params.id)
-            .then( response => {
-              if (response.ok) {
-                this.$router.push('/');
-                this.$root.$emit('reloadBudgets');
-              } else {
-                response.json()
-                  .then( data => {
-                    this.dispatchError(data.message);
-                  });
-              }
+      dateMenu: false,
+      valid: true,
+      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+    };
+  },
+  computed: {
+    currencies: function() {
+      return Object.keys(this.$currencies);
+    }
+  },
+  mounted: function() {
+    this.loadBudget(this.$route.params.id);
+  },
+  watch: {
+    $route(to, from) {
+      this.loadBudget(this.$route.params.id);
+    }
+  },
+  methods: {
+    ...mapActions({
+      dispatchError: "alert/error",
+      dispatchSuccess: "alert/success"
+    }),
+    saveBudget() {
+      var category = {};
+      budgetService
+        .saveBudget(this.$route.params.id, this.budget)
+        .then(response => {
+          if (response.ok) {
+            this.$root.$emit("reloadBudgets");
+            this.dispatchSuccess("general.changesSaved");
+          } else {
+            response.json().then(data => {
+              this.dispatchError(data.message);
             });
-      },
-      loadBudget(id) {
-        budgetService.getBudget(id).then(
-          response => {
-            if (response.ok) {
-              response.json().then(data=>{
-                this.budget.currency = data.currency;
-                this.budget.name = data.budgetName;
-                this.budget.startDate = this.$moment(data.startingDate).format("YYYY-MM-DD");
-                this.budget.default = data.default
-              });
-            } else {
-              reponse.json().then( data=> {
-                this.dispatchError(data.message);
-              });
-            }
           }
-        )
-      }
+        });
+    },
+    setDefault() {
+      budgetService
+        .setDefault(this.$route.params.id, this.budget)
+        .then(response => {
+          if (response.ok) {
+            this.dispatchSuccess("general.changesSaved");
+            this.loadBudget(this.$route.params.id);
+          } else {
+            response.json().then(data => {
+              this.dispatchError(data.message);
+            });
+          }
+        });
+    },
+    deleteBudget() {
+      budgetService.deleteBudget(this.$route.params.id).then(response => {
+        if (response.ok) {
+          this.$router.push("/");
+          this.$root.$emit("reloadBudgets");
+        } else {
+          response.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
+    },
+    loadBudget(id) {
+      budgetService.getBudget(id).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.budget.currency = data.currency;
+            this.budget.name = data.budgetName;
+            this.budget.startDate = this.$moment(data.startingDate).format(
+              "YYYY-MM-DD"
+            );
+            this.budget.default = data.default;
+          });
+        } else {
+          reponse.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
     }
   }
+};
 </script>

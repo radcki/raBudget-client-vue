@@ -65,6 +65,15 @@
             </v-list-tile-action>
           </v-list-tile>
 
+          <v-list-tile class="grey--text text--darken-1" :to="{ name: 'reports', params: { id: budget.id }}">
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t("reports.reports") }}</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon>assessment</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+
           <v-list-tile class="grey--text text--darken-1" :to="{ name: 'budgetCategories', params: { id: budget.id }}">
             <v-list-tile-content>
               <v-list-tile-title>{{ $t("budgets.categories") }}</v-list-tile-title>
@@ -196,9 +205,9 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
-import { budgetService } from "../_services/budget.service";
-import { newBudget } from "../budgets/NewBudget";
-import Confirm from "../components/Confirm.vue";
+import { budgetService } from "./_services/budget.service";
+import { newBudget } from "./budgets/NewBudget";
+import Confirm from "./components/Confirm.vue";
 
 export default {
   name: "app",

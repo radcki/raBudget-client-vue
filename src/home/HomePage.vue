@@ -7,23 +7,23 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
-import { budgetService } from '../_services';
+import { mapState, mapActions } from "vuex";
+import { budgetService } from "../_services";
 
 export default {
-    data: () => ({
-        budgets: {},
-    }),
-    computed: {
-        ...mapState({
-            account: state => state.account
-        })
-    },
-    methods: {
-        ...mapActions('users', {
-            getAllUsers: 'getAll',
-            deleteUser: 'delete'
-        })
-    }
+  data: () => ({
+    budgets: {}
+  }),
+  computed: {
+    ...mapState({
+      account: state => state.account
+    })
+  },
+  methods: {
+    ...mapActions("users", {
+      getAllUsers: "getAll",
+      deleteUser: "delete"
+    })
+  }
 };
 </script>

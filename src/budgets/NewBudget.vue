@@ -502,127 +502,134 @@
 <script>
 import { budgetService } from "../_services/budget.service";
 
-  export default {
-    data () {
-      return {
-        step: 1,
-        budget: {
-          name: null,
-          startDate: null,
-          currency: "pln"
-        },
-        categories: {
-          income: [],
-          spending: [],
-          savings: []
-        },
-        newIncomeCategory: {
-          name: null,
-          amount: null,
-          icon: null,
-        },
-        newSpendingCategory: {
-          name: null,
-          amount: null,
-          icon: null,
-        },
-        newSavingCategory: {
-          name: null,
-          amount: null,
-          icon: null,
-        },
-        icons: this.$categoryIcons,
-        dateMenu: false,
-        validStep1: true,
-        validStep2: true,
-        validStep3: true,
-        validStep4: true,        
-        requiredRule: [v => !!v || this.$t('forms.requiredField'),],
+export default {
+  data() {
+    return {
+      step: 1,
+      budget: {
+        name: null,
+        startDate: null,
+        currency: "pln"
+      },
+      categories: {
+        income: [],
+        spending: [],
+        savings: []
+      },
+      newIncomeCategory: {
+        name: null,
+        amount: null,
+        icon: null
+      },
+      newSpendingCategory: {
+        name: null,
+        amount: null,
+        icon: null
+      },
+      newSavingCategory: {
+        name: null,
+        amount: null,
+        icon: null
+      },
+      icons: this.$categoryIcons,
+      dateMenu: false,
+      validStep1: true,
+      validStep2: true,
+      validStep3: true,
+      validStep4: true,
+      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+    };
+  },
+  computed: {
+    incomeCategoriesSum: function() {
+      var sum = 0;
+      for (var i = 0; i < this.categories.income.length; i++) {
+        sum += this.categories.income[i].amount * 1;
+      }
+      return sum;
+    },
+    spendingCategoriesSum: function() {
+      var sum = 0;
+      for (var i = 0; i < this.categories.spending.length; i++) {
+        sum += this.categories.spending[i].amount * 1;
+      }
+      return sum;
+    },
+    savingsCategoriesSum: function() {
+      var sum = 0;
+      for (var i = 0; i < this.categories.savings.length; i++) {
+        sum += this.categories.savings[i].amount * 1;
+      }
+      return sum;
+    },
+    currencies: function() {
+      return Object.keys(this.$currencies);
+    }
+  },
+  methods: {
+    addIncome() {
+      if (this.$refs.formIncomeCategory.validate()) {
+        // unbind
+        const data = JSON.parse(JSON.stringify(this.newIncomeCategory));
+        this.categories.income.push(data);
+        this.$refs.formIncomeCategory.reset();
       }
     },
-    computed: {
-      incomeCategoriesSum: function() {
-        var sum = 0;
-        for(var i=0;i<this.categories.income.length;i++){
-          sum += this.categories.income[i].amount*1;
-        }
-        return sum
-      },
-      spendingCategoriesSum: function() {
-        var sum = 0;
-        for(var i=0;i<this.categories.spending.length;i++){
-          sum += this.categories.spending[i].amount*1;
-        }
-        return sum
-      },
-      savingsCategoriesSum: function() {
-        var sum = 0;
-        for(var i=0;i<this.categories.savings.length;i++){
-          sum += this.categories.savings[i].amount*1;
-        }
-        return sum
-      },
-      currencies: function() { return Object.keys(this.$currencies); }
+    removeIncome(index) {
+      this.categories.income.splice(index, 1);
     },
-    methods: {
-      addIncome() {
-        if (this.$refs.formIncomeCategory.validate()) {
-          // unbind
-          const data = JSON.parse(JSON.stringify(this.newIncomeCategory));
-          this.categories.income.push(data);
-          this.$refs.formIncomeCategory.reset();
-        }
-      },
-      removeIncome(index) {this.categories.income.splice(index, 1);},
-      editIncome(index) {
-        this.newIncomeCategory = this.categories.income[index];
-        this.categories.income.splice(index, 1);
-      },
+    editIncome(index) {
+      this.newIncomeCategory = this.categories.income[index];
+      this.categories.income.splice(index, 1);
+    },
 
-      addSpending() {
-        if (this.$refs.formSpendingCategory.validate()) {
-          // unbind
-          const data = JSON.parse(JSON.stringify(this.newSpendingCategory));
-          this.categories.spending.push(data);
-          this.$refs.formSpendingCategory.reset();
-        }
-      },
-      removeSpending(index) {this.categories.spending.splice(index, 1);},
-      editSpending(index) {
-        this.newSpendingCategory = this.categories.spending[index];
-        this.categories.spending.splice(index, 1);
-      },
-
-      addSaving() {
-        if (this.$refs.formSavingCategory.validate()) {
-          // unbind
-          const data = JSON.parse(JSON.stringify(this.newSavingCategory));
-          this.categories.savings.push(data);
-          this.$refs.formSavingCategory.reset();
-        }
-      },
-      removeSaving(index) {this.categories.savings.splice(index, 1);},
-      editSaving(index) {
-        this.newSavingCategory = this.categories.savings[index];
-        this.categories.savings.splice(index, 1);
-      },
-      createBudget() {
-        budgetService.createBudget(this.budget, this.categories)
-          .then( response => {
-            if (response.ok){
-              response.json()
-                .then( data => {
-                  this.$router.push('/');
-                  this.$root.$emit('reloadBudgets');
-                });
-            } else {
-              response.json()
-                .then( data => {
-                  console.log(data)
-                });
-            }
-          });
+    addSpending() {
+      if (this.$refs.formSpendingCategory.validate()) {
+        // unbind
+        const data = JSON.parse(JSON.stringify(this.newSpendingCategory));
+        this.categories.spending.push(data);
+        this.$refs.formSpendingCategory.reset();
       }
+    },
+    removeSpending(index) {
+      this.categories.spending.splice(index, 1);
+    },
+    editSpending(index) {
+      this.newSpendingCategory = this.categories.spending[index];
+      this.categories.spending.splice(index, 1);
+    },
+
+    addSaving() {
+      if (this.$refs.formSavingCategory.validate()) {
+        // unbind
+        const data = JSON.parse(JSON.stringify(this.newSavingCategory));
+        this.categories.savings.push(data);
+        this.$refs.formSavingCategory.reset();
+      }
+    },
+    removeSaving(index) {
+      this.categories.savings.splice(index, 1);
+    },
+    editSaving(index) {
+      this.newSavingCategory = this.categories.savings[index];
+      this.categories.savings.splice(index, 1);
+    },
+    createBudget() {
+      budgetService
+        .createBudget(this.budget, this.categories)
+        .then(response => {
+          if (response.ok) {
+            response.json().then(data => {
+              this.$router.push("/");
+              this.$root.$emit("reloadBudgets");
+            });
+          } else {
+            response.json().then(data => {
+              this.dispatchError(data.message);
+            });
+          }
+        });
     }
   }
+};
 </script>

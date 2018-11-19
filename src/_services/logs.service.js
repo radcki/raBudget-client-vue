@@ -1,19 +1,28 @@
-import config from 'config';
-import  { apiHandler }  from './apiHandler';
+import config from 'config'
+import {
+  apiHandler
+} from './apiHandler'
 
 export const logsService = {
-    getAll,
-    getPeriod
-};
-
-function getAll() {
-    return apiHandler.fetchAuthorized(`${config.apiUrl}/logs/all`, {method: 'GET'});
+  getAll,
+  getPeriod
 }
 
-function getPeriod(from, to) {
-    var url = new URL(`${config.apiUrl}/logs/period`);
-    var params = {from:from,to:to};
-    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+function getAll () {
+  return apiHandler.fetchAuthorized(`${config.apiUrl}/logs/all`, {
+    method: 'GET'
+  })
+}
 
-    return apiHandler.fetchAuthorized(url, {method: 'GET'});
+function getPeriod (from, to) {
+  var url = new URL(`${config.apiUrl}/logs/period`)
+  var params = {
+    from: from,
+    to: to
+  }
+  Object.keys(params).forEach(key => url.searchParams.append(key, params[key]))
+
+  return apiHandler.fetchAuthorized(url, {
+    method: 'GET'
+  })
 }

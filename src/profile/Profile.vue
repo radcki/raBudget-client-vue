@@ -92,89 +92,99 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import { userService } from '../_services/user.service';
+import { mapState, mapActions } from "vuex";
+import { userService } from "../_services/user.service";
 
 export default {
-    data () {
-        return {
-            valid: true,
-            validPasswordForm: true,
-            show1: false,
-            show2: false,
-            show3: false,
-            user: {
-                id: null,
-                email: null,
-                username: null,
-            },
-            password: {
-                oldpassword: null,
-                newpassword: null,
-            },
-            newpasswordConfirm: null,
-            emailRule: [
-                v => !!v || this.$t('forms.requiredField'),
-                v => {
-                const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-                return pattern.test(v) || this.$t('forms.incorrectEmail')
-            }],
-            requiredRule: [v => !!v || this.$t('forms.requiredField'),],
-            passwordRule: [
-                v => (v && v.length > 5) || this.$t('forms.tooShortPassword'),
-                v => !!v || this.$t('forms.requiredField'),],
-            passwordMatch: [
-                v => !!v || this.$t('forms.requiredField'),
-                v => this.password.newpassword == v || this.$t('forms.passwordDontMatch'),]
+  data() {
+    return {
+      valid: true,
+      validPasswordForm: true,
+      show1: false,
+      show2: false,
+      show3: false,
+      user: {
+        id: null,
+        email: null,
+        username: null
+      },
+      password: {
+        oldpassword: null,
+        newpassword: null
+      },
+      newpasswordConfirm: null,
+      emailRule: [
+        v => !!v || this.$t("forms.requiredField"),
+        v => {
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          return pattern.test(v) || this.$t("forms.incorrectEmail");
         }
+      ],
+      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      passwordRule: [
+        v => (v && v.length > 5) || this.$t("forms.tooShortPassword"),
+        v => !!v || this.$t("forms.requiredField")
+      ],
+      passwordMatch: [
+        v => !!v || this.$t("forms.requiredField"),
+        v =>
+          this.password.newpassword == v || this.$t("forms.passwordDontMatch")
+      ]
+    };
+  },
+  computed: {
+    ...mapState({
+      account: state => state.account
+    })
+  },
+  created() {
+    this.fetchProfile();
+  },
+  methods: {
+    ...mapActions("users", {
+      deleteUser: "delete"
+    }),
+    ...mapActions("account", ["updateProfile", "changePassword", "logout"]),
+    fetchProfile() {
+      userService.getProfile().then(data => {
+        this.user.id = data.id;
+        this.user.email = data.email;
+        this.user.username = data.username;
+      });
     },
-    computed: {
-        ...mapState({
-            account: state => state.account
-        })       
+    handleProfileUpdate() {
+      if (this.$refs.formProfileUpdate.validate()) {
+        this.updateProfile(this.user);
+      }
     },
-    created () {
-        this.fetchProfile()
+    handlePaswordChange() {
+      if (this.$refs.formPassChange.validate()) {
+        this.changePassword(this.password).then(result => {
+          if (result == true) {
+            this.$refs.formPassChange.reset();
+          }
+        });
+      }
     },
-    methods: {
-        ...mapActions('users', {
-            deleteUser: 'delete'
-        }),
-        ...mapActions('account', ['updateProfile', 'changePassword', 'logout']),
-        fetchProfile () {
-            userService.getProfile().then( data => {
-                this.user.id = data.id
-                this.user.email = data.email;
-                this.user.username = data.username;
+    accountDelete() {
+      this.$root
+        .$confirm("account.deleteAccount", "account.confirmRemove", {
+          color: "red",
+          input: "password",
+          width: 400,
+          buttons: { yes: false, no: false, cancel: true, ok: true }
+        })
+        .then(input => {
+          if (input) {
+            userService.delete(this.user.id, input).then(response => {
+              if (response.ok) {
+                this.logout();
+                this.$router.push({ name: "login" });
+              }
             });
-        },
-        handleProfileUpdate () {
-            if (this.$refs.formProfileUpdate.validate()) {
-                this.updateProfile(this.user);
-            };
-        },
-        handlePaswordChange () {
-            if (this.$refs.formPassChange.validate()) {
-                this.changePassword(this.password).then( result => {
-                    if (result == true ) {
-                        this.$refs.formPassChange.reset()
-                    }
-                });                
-            };
-        },
-        accountDelete () {
-            this.$root.$confirm('account.deleteAccount', 'account.confirmRemove', { color: 'red', input: "password", width: 400, buttons: { yes: false, no: false, cancel: true,ok: true }})
-                .then( (input) => {
-                    if (input) {
-                        userService.delete(this.user.id, input).then(response => {
-                            if (response.ok) {
-                                this.logout();
-                                this.$router.push({name: "login"});
-                            }
-                        });
-                    }             
-                });
-        }
+          }
+        });
     }
+  }
 };
 </script>
