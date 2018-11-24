@@ -151,6 +151,9 @@
             </v-subheader>  
             <v-container class="elevation-1 blue darken-1 white--text">     
               <v-layout row wrap >
+                <v-flex xs4 align-center></v-flex>
+                <v-flex xs4 align-center>{{ $t('categories.totalAmount') }}</v-flex>
+                <v-flex xs4 align-center>{{ $t('categories.monthPlanLeft') }}</v-flex>
                   <template v-for="(category, index) in savingBalance" >
                     <v-flex :key="index + '_name'" xs4 align-center>
                       {{category.budgetCategory.name}}

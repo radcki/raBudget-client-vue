@@ -9,6 +9,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin')
 
 const env = require('../config/prod.env')
 
@@ -30,16 +31,23 @@ const webpackConfig = merge(baseWebpackConfig, {
         ]
       }]
   },
+  mode: 'production',
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
     path: config.build.assetsRoot,
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
-  },  
+  }, 
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': env
+      'process.env': env,
+      config: JSON.stringify({
+        apiUrl: 'https://rabudget.azurewebsites.net'
+      })
+    }),
+    new CleanWebpackPlugin(['wwwroot'], {
+      root: path.join(config.build.assetsRoot, '..')
     }),
     new UglifyJsPlugin({
       uglifyOptions: {

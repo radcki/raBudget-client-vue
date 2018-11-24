@@ -373,7 +373,7 @@
     </v-layout>
 </v-container>
 </template>
-<style scoped>
+<style scoped lang="css">
 table.v-table tbody td,
 table.v-table tbody th {
   height: 19px;

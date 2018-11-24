@@ -8,6 +8,7 @@ const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 const portfinder = require('portfinder')
 
 const HOST = process.env.HOST
@@ -18,7 +19,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
   },
   // cheap-module-eval-source-map is faster for development
-  devtool: config.dev.devtool,
+  //devtool: config.dev.devtool,
+  devtool: 'eval',
 
   // these devServer options should be customized in /config/index.js
   devServer: {
@@ -46,17 +48,22 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': require('../config/dev.env')
+      'process.env': require('../config/dev.env'),
+      config: JSON.stringify({
+        apiUrl: 'http://localhost:4000'
+      })
     }),
-    /*new webpack.HotModuleReplacementPlugin(),*/
+    new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
     new webpack.NoEmitOnErrorsPlugin(),
+    //new HardSourceWebpackPlugin(),
     // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',
       inject: true
     }),
+    new webpack.HashedModuleIdsPlugin(),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -70,11 +77,17 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       path.resolve(__dirname, 'doesnotexist/')
     )
   ],
-  externals: {
-    // global app config object
-    config: JSON.stringify({
-        apiUrl: 'http://localhost:4000'
-    })
+  optimization: {
+    runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all'
+        }
+      }
+    }
   }
 })
 

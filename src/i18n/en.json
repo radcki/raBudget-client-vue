@@ -128,7 +128,8 @@
         "yearBalance": "Balance to end of year",
         "sourceCategory": "Source category",
         "destinationCategory": "Destination docelowa",
-        "categoryType": "Category type"
+        "categoryType": "Category type",
+        "monthPlanLeft": "Planned ammount left"
     },
     "transactions": {
         "categoryTransfer": "Transactions transfer",

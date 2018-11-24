@@ -128,7 +128,8 @@
         "yearBalance": "Pozostałe środki w roku",
         "sourceCategory": "Kategoria źródłowa",
         "destinationCategory": "Kategoria docelowa",
-        "categoryType": "Typ kategorii"
+        "categoryType": "Typ kategorii",
+        "monthPlanLeft": "Pozostała planowa kwota"
     },
     "transactions": {
         "categoryTransfer": "Transfer transakcji",

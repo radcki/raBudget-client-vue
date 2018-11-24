@@ -1,4 +1,4 @@
-import config from 'config'
+
 import {
   apiHandler
 } from './apiHandler'
@@ -27,7 +27,6 @@ function login (username, password) {
       password
     })
   }
-
   return fetch(`${config.apiUrl}/users/authenticate`, requestOptions)
 }
 

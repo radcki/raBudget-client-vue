@@ -3,12 +3,14 @@ const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
-const { VueLoaderPlugin } = require('vue-loader')
+const {
+  VueLoaderPlugin
+} = require('vue-loader')
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
-
+/*
 const createLintingRule = () => ({
   test: /\.(js|vue)$/,
   loader: 'eslint-loader',
@@ -19,7 +21,7 @@ const createLintingRule = () => ({
     emitWarning: !config.dev.showEslintErrorsInOverlay
   }
 })
-
+*/
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
@@ -28,9 +30,9 @@ module.exports = {
   output: {
     path: config.build.assetsRoot,
     filename: '[name].js',
-    publicPath: process.env.NODE_ENV === 'production'
-      ? config.build.assetsPublicPath
-      : config.dev.assetsPublicPath
+    publicPath: process.env.NODE_ENV === 'production' ?
+      config.build.assetsPublicPath :
+      config.dev.assetsPublicPath
   },
   resolve: {
     extensions: ['.js', '.vue', '.json'],
@@ -44,11 +46,15 @@ module.exports = {
   ],
   module: {
     rules: [
-      ...(config.dev.useEslint ? [createLintingRule()] : []),
+      //...(config.dev.useEslint ? [createLintingRule()] : []),
       {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: vueLoaderConfig
+      },
+      {
+        test: /\.css$/,
+        use: ['vue-style-loader']
       },
       {
         test: /\.js$/,
