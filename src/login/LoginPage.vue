@@ -62,11 +62,19 @@ export default {
     };
   },
   computed: {
-    ...mapState("account", ["status"])
+    ...mapState("account", ["status"]),    
+  },
+  watch: {
+    "status.loggedIn": function(isLogged) {
+      if (isLogged){
+        this.$router.push("home");
+      }
+    }
   },
   created() {
-    // reset login status
-    this.logout();
+    if (status.loggedIn){
+      this.$router.push("home");
+    }
   },
   methods: {
     ...mapActions("account", ["login", "logout"]),
@@ -75,8 +83,7 @@ export default {
       const { username, password } = this;
       if (username && password) {
         this.login({ username, password }).then(ok => {
-          if (ok) {
-            this.$router.push("home");
+          if (ok) {            
             this.$root.$emit("reloadBudgets");
           }
         });

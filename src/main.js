@@ -128,7 +128,7 @@ const i18n = new VueI18n({
   messages
 })
 
-new Vue({
+const app = new Vue({
   el: '#app',
   router,
   store,

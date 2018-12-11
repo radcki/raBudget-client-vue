@@ -175,7 +175,7 @@
             <v-list-tile-title>{{ $t("account.account") }}</v-list-tile-title>            
           </v-list-tile>
 
-          <v-list-tile to="/login">
+          <v-list-tile @click="signOut">
             <v-list-tile-action>
                 <v-icon-fa class="fa-lg" icon="sign-out-alt"/>
             </v-list-tile-action>
@@ -192,7 +192,7 @@
       v-model="alert.message"  
       :color="alert.type">
         {{$t(alert.message)}}
-        <v-btn dark flat @click="alert.message = false">
+        <v-btn dark flat @click="clearAlert">
           <v-icon>close</v-icon>
         </v-btn>
     </v-snackbar>   
@@ -232,24 +232,7 @@ export default {
   mounted() {
     this.drawer = this.$vuetify.breakpoint.lgAndUp;
     this.$root.$confirm = this.$refs.confirm.open
-    this.budgetsFetch().then(
-      result => {
-        if (result) {
-          for(var i = 0;i<this.budgets.length;i++){
-            if (this.budgets[i].default){              
-              this.budgets[i].active = true;
-              if (this.$route.name == "home"){
-                this.$router.push({name: "overview", params: {id: this.budgets[i].id}})
-              }
-            } else {
-              this.budgets[i].active = false;
-            }
-          }
-        } else {
-          this.$router.push({name: "newBudget"});
-        }
-      }
-    );
+
     var savedLocale = localStorage.getItem('locale');
     if (savedLocale){
       this.switchLocale(savedLocale);
@@ -263,8 +246,12 @@ export default {
   },
   methods: {
     ...mapActions({
-      clearAlert: "alert/clear"
+      clearAlert: "alert/clear",
+      logout: "account/logout"
     }),
+    signOut(){
+      this.logout().then(()=>{this.$router.push("/")});
+    },
     switchLocale(locale) {      
       locale = locale.substring(0, 2);
       this.locale = locale;
@@ -279,26 +266,49 @@ export default {
           if (response.ok) {
             response.json().then(
               data => {
-                this.budgets = data;
-                resolve(true);
+                this.budgets = data
+                resolve(data);
               }
             );
+          } else if (response.status == 404) {
+            this.budgets = [];
+            resolve([]);            
           } else {
-            if (response.status == 404) {
-              this.budgets = [];
-              resolve(false);            
-            }
+            this.budgets = [];
+            reject(response)
           }
-        }
-      );
+        })
+        .catch(error=>{reject(error)});
       })      
     }
   },
   watch: {
-    $route(to, from) {
-      // clear alert on location change
-      this.clearAlert();
+    "account.status.loggedIn": {
+      handler: function(isLogged) {
+        if(!isLogged){
+          return;
+        }
+        this.budgetsFetch();
+      },
+      immediate: true
     },
+    budgets: function(budgets){
+      if (budgets.length === 0) {
+        this.$router.push({name: "newBudget"});
+      } else {
+        var defaultBudgets = this.budgets.filter( v => v.default )
+        var activeBudget = null;
+        if (defaultBudgets.length > 0){
+          defaultBudgets[0].active = true;
+          activeBudget = defaultBudgets[0]
+        } else {
+          this.budgets[0].active = true;
+          activeBudget = this.budgets[0]
+        }
+        this.$router.push({name: "overview", params: {id: activeBudget.id}})
+      }
+          
+    }
   }
 };
 </script>
