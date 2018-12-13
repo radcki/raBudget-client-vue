@@ -84,7 +84,8 @@
         "search": "Szukaj",
         "budgets": "Budżety",
         "sum": "Suma",
-        "refresh": "Odśwież"
+        "refresh": "Odśwież",
+        "selectAll": "Wszystko"
     },
     "forms": {
         "requiredField": "Pole jest wymagane.",

@@ -36,9 +36,9 @@ function createBudget (budgetData, budgetCategories) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      budgetName: budgetData.name,
+      name: budgetData.name,
       currency: budgetData.currency,
-      startingDate: budgetData.startDate,
+      startingDate: budgetData.startingDate,
       spendingCategories: budgetCategories.spending,
       incomeCategories: budgetCategories.income,
       savingCategories: budgetCategories.savings
@@ -54,10 +54,10 @@ function saveBudget (budgetId, budgetData) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      budgetName: budgetData.name,
-      startingDate: budgetData.startDate,
+      name: budgetData.name,
+      startingDate: budgetData.startingDate,
       currency: budgetData.currency,
-      defailt: budgetData.default
+      default: budgetData.default
     })
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/budgets/${budgetId}/update`, requestOptions)

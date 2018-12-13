@@ -84,7 +84,8 @@
         "search": "Search",
         "budgets": "Budgets",
         "sum": "Sum",
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "selectAll": "Select all"
     },
     "forms": {
         "requiredField": "Field is required.",

@@ -62,30 +62,12 @@
                       </v-menu>
                     </v-flex>
                     <v-flex xs7>
-                      <v-select                      
-                        v-model="editor.category"
-                        :items="categories[selectedType]"
-                        item-text="name"
-                        item-value="categoryId"
-                        single-line
-                        append-icon="keyboard_arrow_down"
-                        :rules="requiredRule"
-                        :label="$t('general.category')">
-
-                        <template slot="selection" slot-scope="data">
-                          <v-list-tile-action>
-                            <v-icon>{{ data.item.icon }}</v-icon>
-                          </v-list-tile-action>                      
-                          <span>{{ data.item.name }}</span>
-                        </template>
-                        <template slot="item" slot-scope="data">
-                          <v-list-tile-action v-if="data.item">
-                            <v-icon>{{ data.item.icon }}</v-icon>
-                          </v-list-tile-action>                      
-                          <span>{{ data.item.name }}</span>
-                        </template>
-
-                      </v-select>
+                        <v-category-select 
+                            :items="categories[selectedType]" 
+                            v-if="categories[selectedType]"
+                            :label="$t('general.category')"
+                            :rules="requiredRule"
+                            v-model="editor.category"></v-category-select>                      
                     </v-flex>
 
                     <v-flex xs5>
@@ -145,33 +127,16 @@
 
              
           </v-flex>
-          <v-flex xs12 >
+
+          <v-flex xs12 v-if="$vuetify.breakpoint.smAndUp">
             <v-subheader class="headline">
                 {{$t('budgets.savingsStatus')}}
             </v-subheader>  
-            <v-container class="elevation-1 blue darken-1 white--text">     
-              <v-layout row wrap >
-                <v-flex xs4 align-center></v-flex>
-                <v-flex xs4 align-center>{{ $t('categories.totalAmount') }}</v-flex>
-                <v-flex xs4 align-center>{{ $t('categories.monthPlanLeft') }}</v-flex>
-                  <template v-for="(category, index) in savingBalance" >
-                    <v-flex :key="index + '_name'" xs4 align-center>
-                      {{category.budgetCategory.name}}
-                    </v-flex>
-                    <v-flex :key="index + '_savingsum'" xs4>
-                      <v-chip class="amber darken-3 elevation-3 white--text" small>
-                        {{category.totalTransactionsSum | currency($currencies[budget.currency])}}
-                      </v-chip>
-                    </v-flex>
-                    <v-flex :key="index + '_savingplan'" xs4>
-                      <v-chip class="amber darken-3 elevation-3 white--text" small>
-                        {{category.thisMonthBudgetBalance | currency($currencies[budget.currency])}}
-                      </v-chip>
-                    </v-flex>
-                  </template>
-              </v-layout>
-            </v-container>
-
+            <v-mini-categories-summary 
+              color="white--text"
+              background-color="blue darken-1"
+              :data-balance="savingBalance" 
+              :data-budget="budget"></v-mini-categories-summary>
           </v-flex>
         </v-layout>
       </v-flex>
@@ -302,6 +267,17 @@
         </v-layout>
       </v-flex>
 
+      <v-flex xs12 v-if="!$vuetify.breakpoint.smAndUp">
+        <v-subheader class="headline">
+            {{$t('budgets.savingsStatus')}}
+        </v-subheader>  
+        <v-mini-categories-summary 
+          color="white--text"
+          background-color="blue darken-1"
+          :data-balance="savingBalance" 
+          :data-budget="budget"></v-mini-categories-summary>
+      </v-flex>
+
       <v-flex xs12>
          <v-subheader class="headline">
             {{$t('transactions.recentTransactions')}}
@@ -309,139 +285,54 @@
       </v-flex>
 
       <v-flex xs12 sm6 lg4  v-if="categories.spendings">
-        <v-list class="py-0 elevation-1" dense subheader>     
-          <v-list-tile class="amber darken-1 py-1">
-            <v-list-tile-title class="subheading white--text">
-              {{$t('transactions.recentSpending')}}
-            </v-list-tile-title>
-          </v-list-tile> 
-        <template  v-for="(transactions, date) in spendingsByDate">
-          <v-list-tile-title :key="date" class="my-1 px-3 text-xs-right grey--text caption">
-            {{ date  | moment("dddd, D.MM.YYYY") }}
-          </v-list-tile-title>
-          <v-divider :key="date + '_divider'" inset></v-divider>
-          <v-list-tile :key="date + '_' + i" v-for="(transaction, i) in transactions" avatar class="pb-1">
-            <v-list-tile-avatar>
-              <v-icon>{{ transaction.category.icon }}</v-icon>
-            </v-list-tile-avatar>
-
-            <v-list-tile-content>
-              <v-list-tile-title class="font-weight-medium">
-                {{ transaction.description}} 
-              </v-list-tile-title>
-
-              <v-list-tile-sub-title class="text--primary">
-                {{transaction.amount | currency($currencies[budget.currency])}}
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-
-            <v-list-tile-action>
-              <v-icon @click="editTransaction(transaction.transactionId)">edit</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-icon @click="deleteTransaction(transaction.transactionId)">delete</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
-        </template>
-        </v-list>
+        <v-mini-transactions-list
+          :items="transactions.spendings"
+          color="amber darken-1"
+          :title="$t('transactions.recentSpending')"
+          :data-budget="budget"
+          :on-edit="editTransaction" :on-delete="deleteTransaction"
+          ></v-mini-transactions-list>        
       </v-flex>
 
       <v-flex xs12 sm6 lg4 v-if="categories.incomes">
-        <v-list class="py-0 elevation-1" dense subheader>     
-          <v-list-tile class="green darken-1 py-1">
-            <v-list-tile-title class="subheading white--text">
-              {{$t('transactions.recentIncome')}}
-            </v-list-tile-title>
-          </v-list-tile> 
-        <template v-for="(transactions, date) in incomesByDate">
-          <v-list-tile-title :key="date" class="my-1 px-3 text-xs-right grey--text caption">
-            {{ date  | moment("dddd, D.MM.YYYY") }}
-          </v-list-tile-title>
-          <v-divider :key="date + '_divider'" inset></v-divider>
-          <v-list-tile :key="date + '_' + i" v-for="(transaction, i) in transactions" avatar class="pb-1">
-            <v-list-tile-avatar>
-              <v-icon>{{ transaction.category.icon }}</v-icon>
-            </v-list-tile-avatar>
-
-            <v-list-tile-content>
-              <v-list-tile-title class="font-weight-medium">
-                {{ transaction.description}} 
-              </v-list-tile-title>
-
-              <v-list-tile-sub-title class="text--primary">
-                {{transaction.amount | currency($currencies[budget.currency])}}
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-
-            <v-list-tile-action>
-              <v-icon @click="editTransaction(transaction.transactionId)">edit</v-icon>
-            </v-list-tile-action>
-
-            <v-list-tile-action>
-              <v-icon @click="deleteTransaction(transaction.transactionId)">delete</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
-        </template>
-        </v-list>
+        <v-mini-transactions-list
+          :items="transactions.incomes"
+          color="green darken-1"
+          :title="$t('transactions.recentIncome')"
+          :data-budget="budget"
+          :on-edit="editTransaction" :on-delete="deleteTransaction"
+          ></v-mini-transactions-list>  
+        
       </v-flex>
 
       <v-flex xs12 sm6 lg4 v-if="categories.savings">
-        <v-list class="py-0 elevation-1" dense subheader>     
-          <v-list-tile class="blue darken-1 py-1">
-            <v-list-tile-title class="subheading white--text">
-              {{$t('transactions.recentSaving')}}
-            </v-list-tile-title>
-          </v-list-tile> 
-        <template v-for="(transactions, date) in savingsByDate">
-          <v-list-tile-title :key="date" class="my-1 px-3 text-xs-right grey--text caption">
-            {{ date  | moment("dddd, D.MM.YYYY") }}
-          </v-list-tile-title>
-          <v-divider :key="date + '_divider'" inset></v-divider>
-          <v-list-tile :key="date + '_' + i" v-for="(transaction, i) in transactions" avatar class="pb-1">
-            <v-list-tile-avatar>
-              <v-icon>{{ transaction.category.icon }}</v-icon>
-            </v-list-tile-avatar>
-
-            <v-list-tile-content>
-              <v-list-tile-title class="font-weight-medium">
-                {{ transaction.description}} 
-              </v-list-tile-title>
-
-              <v-list-tile-sub-title class="text--primary">
-                {{transaction.amount | currency($currencies[budget.currency])}}
-              </v-list-tile-sub-title>
-            </v-list-tile-content>
-
-            <v-list-tile-action>
-              <v-icon @click="editTransaction(transaction.transactionId)">edit</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-icon @click="deleteTransaction(transaction.transactionId)">delete</v-icon>
-            </v-list-tile-action>
-          </v-list-tile>
-        </template>
-        </v-list>
+        <v-mini-transactions-list
+          :items="transactions.savings"
+          color="blue darken-1"
+          :title="$t('transactions.recentSaving')"
+          :data-budget="budget"
+          :on-edit="editTransaction" :on-delete="deleteTransaction"
+          ></v-mini-transactions-list>
       </v-flex>
 
     </v-layout>
-    <v-dialog v-if="$vuetify.breakpoint.xs" lazy fullscreen v-model="editorDialog">
-      <v-card>     
-        <v-card-text class="pa-0">
-          <v-toolbar :color="color[tab]" dark tabs>
-            <v-btn icon dark @click.native="editorDialog = false">
-              <v-icon>close</v-icon>
-            </v-btn>
-            <v-toolbar-title>
-             {{$t('transactions.newtransaction')}}
-            </v-toolbar-title>
-            <v-spacer></v-spacer>
+    <v-dialog v-if="$vuetify.breakpoint.xs" lazy fullscreen v-model="editorDialog" hide-overlay transition="dialog-bottom-transition">
+      <v-card>
+        <v-toolbar :color="color[tab]" fixed app dark tabs>
+          <v-btn icon dark @click.native="editorDialog = false">
+            <v-icon>close</v-icon>
+          </v-btn>
+          <v-toolbar-title>
+            {{$t('transactions.newtransaction')}}
+          </v-toolbar-title>
+          <v-spacer></v-spacer>
 
-            <v-btn dark flat v-if="tab!=3" @click="createTransaction">
-              {{ $t('general.add') }}
-            </v-btn>
-            <v-btn dark flat v-if="tab==3" @click="createAllocation">
-              {{ $t('general.add') }}
-            </v-btn>
+          <v-btn dark flat v-if="tab!=3" @click="createTransaction">
+            {{ $t('general.add') }}
+          </v-btn>
+          <v-btn dark flat v-if="tab==3" @click="createAllocation">
+            {{ $t('general.add') }}
+          </v-btn>
           <v-tabs
             slot="extension"
             v-model="tab"
@@ -461,10 +352,10 @@
               Alokacje
             </v-tab>
           </v-tabs> 
-          </v-toolbar>
-
-          <v-form ref="editorForm" v-model="valid" lazy-validation>           
-          <v-container>     
+        </v-toolbar>
+      <v-content>
+        <v-form ref="editorForm" v-model="valid" lazy-validation>           
+          <v-container >     
             <v-layout row wrap align-center justify-center>
               <v-flex xs12>
                 <v-menu
@@ -488,7 +379,6 @@
                     readonly
                   ></v-text-field>
                   <v-date-picker v-model="editor.date" @input="$refs.dateMenu.save(editor.date)"></v-date-picker>
-
                 </v-menu>
               </v-flex>
               <v-flex xs12>
@@ -560,7 +450,7 @@
             </v-layout>                
           </v-container>  
           </v-form>            
-        </v-card-text>
+        </v-content> 
       </v-card>
     </v-dialog>
     
@@ -578,9 +468,13 @@ import { transactionsService } from "../_services/transactions.service";
 import { allocationsService } from "../_services/allocations.service";
 import { mapState, mapActions } from "vuex";
 
+
 export default {
   components: {
-    "transaction-editor": () => import("../components/TransactionEditor")
+    "transaction-editor": () => import("../components/TransactionEditor"),
+    "v-category-select": () => import("../components/CategorySelect"),
+    "v-mini-transactions-list": () => import("../components/MinitransactionsList"),
+    "v-mini-categories-summary": () => import("../components/MiniCategoriesSummary")
   },
   data() {
     return {
@@ -636,36 +530,6 @@ export default {
           : this.tab == 2
             ? "savings"
             : "allocations";
-    },
-    spendingsByDate: function() {
-      if (this.transactions.spendings) {
-        return this.transactions.spendings.reduce((acc, transaction) => {
-          (acc[transaction.date] = acc[transaction.date] || []).push(
-            transaction
-          );
-          return acc;
-        }, {});
-      }
-    },
-    incomesByDate: function() {
-      if (this.transactions.incomes) {
-        return this.transactions.incomes.reduce((acc, transaction) => {
-          (acc[transaction.date] = acc[transaction.date] || []).push(
-            transaction
-          );
-          return acc;
-        }, {});
-      }
-    },
-    savingsByDate: function() {
-      if (this.transactions.savings) {
-        return this.transactions.savings.reduce((acc, transaction) => {
-          (acc[transaction.date] = acc[transaction.date] || []).push(
-            transaction
-          );
-          return acc;
-        }, {});
-      }
     }
   },
   mounted: function() {

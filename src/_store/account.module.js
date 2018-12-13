@@ -1,10 +1,12 @@
 import {userService} from '../_services/user.service'
 import {apiHandler} from '../_services/apiHandler'
+import moment from 'moment'
 
 var user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
 
 const state = {
   user: user,
+  lastAuthCheck: null,
   status: {
     loggedIn: false,
     loggingIn: false,
@@ -51,8 +53,24 @@ const actions = {
   },
   checkLogin ({state}) {
     return new Promise((resolve, reject) => {
-      state.status.loggedIn = state.user != null
-      resolve(state.status.loggedIn)
+      if (state.user == null) {
+        state.status.loggedIn = false
+        resolve(state.status.loggedIn)
+        return
+      }
+      if (state.lastAuthCheck && state.lastAuthCheck.diff(moment(), 'minutes') < 5) {
+        state.status.loggedIn = true
+        resolve(state.status.loggedIn)
+        return
+      }
+      userService.confirmAuthorization().then(response => {
+        state.status.loggedIn = !!response.ok
+        state.lastAuthCheck = moment()
+        resolve(state.status.loggedIn)
+      }).catch(() => {
+        state.status.loggedIn = false
+        resolve(state.status.loggedIn)
+      })
     })
   },
   logout ({commit}) {

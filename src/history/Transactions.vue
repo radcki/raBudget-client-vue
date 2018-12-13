@@ -24,27 +24,14 @@
                           </v-radio-group>
                         </v-flex>
                         <v-flex xs6>
-                          <v-select
-                            :items="categories[categoryType]"
+                          <v-category-select 
+                            multiple
+                            :items="categories[categoryType]" 
+                            v-if="categories[categoryType]"                            
                             v-model="filters.categories"
-                            v-if="filters.categories"
-                            multiple                            
-                            item-text="name"
-                            return-object
-                            single-line
-                            class="caption"
                             :rules="requiredRule"
                             persistent-hint
-                            :hint="$t('general.category')">
-
-                            <template slot="item" slot-scope="data">
-                              <v-list-tile-action v-if="data.item">
-                                <v-icon>{{ data.item.icon }}</v-icon>
-                              </v-list-tile-action>                      
-                              <span>{{ data.item.name }}</span>
-                            </template>
-                          </v-select>
-
+                            :hint="$t('general.category')"></v-category-select>                            
                         </v-flex>
                         
                       </v-layout>
@@ -238,7 +225,8 @@ import { mapState, mapActions } from "vuex";
 
 export default {
   components: {
-    "transaction-editor": () => import("../components/TransactionEditor")
+    "transaction-editor": () => import("../components/TransactionEditor"),
+    "v-category-select": () => import("../components/CategorySelect")
   },
   data() {
     return {

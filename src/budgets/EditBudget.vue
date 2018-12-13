@@ -7,7 +7,7 @@
       </v-flex>
 
       <v-flex xs12>
-        <v-card max-width="800">
+        <v-card max-width="800" v-if="!$wait.is('budgets.load')">
           <v-card-title>
             <v-subheader class="headline">
             {{ $t('budgets.budget') }}
@@ -40,7 +40,7 @@
                       :close-on-content-click="false"
                       v-model="dateMenu"
                       :nudge-right="40"
-                      :return-value.sync="budget.startDate"
+                      :return-value.sync="budget.startingDate"
                       lazy
                       transition="scale-transition"
                       offset-y
@@ -49,13 +49,13 @@
                     >
                       <v-text-field
                         slot="activator"
-                        v-model="budget.startDate"
+                        v-model="budget.startingDate"
                         :label="$t('budgets.startDate')"
                         :rules="requiredRule"
                         prepend-icon="event"
                         readonly
                       ></v-text-field>
-                      <v-date-picker v-model="budget.startDate" @input="$refs.dateMenu.save(budget.startDate)"></v-date-picker>
+                      <v-date-picker v-model="budget.startingDate" @input="$refs.dateMenu.save(budget.startingDate)"></v-date-picker>
                     </v-menu>
                   </v-flex>
                   <v-flex xs12>
@@ -95,30 +95,22 @@ export default {
   data() {
     return {
       step: 1,
-      budget: {
-        name: null,
-        startDate: null,
-        currency: "pln",
-        default: null
-      },
+
       dateMenu: false,
       valid: true,
       requiredRule: [v => !!v || this.$t("forms.requiredField")]
     };
   },
   computed: {
+    ...mapState({
+      budgets: state => state.budgets.budgets
+    }),
+
     currencies: function() {
       return Object.keys(this.$currencies);
-    }
-  },
-  mounted: function() {
-    this.loadBudget(this.$route.params.id);
-  },
-  watch: {
-    $route(to, from) {
-      this.loadBudget(this.$route.params.id);
-    }
-  },
+    },
+    budget() {return this.budgets.filter(v=>v.id==this.$route.params.id)[0]}
+  },  
   methods: {
     ...mapActions({
       dispatchError: "alert/error",
@@ -170,7 +162,7 @@ export default {
         if (response.ok) {
           response.json().then(data => {
             this.budget.currency = data.currency;
-            this.budget.name = data.budgetName;
+            this.budget.name = data.name;
             this.budget.startDate = this.$moment(data.startingDate).format(
               "YYYY-MM-DD"
             );

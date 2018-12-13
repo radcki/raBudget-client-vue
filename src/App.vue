@@ -103,34 +103,11 @@
       <v-toolbar-side-icon v-if="account.status.loggedIn" @click.stop="drawer = !drawer">
         <v-icon>menu</v-icon>
       </v-toolbar-side-icon>
-      <v-toolbar-title class="mr-5 align-center">
+      <v-toolbar-title class="align-center">
         <span class="title">raBudget</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       
-      <v-menu v-if="isAdmin">
-        <v-btn slot="activator" flat>
-          ADMIN
-        </v-btn>
-        
-        <v-list light subheader>
-          <v-list-tile to="/admin/users">
-            <v-list-tile-action>
-                <v-icon>supervised_user_circle</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-title>{{ $t("admin.users") }}</v-list-tile-title>            
-          </v-list-tile>
-
-          <v-list-tile to="/admin/logs">
-            <v-list-tile-action>
-                <v-icon>list</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-title>{{ $t("admin.logs") }}</v-list-tile-title>            
-          </v-list-tile>
-
-        </v-list>
-      </v-menu>
-
       <v-menu left>
         <v-btn slot="activator" flat>
           <v-icon class="mr-2">language</v-icon>{{locale}}
@@ -166,6 +143,22 @@
         </v-btn>
         
         <v-list light subheader>
+          <template v-if="isAdmin">
+            <v-subheader>ADMIN</v-subheader>
+            <v-list-tile to="/admin/users">
+              <v-list-tile-action>
+                  <v-icon color="red">supervised_user_circle</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-title>{{ $t("admin.users") }}</v-list-tile-title>            
+            </v-list-tile>
+
+            <v-list-tile to="/admin/logs">
+              <v-list-tile-action>
+                  <v-icon color="red">list</v-icon>
+              </v-list-tile-action>
+              <v-list-tile-title>{{ $t("admin.logs") }}</v-list-tile-title>            
+            </v-list-tile>
+          </template>
           <v-subheader>{{ $t("account.logged") }}: {{ account.user.username }}</v-subheader>
 
           <v-list-tile to="/profile">
@@ -216,14 +209,13 @@ export default {
   },
   data: () => ({
     locale: 'pl',
-    drawer: null,
-    test: true,
-    budgets: [],
+    drawer: null
   }),
   computed: {
     ...mapState({
       alert: state => state.alert,
-      account: state => state.account
+      account: state => state.account,
+      budgets: state => state.budgets.budgets
     }),
     isAdmin: function() {
       return this.account.user && this.account.user.roles && this.account.user.roles.filter(function(v){return v == 1}).length > 0;
@@ -247,7 +239,8 @@ export default {
   methods: {
     ...mapActions({
       clearAlert: "alert/clear",
-      logout: "account/logout"
+      logout: "account/logout",
+      budgetsFetch: "budgets/fetchBudgets"
     }),
     signOut(){
       this.logout().then(()=>{this.$router.push("/")});
@@ -258,28 +251,6 @@ export default {
       localStorage.setItem('locale', locale);
       this.$i18n.locale = locale
       this.$moment.locale(locale);  
-    },
-    budgetsFetch() {
-      return new Promise((resolve, reject) => {
-        budgetService.userBudgets()
-        .then(response => {
-          if (response.ok) {
-            response.json().then(
-              data => {
-                this.budgets = data
-                resolve(data);
-              }
-            );
-          } else if (response.status == 404) {
-            this.budgets = [];
-            resolve([]);            
-          } else {
-            this.budgets = [];
-            reject(response)
-          }
-        })
-        .catch(error=>{reject(error)});
-      })      
     }
   },
   watch: {
@@ -288,21 +259,21 @@ export default {
         if(!isLogged){
           return;
         }
-        this.budgetsFetch();
+        this.$wait.start('budgets.load');
+        this.budgetsFetch().then(result=>{this.$wait.end('budgets.load')});
       },
       immediate: true
     },
     budgets: function(budgets){
       if (budgets.length === 0) {
         this.$router.push({name: "newBudget"});
-      } else {
+      } else if (this.$route.name == "home") {
         var defaultBudgets = this.budgets.filter( v => v.default )
         var activeBudget = null;
+
         if (defaultBudgets.length > 0){
-          defaultBudgets[0].active = true;
           activeBudget = defaultBudgets[0]
         } else {
-          this.budgets[0].active = true;
           activeBudget = this.budgets[0]
         }
         this.$router.push({name: "overview", params: {id: activeBudget.id}})

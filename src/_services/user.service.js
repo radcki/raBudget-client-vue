@@ -13,6 +13,7 @@ export const userService = {
   update,
   adminUpdate,
   changePassword,
+  confirmAuthorization,
   delete: _delete
 }
 
@@ -32,6 +33,11 @@ function login (username, password) {
 
 function logout () {
   return apiHandler.logout()
+}
+function confirmAuthorization () {
+  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/confirm-authorization`, {
+    method: 'GET'
+  })
 }
 
 function register (user) {

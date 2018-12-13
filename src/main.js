@@ -7,6 +7,8 @@ import App from './App'
 import VueI18n from 'vue-i18n'
 import VueCurrencyFilter from 'vue-currency-filter'
 import VueMoment from 'vue-moment'
+import VueWait from 'vue-wait'
+
 import 'moment/locale/pl'
 import 'moment/locale/en-gb'
 
@@ -25,6 +27,7 @@ library.add(faUserCircle)
 library.add(faDotCircle)
 library.add(faCircle)
 
+Vue.use(VueWait)
 Vue.use(VueI18n)
 Vue.use(VeeValidate)
 Vue.use(Vuetify, {
@@ -130,6 +133,10 @@ const i18n = new VueI18n({
 
 const app = new Vue({
   el: '#app',
+  wait: new VueWait({
+    useVuex: true, // You must pass this option `true` to use Vuex
+    vuexModuleName: 'vuewait' // It's optional, `wait` by default.
+  }),
   router,
   store,
   i18n,
