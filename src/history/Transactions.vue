@@ -38,77 +38,12 @@
                     </v-container>
                   </v-flex>
 
-                  <v-flex xs12 md6>
-                    <v-container fluid grid-list-sm class="pa-0">
-                      <v-layout row wrap > 
-                        
-                        <v-flex xs6 style="width: 120px">
-                          <v-menu
-                            ref="dateMenuStart"
-                            :close-on-content-click="false"
-                            v-model="dateMenuStart"
-                            :nudge-right="40"
-                            :return-value.sync="filters.startDate"
-                            lazy
-                            transition="scale-transition"
-                            offset-y
-                            full-width
-                            min-width="290px"
-                          >
-                            <v-text-field
-                              slot="activator"
-                              v-model="filters.startDate"
-                              :label="$t('general.fromDate')"
-                              :rules="requiredRule"
-                              readonly
-                            ></v-text-field>
-                            <v-date-picker 
-                              :min="budget.startDate"
-                              :max="today"
-                              v-model="filters.startDate" 
-                              @input="$refs.dateMenuStart.save(filters.startDate)"></v-date-picker>
-
-                          </v-menu>
-                        </v-flex>
-
-                        <v-flex xs6 style="width: 120px" >
-                          <v-menu
-                            ref="dateMenuEnd"
-                            :close-on-content-click="false"
-                            v-model="dateMenuEnd"                      
-                            :nudge-right="40"
-                            :return-value.sync="filters.endDate"
-                            lazy
-                            transition="scale-transition"
-                            offset-y
-                            full-width
-                            min-width="290px"
-                          >
-                            <v-text-field
-                              slot="activator"
-                              v-model="filters.endDate"
-                              :label="$t('general.fromDate')"
-                              :rules="requiredRule"
-                              readonly
-                            ></v-text-field>
-                            <v-date-picker 
-                              :min="budget.startDate"
-                              :max="today" 
-                              v-model="filters.endDate" 
-                              @input="$refs.dateMenuEnd.save(filters.endDate)"></v-date-picker>
-
-                          </v-menu>
-                        </v-flex>
-                        <v-flex xs12>
-                          <v-range-slider
-                            v-model="sliderValue"
-                            :max="sliderMax"
-                            :min="0"
-                            :step="1"
-                          ></v-range-slider>
-                        </v-flex>
-                      </v-layout>
-                    </v-container>
+                  <v-flex xs12 md6 v-if="budget.startDate">
+                    <v-date-range-slider                      
+                      :min="$moment(budget.startDate).format('YYYY-MM-DD')"
+                      :max="today"
+                      v-model="selectedRange"
+                      step="days"></v-date-range-slider>                    
                   </v-flex>
 
                 </v-layout>
@@ -226,16 +161,18 @@ import { mapState, mapActions } from "vuex";
 export default {
   components: {
     "transaction-editor": () => import("../components/TransactionEditor"),
-    "v-category-select": () => import("../components/CategorySelect")
+    "v-category-select": () => import("../components/CategorySelect"),
+    "v-date-range-slider": () => import("../components/DateRangeSlider"),
   },
   data() {
     return {
       loading: false,
       error: false,
       search: null,
-      dateMenuStart: false,
-      dateMenuEnd: false,
+
       categoryType: "spendings",
+      selectedRange: [null, null],
+
       budget: {
         name: null,
         startDate: null,
@@ -243,8 +180,6 @@ export default {
         balance: null
       },
       filters: {
-        startDate: null,
-        endDate: null,
         categories: null
       },
       categories: {
@@ -278,8 +213,7 @@ export default {
           sortable: false
         }
       ],
-      sliderValue: [null, null],
-      sliderMax: null,
+
       transactions: null,
       tab: 0,
       color: [
@@ -297,7 +231,12 @@ export default {
     },
     today: function() {
       return this.$moment().format("YYYY-MM-DD");
-    }
+    },
+    monthAgoOrStart(){ 
+      return this.$moment().subtract(1, 'month') < this.$moment(this.budget.startDate) 
+          ? this.$moment(this.budget.startDate).format('YYYY-MM-DD')
+          : this.$moment().subtract(1, 'month')
+    }    
   },
   mounted: function() {
     this.loadBudget(this.$route.params.id);
@@ -305,41 +244,11 @@ export default {
   watch: {
     $route(to, from) {
       this.loadBudget(this.$route.params.id);
-      this.refreshFields();
       this.fetchTransactions();
     },
     "budget.startDate": function(date) {
-      if (date != null) {
-        this.sliderMax = this.$moment().diff(this.$moment(date), "days");
-        var daysSinceStart = this.daysSinceStart(
-          this.$moment().format("YYYY-MM-DD")
-        );
-        this.sliderValue[1] = daysSinceStart;
-        this.sliderValue[0] =
-          this.$moment().subtract(1, "months") <
-          this.$moment(this.budget.startDate) <
-          0
-            ? this.budget.startDate
-            : this.daysSinceStart(
-                this.$moment()
-                  .subtract(1, "months")
-                  .format("YYYY-MM-DD")
-              );
-        this.refreshFields();
-        this.fetchTransactions();
-      }
-    },
-    "sliderValue.0": function(minDays) {
-      this.refreshFields();
-    },
-    "sliderValue.1": function(maxDays) {
-      this.refreshFields();
-    },
-    "filters.startDate": function() {
-      this.refreshSlider();
-    },
-    "filters.endDate": function() {
-      this.refreshSlider();
+        this.selectedRange = [this.monthAgoOrStart, this.today]
+        this.fetchTransactions();      
     },
     categoryType: function(value) {
       this.transactions = null;
@@ -352,26 +261,6 @@ export default {
       dispatchError: "alert/error",
       dispatchSuccess: "alert/success"
     }),
-    daysSinceStart(date) {
-      return this.$moment(date).diff(
-        this.$moment(this.budget.startDate),
-        "days"
-      );
-    },
-    refreshSlider() {
-      this.sliderValue = [
-        this.daysSinceStart(this.filters.startDate),
-        this.daysSinceStart(this.filters.endDate)
-      ];
-    },
-    refreshFields() {
-      this.filters.startDate = this.$moment(this.budget.startDate)
-        .add(this.sliderValue[0], "days")
-        .format("YYYY-MM-DD");
-      this.filters.endDate = this.$moment(this.budget.startDate)
-        .add(this.sliderValue[1], "days")
-        .format("YYYY-MM-DD");
-    },
     loadBudget(id) {
       budgetService.getBudget(id).then(response => {
         if (response.ok) {
@@ -399,8 +288,8 @@ export default {
         .listTransactions(
           this.$route.params.id,
           null,
-          this.filters.startDate,
-          this.filters.endDate,
+          this.selectedRange[0],
+          this.selectedRange[1],
           this.filters.categories
         )
         .then(response => {

@@ -9,8 +9,7 @@
       mobile-break-point="960"
       fixed
       clipped
-      app
-    >
+      app>
       <v-list>
 
         <v-list-tile>
@@ -174,7 +173,6 @@
             </v-list-tile-action>
             <v-list-tile-title>{{ $t("account.signOut") }}</v-list-tile-title>            
           </v-list-tile>
-
         </v-list>
       </v-menu>
     </v-toolbar>
