@@ -134,8 +134,8 @@ const i18n = new VueI18n({
 const app = new Vue({
   el: '#app',
   wait: new VueWait({
-    useVuex: true, // You must pass this option `true` to use Vuex
-    vuexModuleName: 'vuewait' // It's optional, `wait` by default.
+    useVuex: true,
+    vuexModuleName: 'wait'
   }),
   router,
   store,

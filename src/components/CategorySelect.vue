@@ -92,7 +92,7 @@ export default {
             }
         },
         categoriesSelected: function() {
-            if (!this.multiple || !this.items || this.selected.length == 0){
+            if (!this.multiple || !this.items || !this.selected || this.selected.length == 0){
                 return "none";
             }
             var n = this.selected.length;

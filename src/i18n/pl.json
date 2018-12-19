@@ -94,6 +94,7 @@
         "passwordDontMatch": "Hasła nie są takie same"
     },
     "budgets": {
+        "loading": "Trwa wczytywanie budżetu...",
         "spendingBalance": "Bilans wydatków",
         "budgetName": "Nazwa budżetu",
         "setDefault": "Ustaw jako domyślny",

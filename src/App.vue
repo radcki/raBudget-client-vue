@@ -257,8 +257,8 @@ export default {
         if(!isLogged){
           return;
         }
-        this.$wait.start('budgets.load');
-        this.budgetsFetch().then(result=>{this.$wait.end('budgets.load')});
+        this.$wait.start('budgets');
+        this.budgetsFetch().then(result=>{this.$wait.end('budgets')});
       },
       immediate: true
     },

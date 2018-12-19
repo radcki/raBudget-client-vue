@@ -18,17 +18,17 @@
                       <v-layout row wrap> 
                         <v-flex xs6>
                           <v-radio-group light v-model="categoryType" :mandatory="true" column>
-                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.spendings')" value="spendings"></v-radio>
-                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.incomes')" value="incomes"></v-radio>
-                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.savings')" value="savings"></v-radio>
+                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.spendings')" value="spendingCategories"></v-radio>
+                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.incomes')" value="incomeCategories"></v-radio>
+                            <v-radio color="primary" off-icon="radio_button_unchecked" on-icon="radio_button_checked" :label="$t('general.savings')" value="savingCategories"></v-radio>
                           </v-radio-group>
                         </v-flex>
-                        <v-flex xs6>
+                        <v-flex xs6 v-if="budget">
                           <v-category-select 
                             multiple
-                            :items="categories[categoryType]" 
-                            v-if="categories[categoryType]"                            
-                            v-model="filters.categories"
+                            :items="budget[categoryType]" 
+                            v-if="budget[categoryType]"                            
+                            v-model="selectedCategories"
                             :rules="requiredRule"
                             persistent-hint
                             :hint="$t('general.category')"></v-category-select>                            
@@ -38,9 +38,9 @@
                     </v-container>
                   </v-flex>
 
-                  <v-flex xs12 md6 v-if="budget.startDate">
+                  <v-flex xs12 md6 v-if="budget">
                     <v-date-range-slider                      
-                      :min="$moment(budget.startDate).format('YYYY-MM-DD')"
+                      :min="$moment(budget.startingDate).format('YYYY-MM-DD')"
                       :max="today"
                       v-model="selectedRange"
                       step="days"></v-date-range-slider>                    
@@ -170,23 +170,10 @@ export default {
       error: false,
       search: null,
 
-      categoryType: "spendings",
+      categoryType: "spendingCategories",
       selectedRange: [null, null],
+      selectedCategories: null,
 
-      budget: {
-        name: null,
-        startDate: null,
-        currency: null,
-        balance: null
-      },
-      filters: {
-        categories: null
-      },
-      categories: {
-        incomes: null,
-        spendings: null,
-        savings: null
-      },
       headers: [
         {
           text: this.$t("general.category"),
@@ -226,6 +213,12 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      budgets: state => state.budgets.budgets
+    }),
+    budget() {
+      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
+    },
     currencies: function() {
       return Object.keys(this.$currencies);
     },
@@ -233,26 +226,33 @@ export default {
       return this.$moment().format("YYYY-MM-DD");
     },
     monthAgoOrStart(){ 
-      return this.$moment().subtract(1, 'month') < this.$moment(this.budget.startDate) 
-          ? this.$moment(this.budget.startDate).format('YYYY-MM-DD')
-          : this.$moment().subtract(1, 'month')
+      return this.$moment().subtract(1, 'month') < this.$moment(this.budget.startingDate) 
+          ? this.$moment(this.budget.startingDate).format('YYYY-MM-DD')
+          : this.$moment().subtract(1, 'month').format('YYYY-MM-DD')
     }    
   },
-  mounted: function() {
-    this.loadBudget(this.$route.params.id);
+  created: function(){           
+    if (this.budget){
+      this.selectedCategories = this.budget[this.categoryType];
+      this.selectedRange = [this.monthAgoOrStart, this.today] 
+      this.fetchTransactions();  
+    }     
   },
-  watch: {
-    $route(to, from) {
-      this.loadBudget(this.$route.params.id);
-      this.fetchTransactions();
-    },
-    "budget.startDate": function(date) {
+  watch: {    
+    budget: function(budget) {
         this.selectedRange = [this.monthAgoOrStart, this.today]
+        
+        if (this.budget && this.budget[this.categoryType]){
+          this.selectedCategories = this.budget[this.categoryType];
+        }
         this.fetchTransactions();      
     },
     categoryType: function(value) {
       this.transactions = null;
-      this.filters.categories = this.categories[value];
+      if (this.budget && this.budget[value]){
+        this.selectedCategories = this.budget[value];
+      }
+      
       this.fetchTransactions();
     }
   },
@@ -261,27 +261,6 @@ export default {
       dispatchError: "alert/error",
       dispatchSuccess: "alert/success"
     }),
-    loadBudget(id) {
-      budgetService.getBudget(id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.budget.balance = data.balance;
-            this.budget.currency = data.currency;
-            this.budget.startDate = data.startingDate;
-            this.categories = {
-              spendings: data.spendingCategories,
-              savings: data.savingCategories,
-              incomes: data.incomeCategories
-            };
-            this.filters.categories = data.spendingCategories;
-          });
-        } else {
-          reponse.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
-    },
     fetchTransactions() {
       this.loading = true;
       transactionsService
@@ -290,13 +269,17 @@ export default {
           null,
           this.selectedRange[0],
           this.selectedRange[1],
-          this.filters.categories
+          this.selectedCategories
         )
         .then(response => {
           if (response.ok) {
             response.json().then(data => {
               this.loading = false;
-              this.transactions = data;
+              this.transactions = {
+                spendingCategories: data.spendings,
+                savingCategories: data.savings,
+                incomeCategories: data.incomes,
+              };
             });
           } else {
             this.loading = false;

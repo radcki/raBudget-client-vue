@@ -94,6 +94,7 @@
         "passwordDontMatch": "Passwords are not the same"
     },
     "budgets": {
+        "loading": "Budget is loading...",
         "spendingBalance": "Spending balance",
         "budgetName": "Budget name",
         "setDefault": "Set as default",

@@ -1,6 +1,19 @@
 <template>
-<v-container grid-list-md>     
-    <v-layout row wrap>
+<v-container grid-list-md :fill-height="$wait.is('budgets')">
+    <v-layout row wrap v-if="$wait.is('budgets')" align-center justify-center>
+      <v-progress-circular
+      :size="70"
+      :width="7"
+      color="grey darken-1"
+      indeterminate></v-progress-circular>
+      <br/>
+      <v-subheader class="headline">
+        {{ $t("budgets.loading") }}
+      </v-subheader>
+      
+    </v-layout>
+
+    <v-layout row wrap v-else>
       <v-flex d-flex xs12 md8 lg5 >        
         <v-layout row wrap align-start align-content-start>        
           <v-flex xs12 v-if="$vuetify.breakpoint.smAndUp">      
@@ -60,10 +73,9 @@
 
                       </v-menu>
                     </v-flex>
-                    <v-flex xs7>
+                    <v-flex xs7 v-if="budget">
                         <v-category-select 
-                            :items="categories[selectedType]" 
-                            v-if="categories[selectedType]"
+                            :items="budget[selectedType+'Categories']"                             
                             :label="$t('general.category')"
                             :rules="requiredRule"
                             v-model="editor.category"></v-category-select>                      
@@ -78,8 +90,8 @@
 
                     <v-flex xs7 v-if="tab == 3">
                       <v-category-select 
-                        :items="categories[selectedType]" 
-                        v-if="categories[selectedType]"
+                        :items="budget[selectedType+'Categories']" 
+                        v-if="budget[selectedType+'Categories']"
                         :label="$t('categories.sourceCategory')"
                         :rules="requiredRule"
                         v-model="editor.sourceCategory"></v-category-select>                       
@@ -135,8 +147,8 @@
                 {{$t('budgets.availablefunds')}}
               </v-card-title>
               <v-card-text class="display-1">
-                <span v-if="budget.balance || budget.balance == 0">{{budget.balance | currency($currencies[budget.currency]) }}</span>
-                <v-progress-circular v-else indeterminate color="white"></v-progress-circular>
+                <v-progress-circular v-if="$wait.is('budgets.loading')" indeterminate color="white"></v-progress-circular>
+                <span v-else>{{budget.balance | currency($currencies[budget.currency]) }}</span>                
               </v-card-text>              
             </v-card>
           </v-flex>
@@ -147,10 +159,11 @@
                 {{$t('budgets.unassignedFunds')}}            
               </v-card-title>
               <v-card-text class="display-1">
-                <span v-if="budget.unassignedFunds">
+                <v-progress-circular v-if="$wait.is('unassignedFunds')" indeterminate color="white"></v-progress-circular>
+                <span v-else>
                   {{ budget.unassignedFunds | currency($currencies[budget.currency]) }}
                 </span>
-                <v-progress-circular v-else indeterminate color="white"></v-progress-circular>
+                
               </v-card-text>
             </v-card>
           </v-flex>
@@ -250,11 +263,12 @@
             </v-tab>
           </v-tabs> 
         </v-toolbar>
-        <v-form ref="editorForm" class="pt-4" v-model="valid" lazy-validation>           
+        <v-form ref="editorForm" v-model="valid" lazy-validation>           
           <v-container >     
             <v-layout row wrap align-center justify-center>
-              <v-flex xs12>
-                <v-menu
+              <v-flex xs12 class="mt-5"></v-flex>
+              <v-flex xs12 class="mt-5">
+                <v-menu                
                   ref="dateMenu"
                   :close-on-content-click="false"
                   v-model="dateMenu"
@@ -277,19 +291,19 @@
                   <v-date-picker v-model="editor.date" @input="$refs.dateMenu.save(editor.date)"></v-date-picker>
                 </v-menu>
               </v-flex>
-              <v-flex xs12>
+              <v-flex xs12 v-if="budget">
                 <v-category-select 
-                  :items="categories[selectedType]" 
-                  v-if="categories[selectedType]"
+                  :items="budget[selectedType+'Categories']" 
+                  v-if="budget[selectedType+'Categories']"
                   :label="$t('general.category')"
                   :rules="requiredRule"
                   v-model="editor.category"></v-category-select> 
               </v-flex>               
 
-              <v-flex xs12 v-if="tab == 3">
+              <v-flex xs12 v-if="tab == 3 && budget">
                 <v-category-select 
-                  :items="categories[selectedType]" 
-                  v-if="categories[selectedType]"
+                  :items="budget[selectedType+'Categories']" 
+                  v-if="budget[selectedType+'Categories']"
                   :label="$t('categories.sourceCategory')"
                   :rules="requiredRule"
                   v-model="editor.sourceCategory"></v-category-select>                
@@ -341,13 +355,6 @@ export default {
     return {
       editorDialog: false,
       valid: true,
-      budget: {
-        name: null,
-        startDate: null,
-        currency: null,
-        balance: null,
-        unassignedFunds: null
-      },
       dateMenu: false,
       categories: {
         incomes: [],
@@ -364,7 +371,7 @@ export default {
       editor: {
         category: null,
         sourceCategory: null,
-        date: null,
+        date: this.getDate(),
         description: null,
         amount: null
       },
@@ -379,22 +386,27 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      budgets: state => state.budgets.budgets
+    }),
     currencies: function() {
       return Object.keys(this.$currencies);
     },
     selectedType: function() {
       this.editor.category = null;
       return this.tab == 0 || this.tab == 3
-        ? "spendings"
+        ? "spending"
         : this.tab == 1
-          ? "incomes"
+          ? "income"
           : this.tab == 2
-            ? "savings"
-            : "allocations";
+            ? "saving"
+            : "allocation";
+    },
+    budget() {
+      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
     }
   },
   mounted: function() {
-    this.editor.date = this.getDate();
     this.refresh(this.$route.params.id);
   },
   watch: {
@@ -404,33 +416,26 @@ export default {
     },
     tab: function(value) {
       this.$refs.editorForm.resetValidation();
+    },
+    budget: function(budget){
+      this.fetchUnassignedFunds(budget);
     }
   },
   methods: {
     ...mapActions({
       dispatchError: "alert/error",
-      dispatchSuccess: "alert/success"
+      dispatchSuccess: "alert/success",
+      fetchUnassignedFunds: "budgets/fetchUnassignedFunds",
+      fetchBudgets: "budgets/fetchBudgets"
     }),
     refresh(id) {
-      this.loadBudget(id);
       this.fetchLeatestTransactions(id);
       this.fetchSpendingCategoriesBalance(id);
-      this.fetchSavingCategoriesBalance(id);
-      this.unassignedFunds(id);
+      this.fetchSavingCategoriesBalance(id); 
+      //this.fetchUnassignedFunds(this.budget); 
+      this.fetchBudgets();    
     },
-    clear() {
-      this.budget = {
-        name: null,
-        startDate: null,
-        currency: null,
-        balance: null,
-        unassignedFunds: null
-      };
-      this.categories = {
-        incomes: [],
-        spendings: [],
-        savings: []
-      };
+    clear() {      
       this.transactions = {
         incomes: null,
         spendings: null,
@@ -438,25 +443,7 @@ export default {
       };
       this.categoriesBalance = null;
     },
-    loadBudget(id) {
-      budgetService.getBudget(id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.budget.balance = data.balance;
-            this.budget.currency = data.currency;
-            this.categories = {
-              spendings: data.spendingCategories,
-              savings: data.savingCategories,
-              incomes: data.incomeCategories
-            };
-          });
-        } else {
-          reponse.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
-    },
+    
     fetchLeatestTransactions(budgetId) {
       transactionsService
         .listTransactions(budgetId, 8, null, null)
@@ -578,19 +565,6 @@ export default {
       let month = toTwoDigits(today.getMonth() + 1);
       let day = toTwoDigits(today.getDate());
       return `${year}-${month}-${day}`;
-    },
-    unassignedFunds(id) {
-      budgetService.getUnassigned(id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.budget.unassignedFunds = data.funds;
-          });
-        } else {
-          response.json().then(error => {
-            this.budget.unassignedFunds = "?";
-          });
-        }
-      });
     }
   }
 };

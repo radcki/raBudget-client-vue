@@ -9,98 +9,16 @@
       </v-flex>
 
        <v-flex xs12>
-        <v-card class="px-3">
+        <v-card class="px-3" v-if="budget && budget.startingDate">
           <v-card-text>
-            <v-container fluid grid-list-sm class="pa-0">
-                <v-layout row wrap> 
-                  <v-flex xs4 md2 class="text-xs-center">
-                    <v-chip small :color="period == 'full'? 'primary' : 'grey'" @click="period = 'full'" text-color="white">{{ $t("reports.periodFull") }}</v-chip><br/>
-                    <v-chip small :color="period == '6m'? 'primary' : 'grey'" @click="period = '6m'" text-color="white">{{ $t("reports.period6m") }}</v-chip><br/>
-                    <v-chip small :color="period == '1m'? 'primary' : 'grey'" @click="period = '1m'" text-color="white">{{ $t("reports.period1m") }}</v-chip><br/>
-                  </v-flex>
-                  <v-flex xs12 md6>
-                    <v-container fluid grid-list-sm class="pa-0">
-                      <v-layout row wrap > 
-                        
-                        <v-flex xs6 style="width: 120px">
-                          <v-menu
-                            ref="dateMenuStart"
-                            :close-on-content-click="false"
-                            v-model="dateMenuStart"
-                            :nudge-right="40"
-                            :return-value.sync="filters.startDate"
-                            lazy
-                            transition="scale-transition"
-                            offset-y
-                            full-width
-                            min-width="290px"
-                          >
-                            <v-text-field
-                              slot="activator"
-                              v-model="filters.startDate"
-                              :label="$t('general.fromDate')"
-                              hide-details
-                              readonly
-                            ></v-text-field>
-                            <v-date-picker 
-                              :min="budget.startDate"
-                              :max="today"
-                              type="month"
-                              :locale="locale"
-                              v-model="filters.startDate" 
-                              @input="$refs.dateMenuStart.save(filters.startDate)"></v-date-picker>
-
-                          </v-menu>
-                        </v-flex>
-
-                        <v-flex xs6 style="width: 120px" >
-                          <v-menu
-                            ref="dateMenuEnd"
-                            :close-on-content-click="false"
-                            v-model="dateMenuEnd"                      
-                            :nudge-right="40"
-                            :return-value.sync="filters.endDate"
-                            lazy
-                            transition="scale-transition"
-                            offset-y
-                            full-width
-                            min-width="290px"
-                          >
-                            <v-text-field
-                              slot="activator"
-                              v-model="filters.endDate"
-                              :label="$t('general.fromDate')"
-                              hide-details
-                              readonly
-                            ></v-text-field>
-                            <v-date-picker 
-                              :min="budget.startDate"
-                              :max="today" 
-                              type="month"
-                              :locale="locale"
-                              v-model="filters.endDate" 
-                              @input="$refs.dateMenuEnd.save(filters.endDate)"></v-date-picker>
-
-                          </v-menu>
-                        </v-flex>
-                        <v-flex xs12>
-                          <v-range-slider
-                            v-model="sliderValue"
-                            :max="sliderMax"
-                            :min="0"
-                            :step="1"
-                          ></v-range-slider>
-                        </v-flex>
-                      </v-layout>
-                    </v-container>
-                  </v-flex>
-                  <v-flex xs12 md4 v-if="$vuetify.breakpoint.smAndUp" class="text-xs-right" align-self-end>
-                    <v-btn color="primary" @click="loadPeriodReport">{{ $t('general.refresh') }}</v-btn>
-                  </v-flex>
-                </v-layout>
-            </v-container>
+            <v-date-range-slider                      
+                :min="$moment(budget.startingDate).format('YYYY-MM')"
+                :max="thisMonth"
+                chips
+                v-model="selectedRange"
+                step="months"></v-date-range-slider>
           </v-card-text>  
-          <v-card-actions v-if="$vuetify.breakpoint.xsOnly">
+          <v-card-actions >
             <v-spacer>              
             </v-spacer>
             <v-btn color="primary" @click="loadPeriodReport">{{ $t('general.refresh') }}</v-btn>
@@ -124,7 +42,7 @@
             <v-progress-linear indeterminate v-if="loading" class="pa-0 ma-0" height="5"></v-progress-linear>
           </div>
           
-          <v-card-text>
+          <v-card-text :class="$vuetify.breakpoint.smAndUp ? '' : 'pa-0'">
             <v-container fluid grid-list-sm class="pa-0">
                 <v-layout row wrap class="pa-0">
                     <v-flex xs12>
@@ -166,10 +84,10 @@
                                 slot="activator"
                                 :height="10"
                                 v-if="props.item.budgetAmount != 0"
-                                :value="100*props.item.budgetAmount/spendingTotals.budgetAmount"
+                                :value="100*props.item.budgetAmount/periodTotals.budgetAmount"
                               >                
                               </v-progress-linear>
-                              <span>{{ props.item.budgetAmount/spendingTotals.budgetAmount | percentage }}</span>
+                              <span>{{ props.item.budgetAmount/periodTotals.budgetAmount | percentage }}</span>
                             </v-tooltip>
                           </td>
                           <td class="py-1">
@@ -181,10 +99,10 @@
                                 slot="activator"
                                 :height="10"
                                 v-if="props.item.transactionsSum != 0"
-                                :value="100*props.item.transactionsSum/spendingTotals.transactionsSum"
+                                :value="100*props.item.transactionsSum/periodTotals.transactionsSum"
                               >                
                               </v-progress-linear>
-                              <span>{{ props.item.transactionsSum/spendingTotals.transactionsSum | percentage }}</span>
+                              <span>{{ props.item.transactionsSum/periodTotals.transactionsSum | percentage }}</span>
                             </v-tooltip>
                           </td>
                           <td class="py-1">
@@ -196,10 +114,10 @@
                                 slot="activator"
                                 :height="10"
                                 v-if="props.item.allocationsSum != 0"
-                                :value="100*props.item.allocationsSum/spendingTotals.allocationsSum"
+                                :value="100*props.item.allocationsSum/periodTotals.allocationsSum"
                               >                
                               </v-progress-linear>
-                              <span>{{ props.item.allocationsSum/spendingTotals.allocationsSum | percentage }}</span>
+                              <span>{{ props.item.allocationsSum/periodTotals.allocationsSum | percentage }}</span>
                             </v-tooltip>
                           </td>
                           <td class="py-1">
@@ -211,10 +129,10 @@
                                 slot="activator"
                                 :height="10"
                                 v-if="props.item.averagePerDay != 0"
-                                :value="100*props.item.averagePerDay/spendingTotals.averagePerDay"
+                                :value="100*props.item.averagePerDay/periodTotals.averagePerDay"
                               >                
                               </v-progress-linear>
-                              <span>{{ props.item.averagePerDay/spendingTotals.averagePerDay | percentage }}</span>
+                              <span>{{ props.item.averagePerDay/periodTotals.averagePerDay | percentage }}</span>
                             </v-tooltip>
                           </td>
                           <td class="py-1">
@@ -226,21 +144,21 @@
                                 slot="activator"
                                 :height="10"
                                 v-if="props.item.averagePerMonth != 0"
-                                :value="100*props.item.averagePerMonth/spendingTotals.averagePerMonth"
+                                :value="100*props.item.averagePerMonth/periodTotals.averagePerMonth"
                               >                
                               </v-progress-linear>
-                              <span>{{ props.item.averagePerMonth/spendingTotals.averagePerMonth | percentage }}</span>
+                              <span>{{ props.item.averagePerMonth/periodTotals.averagePerMonth | percentage }}</span>
                             </v-tooltip>
                           </td>
                         </template>
 
                         <template slot="footer">
                           <td class="text-xs-right"><strong>{{ $t("general.sum") }}</strong></td>
-                          <td class="py-1">{{spendingTotals.budgetAmount | currency($currencies[budget.currency])}}</td>
-                          <td class="py-1">{{spendingTotals.transactionsSum | currency($currencies[budget.currency])}}</td>
-                          <td class="py-1">{{spendingTotals.allocationsSum | currency($currencies[budget.currency])}}</td>
-                          <td class="py-1">{{spendingTotals.averagePerDay | currency($currencies[budget.currency])}}</td>
-                          <td class="py-1">{{spendingTotals.averagePerMonth | currency($currencies[budget.currency])}}</td>
+                          <td class="py-1">{{periodTotals.budgetAmount | currency($currencies[budget.currency])}}</td>
+                          <td class="py-1">{{periodTotals.transactionsSum | currency($currencies[budget.currency])}}</td>
+                          <td class="py-1">{{periodTotals.allocationsSum | currency($currencies[budget.currency])}}</td>
+                          <td class="py-1">{{periodTotals.averagePerDay | currency($currencies[budget.currency])}}</td>
+                          <td class="py-1">{{periodTotals.averagePerMonth | currency($currencies[budget.currency])}}</td>
                       </template>
                       </v-data-table>
 
@@ -303,8 +221,63 @@
                                   {{data.averagePerMonth | currency($currencies[budget.currency])}}
                                 </div>
                             </v-flex>
-
                           </template>
+                    
+                          
+                          <v-flex xs12>
+                              <v-divider></v-divider>
+                            </v-flex>
+                            <v-flex  class='text-xs-left' xs12 sm2>
+                              <v-avatar slot="activator" size="28px" color="grey darken-1">   
+                              </v-avatar>
+                              <span class="px-2 caption">{{$t("general.sum")}}</span>
+                            </v-flex>
+
+                            <v-flex class='text-xs-center body-2' xs6>
+                              {{ $t("reports.budgetSum") }}
+                            </v-flex>
+                            <v-flex sm2 xs6 >
+                                <div class="text-xs-center caption">
+                                  {{periodTotals.budgetAmount | currency($currencies[budget.currency])}}
+                                </div>
+                            </v-flex>
+
+                            <v-flex class='text-xs-center body-2' xs6>
+                              {{ $t("reports.transactionsSum") }}
+                            </v-flex>
+                            <v-flex sm2 xs6 >
+                                <div class="text-xs-center caption">
+                                  {{periodTotals.transactionsSum | currency($currencies[budget.currency])}}
+                                </div>
+                            </v-flex>
+
+                            <v-flex class='text-xs-center body-2' xs6>
+                              {{ $t("reports.allocationsSum") }}
+                            </v-flex>
+                            <v-flex sm2 xs6 >
+                                <div class="text-xs-center caption">
+                                  {{periodTotals.allocationsSum | currency($currencies[budget.currency])}}
+                                </div>
+                            </v-flex>
+
+                            <v-flex class='text-xs-center body-2' xs6>
+                              {{ $t("reports.averagePerDay") }}
+                            </v-flex>
+                            <v-flex sm2 xs6 >
+                                <div class="text-xs-center caption">
+                                  {{periodTotals.averagePerDay | currency($currencies[budget.currency])}}
+                                </div>
+                            </v-flex>
+
+                            <v-flex class='text-xs-center body-2' xs6>
+                              {{ $t("reports.averagePerMonth") }}
+                            </v-flex>
+                            <v-flex sm2 xs6 >
+                                <div class="text-xs-center caption">
+                                  {{periodTotals.averagePerMonth | currency($currencies[budget.currency])}}
+                                </div>
+                            </v-flex>
+
                         </v-layout>
                       </v-container>
                     </v-flex>
@@ -338,19 +311,18 @@
 
                             </v-list>
                           </v-flex>
-                          <v-flex xs12 md9 class="pa-3">
-                            <v-select
+                          <v-flex xs12 md9 class="py-3">
+                            <v-category-select 
+                              multiple
+                              :items="budget[categoryType]" 
+                              v-if="budget"                            
                               v-model="selectedCategories"
-                              :items="categories[categoryType]"
-                              chips deletable-chips small-chips
-                              return-object item-text="name"
-                              :label="$t('categories.budgetCategories')"
-                              multiple                  
-                            ></v-select>               
+                              :label="$t('categories.budgetCategories')"></v-category-select>  
+            
                             <template v-if="selectedCategories.length > 0 && chartData">
                               <GChart                  
                                 :settings="{packages: ['line']}"
-                                style="min-height:400px;"
+                                :style="$vuetify.breakpoint.xsOnly ? 'min-height: 200px': 'min-height:400px'"
                                 :data="chartData"
                                 :options="chartOptions"
                                 :createChart="(el, google) => new google.charts.Line(el)"
@@ -367,9 +339,7 @@
             </v-container>
           </v-card-text>
         </v-card>
-        </v-flex> 
-          
-
+      </v-flex>      
     </v-layout>
 </v-container>
 </template>
@@ -393,7 +363,9 @@ import { GChart } from "vue-google-charts";
 export default {
   components: {
     GChart,
-    "transaction-editor": () => import("../components/TransactionEditor")
+    "transaction-editor": () => import("../components/TransactionEditor"),
+    "v-date-range-slider": () => import("../components/DateRangeSlider"),
+    "v-category-select": () => import("../components/CategorySelect"),
   },
   data() {
     return {
@@ -401,20 +373,6 @@ export default {
       periodLoading: false,
       monthlyLoading: false,
 
-      dateMenuStart: false,
-      dateMenuEnd: false,
-
-      budget: {
-        name: null,
-        startDate: null,
-        currency: null,
-        balance: null
-      },
-      filters: {
-        startDate: null,
-        endDate: null,
-        categories: null
-      },
       periodData: {
         spendingCategories: null,
         savingCategories: null,
@@ -427,16 +385,9 @@ export default {
         incomeCategories: null
       },
 
-      categories: {
-        spendings: null,
-        savings: null,
-        incomes: null
-      },
       selectedCategories: [],
+      selectedRange: [null, null],
 
-      period: "full",
-      sliderValue: [null, null],
-      sliderMax: null,
       mode: "period",
       chartDataType: "averagePerDay",
       chartOptions: {
@@ -490,30 +441,30 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      budgets: state => state.budgets.budgets
+    }),
+    budget() {
+      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
+    },
     loading: function() {
       return this.budgetLoading || this.periodLoading || this.monthlyLoading;
     },
     currencies: function() {
       return Object.keys(this.$currencies);
     },
-    today: function() {
-      return this.$moment().format("YYYY-MM-DD");
-    },
-    budgetId: function() {
-      return this.$route.params.id;
+    thisMonth: function() {
+      return this.$moment().format("YYYY-MM");
     },
     locale: function() {
       return this.$i18n.locale;
     },
-    periodReport: function() {
-      var type = this.categoryType;
-      return this.periodData[type];
-    },
+    periodReport: function() { return this.periodData[this.categoryType];},
     monthlyReport: function() {
       var type = this.categoryType;
       return this.monthlyData[type];
     },
-    spendingTotals: function() {
+    periodTotals: function() {
       var data = {
         budgetAmount: 0,
         transactionsSum: 0,
@@ -521,8 +472,8 @@ export default {
         averagePerDay: 0,
         averagePerMonth: 0
       };
-      for (var i = 0, n = this.periodReport.length; i < n; i++) {
-        var cat = this.periodReport[i];
+      for (var i = 0, n = this.periodData[this.categoryType].length; i < n; i++) {
+        var cat = this.periodData[this.categoryType][i];
         data.budgetAmount += cat.budgetAmount;
         data.transactionsSum += cat.transactionsSum;
         data.allocationsSum += cat.allocationsSum;
@@ -568,62 +519,31 @@ export default {
       return data;
     }
   },
-  mounted: function() {
+  created: function() {
     this.debouncedLoadPeriodReport = debounce(this.loadPeriodReport, 800);
     this.debouncedLoadMonthlyReport = debounce(this.loadMonthlyReport, 800);
-    this.loadBudget(this.$route.params.id);
+    if (this.budget){
+      this.selectedRange = [this.$moment(this.budget.startingDate).format("YYYY-MM"), this.$moment().format("YYYY-MM")]
+    }
   },
   watch: {
-    $route(to, from) {
-      this.loadBudget(this.$route.params.id);
-    },
     categoryType: function(type) {
       this.selectedCategories = [];
     },
-    "budget.startDate": function(date) {
-      if (date != null) {
-        this.sliderMax = this.$moment().diff(this.$moment(date), "months");
-        var monthsSinceStart = this.monthsSinceStart(
-          this.$moment().format("YYYY-MM")
-        );
-        this.sliderValue[1] = monthsSinceStart;
-        this.sliderValue[0] = 0;
-        this.refreshFields();
+    budget: function(budget) {
+      if (!budget){
+        return;
+      }
+      this.selectedRange = [this.$moment(budget.startingDate).format("YYYY-MM"), this.$moment().format("YYYY-MM")]
+      if (this.mode = 'period'){
+        this.loadPeriodReport();
+      } else {
+        this.loadMonthlyReport();
       }
     },
-    "sliderValue.0": function(minDays) {
-      this.refreshFields();
-    },
-    "sliderValue.1": function(maxDays) {
-      this.refreshFields();
-    },
-    "filters.startDate": function(value) {
-      this.checkPeriod();
-      this.refreshSlider();
-    },
-    "filters.endDate": function(value) {
-      this.checkPeriod();
-      this.refreshSlider();
-    },
-    period: function(value) {
-      if (value == "full") {
-        this.filters.startDate = this.$moment(this.budget.startDate).format(
-          "YYYY-MM"
-        );
-        this.filters.endDate = this.$moment().format("YYYY-MM");
-      }
-      if (value == "6m") {
-        this.filters.startDate = this.$moment()
-          .subtract(6, "month")
-          .format("YYYY-MM");
-        this.filters.endDate = this.$moment().format("YYYY-MM");
-      }
-      if (value == "1m") {
-        this.filters.startDate = this.$moment()
-          .subtract(1, "month")
-          .format("YYYY-MM");
-        this.filters.endDate = this.$moment().format("YYYY-MM");
-      }
+    selectedRange(){
+      this.debouncedLoadPeriodReport();
+      this.debouncedLoadMonthlyReport()
     }
   },
   methods: {
@@ -631,90 +551,12 @@ export default {
       dispatchError: "alert/error",
       dispatchSuccess: "alert/success"
     }),
-    checkPeriod: function() {
-      if (!this.$moment(this.filters.endDate).isSame(this.$moment(), "month")) {
-        this.period = null;
-        return;
-      }
-      if (
-        this.$moment(this.filters.startDate).isSame(
-          this.$moment(this.budget.startDate),
-          "month"
-        )
-      ) {
-        this.period = "full";
-        return;
-      }
-      if (
-        this.$moment(this.filters.startDate).isSame(
-          this.$moment().subtract(6, "month"),
-          "month"
-        )
-      ) {
-        this.period = "6m";
-        return;
-      }
-      if (
-        this.$moment(this.filters.startDate).isSame(
-          this.$moment().subtract(1, "month"),
-          "month"
-        )
-      ) {
-        this.period = "1m";
-        return;
-      }
-      this.period = null;
-    },
-    monthsSinceStart(date) {
-      return this.$moment(date).diff(
-        this.$moment(this.budget.startDate),
-        "months"
-      );
-    },
-    refreshSlider() {
-      this.sliderValue = [
-        this.monthsSinceStart(this.filters.startDate),
-        this.monthsSinceStart(this.filters.endDate)
-      ];
-    },
-    refreshFields() {
-      this.filters.startDate = this.$moment(this.budget.startDate)
-        .add(this.sliderValue[0], "month")
-        .format("YYYY-MM");
-      this.filters.endDate = this.$moment(this.budget.startDate)
-        .add(this.sliderValue[1], "month")
-        .format("YYYY-MM");
-      this.debouncedLoadPeriodReport();
-      this.debouncedLoadMonthlyReport();
-    },
-    loadBudget(id) {
-      this.budgetLoading = true;
-      budgetService.getBudget(id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.budgetLoading = false;
-            this.budget.startDate = data.startingDate;
-            this.budget.currency = data.currency;
-            this.categories = {
-              spendingCategories: data.spendingCategories,
-              savingCategories: data.savingCategories,
-              incomeCategories: data.incomeCategories
-            };
-          });
-        } else {
-          reponse.json().then(data => {
-            this.budgetLoading = false;
-            this.dispatchError(data.message);
-          });
-        }
-      });
-    },
     loadPeriodReport: function() {
       this.periodLoading = true;
-      var startDate = this.filters.startDate + "-01";
-      var endDate = this.$moment(this.filters.endDate + "-01").endOf("month");
+      var startingDate = this.selectedRange[0] + "-01";
+      var endDate = this.$moment(this.selectedRange[1] + "-01").endOf("month");
       budgetService
-        .getPeriodReport(this.budgetId, startDate, endDate.format("YYYY-MM-DD"))
+        .getPeriodReport(this.budget.id, startingDate, endDate.format("YYYY-MM-DD"))
         .then(response => {
           if (response.ok) {
             response.json().then(data => {
@@ -733,12 +575,12 @@ export default {
     },
     loadMonthlyReport: function() {
       this.monthlyLoading = true;
-      var startDate = this.filters.startDate + "-01";
-      var endDate = this.$moment(this.filters.endDate + "-01").endOf("month");
+      var startingDate = this.selectedRange[0] + "-01";
+      var endDate = this.$moment(this.selectedRange[1] + "-01").endOf("month");
       budgetService
         .getMonthlyReport(
-          this.budgetId,
-          startDate,
+          this.budget.id,
+          startingDate,
           endDate.format("YYYY-MM-DD")
         )
         .then(response => {

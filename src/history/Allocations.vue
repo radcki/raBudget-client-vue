@@ -13,20 +13,20 @@
           <v-card-text>
             <v-container fluid grid-list-sm class="pa-0">
                 <v-layout row wrap> 
-                  <v-flex xs12 md6>                    
+                  <v-flex xs12 md6 v-if="budget">                    
                     <v-category-select 
                       multiple
-                      :items="categories[categoryType]" 
-                      v-if="categories[categoryType]"
-                      v-model="filters.categories"
+                      :items="budget[categoryType]" 
+                      v-if="budget[categoryType]"
+                      v-model="selectedCategories"
                       :rules="requiredRule"
                       persistent-hint
                       :hint="$t('general.category')"></v-category-select>
                   </v-flex>
 
-                  <v-flex xs12 md6 v-if="budget.startDate">
+                  <v-flex xs12 md6 v-if="budget">
                     <v-date-range-slider                      
-                      :min="$moment(budget.startDate).format('YYYY-MM-DD')"
+                      :min="$moment(budget.startingDate).format('YYYY-MM-DD')"
                       :max="today"
                       v-model="selectedRange"
                       step="days"></v-date-range-slider>                    
@@ -156,25 +156,10 @@ export default {
       error: false,
       search: null,
 
-      categoryType: "spendings",
+      categoryType: "spendingCategories",
       selectedRange: [null, null],
+      selectedCategories: null,
 
-      budget: {
-        name: null,
-        startDate: null,
-        currency: null,
-        balance: null
-      },
-      filters: {
-        startDate: null,
-        endDate: null,
-        categories: null
-      },
-      categories: {
-        incomes: null,
-        spendings: null,
-        savings: null
-      },
       headers: [
         {
           text: this.$t("general.category"),
@@ -214,6 +199,12 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      budgets: state => state.budgets.budgets
+    }),
+    budget() {
+      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
+    },
     currencies: function() {
       return Object.keys(this.$currencies);
     },
@@ -221,26 +212,32 @@ export default {
       return this.$moment().format("YYYY-MM-DD");
     },
     monthAgoOrStart(){ 
-      return this.$moment().subtract(1, 'month') < this.$moment(this.budget.startDate) 
-          ? this.$moment(this.budget.startDate).format('YYYY-MM-DD')
+      return this.$moment().subtract(1, 'month') < this.$moment(this.budget.startingDate) 
+          ? this.$moment(this.budget.startingDate).format('YYYY-MM-DD')
           : this.$moment().subtract(1, 'month')
     }   
   },
-  mounted: function() {
-    this.loadBudget(this.$route.params.id);
+  created: function(){           
+    if (this.budget){
+      this.selectedCategories = this.budget[this.categoryType];
+      this.selectedRange = [this.monthAgoOrStart, this.today] 
+      this.fetchAllocations();  
+    }     
   },
   watch: {
-    $route(to, from) {
-      this.loadBudget(this.$route.params.id);
-      this.fetchAllocations();
-    },
-    "budget.startDate": function(date) {
-      this.selectedRange = [this.monthAgoOrStart, this.today]
-      this.fetchAllocations();
+    budget: function(budget) {
+        this.selectedRange = [this.monthAgoOrStart, this.today]
+        
+        if (this.budget && this.budget[this.categoryType]){
+          this.selectedCategories = this.budget[this.categoryType];
+        }
+        this.fetchAllocations();      
     },
     categoryType: function(value) {
       this.allocations = null;
-      this.filters.categories = this.categories[value];
+      if (this.budget && this.budget[value]){
+        this.selectedCategories = this.budget[value];
+      }
       this.fetchAllocations();
     }
   },
@@ -249,27 +246,6 @@ export default {
       dispatchError: "alert/error",
       dispatchSuccess: "alert/success"
     }),
-    loadBudget(id) {
-      budgetService.getBudget(id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.budget.balance = data.balance;
-            this.budget.currency = data.currency;
-            this.budget.startDate = data.startingDate;
-            this.categories = {
-              spendings: data.spendingCategories,
-              savings: data.savingCategories,
-              incomes: data.incomeCategories
-            };
-            this.filters.categories = data.spendingCategories;
-          });
-        } else {
-          reponse.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
-    },
     fetchAllocations() {
       this.loading = true;
       allocationsService
@@ -278,7 +254,7 @@ export default {
           null,
           this.selectedRange[0],
           this.selectedRange[1],
-          this.filters.categories
+          this.selectedCategories
         )
         .then(response => {
           if (response.ok) {

@@ -38,13 +38,26 @@ function logout () {
   localStorage.removeItem('token')
 }
 
+function noRefreshPending () {
+  return new Promise((resolve, reject) => {
+    var i = 0
+    var finished = setInterval(() => {
+      var isRefreshing = localStorage.getItem('tokenRefreshing')
+      if (!isRefreshing || i > 50) {
+        clearInterval(finished)
+        resolve()
+      }
+      i++
+    }, 100)
+  })
+}
+
 function renewToken () {
   var body = JSON.stringify({
     token: getAccessToken(),
     refreshToken: getRefreshToken(),
     clientId: getClientId()
-  })
-
+  })  
   return fetch(`${config.apiUrl}/users/renewtoken`, {
     method: 'POST',
     body: body,
@@ -55,37 +68,38 @@ function renewToken () {
 }
 
 function fetchAuthorized (url, options) {
-  var jwtToken = getAccessToken()
-  options = options || {}
-  options.headers = options.headers || {}
-  options.headers['Authorization'] = 'Bearer ' + jwtToken
-
-  return fetch(url, options).then(response => {
-    if (response.ok) {
-      // zapytanie udane
-      return response
-    }
-    // niepowodzenie zapytania - tez czy z powodu autoryzcaji
-    if (response.status === 401 && response.headers.has('Token-Expired')) {
-      // token wygasł - próba odnowienia
-      renewToken().then(refreshResponse => {
-        if (!refreshResponse.ok) {
-          // odnowienie nieudane
-          // wymuś wylogowanie
-          logout()
-          location.reload(true)
-          return response // zwróć 401
+  return new Promise((resolve, reject) => {
+    noRefreshPending().then(() => { // potwierdzenie czy aktualnie w toku nie jest odświeżenie tokenu
+      var jwtToken = getAccessToken()
+      options = options || {}
+      options.headers = options.headers || {}
+      options.headers['Authorization'] = 'Bearer ' + jwtToken
+      fetch(url, options).then(response => {
+        if (response.ok) {
+          // zapytanie udane
+          resolve(response)
+        } else {
+          if (response.status === 401 && response.headers.has('Token-Expired')) {
+            localStorage.setItem('tokenRefreshing', true) // oznaczenie że token jest własnie odświeżany
+            renewToken().then(refreshResponse => { // wysłanie requestu o nowy token
+              if (refreshResponse.ok) {
+                refreshResponse.json().then(freshTokens => {
+                  saveAccessToken(freshTokens.token)
+                  saveRefreshToken(freshTokens.refreshToken)
+                  localStorage.removeItem('tokenRefreshing') // oznaczenie końca odświeżania
+                  resolve(fetchAuthorized(url, options))
+                })
+              } else {
+                localStorage.removeItem('tokenRefreshing') // oznaczenie końca odświeżania
+                logout()
+                resolve(response)
+              }
+            })
+          }
         }
-        // odnowienie udane - zapis nowych danych i ponowienie zapytania
-        refreshResponse.json().then(freshTokens => {
-          saveAccessToken(freshTokens.token)
-          saveRefreshToken(freshTokens.refreshToken)
-          return fetchAuthorized(url, options)
-        })
+      }).catch(error => {
+        reject(error)
       })
-    } else {
-      // zwrócenie nieudanej odpowiedzi
-      return response
-    }
+    })
   })
 }
