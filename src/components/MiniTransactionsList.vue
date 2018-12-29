@@ -32,12 +32,12 @@
           <v-list single-line light subheader>
             <v-list-tile>
               <v-list-tile-title>
-                <v-icon @click="onEdit(transaction.transactionId)">edit</v-icon>
+                <v-icon @click="$emit('edit', transaction.transactionId)">edit</v-icon>
               </v-list-tile-title>
             </v-list-tile>
             <v-list-tile>
               <v-list-tile-title>
-                <v-icon @click="onDelete(transaction.transactionId)">delete</v-icon>
+                <v-icon @click="$emit('delete', transaction.transactionId)">delete</v-icon>
               </v-list-tile-title>
             </v-list-tile>
           </v-list>
@@ -61,14 +61,6 @@ export default {
       type: String
     },
     color: String,
-    onEdit: {
-      type: Function,
-      required: true
-    },
-    onDelete: {
-      type: Function,
-      required: true
-    }
   },
   computed: {
     itemsByDate: function() {

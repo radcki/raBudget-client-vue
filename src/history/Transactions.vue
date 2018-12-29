@@ -137,10 +137,23 @@
             </v-list-tile-content>
 
             <v-list-tile-action>
-              <v-icon @click="editTransaction(transaction.transactionId)">edit</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-icon @click="deleteTransaction(transaction.transactionId)">delete</v-icon>
+              <v-menu>
+                <v-btn slot="activator" icon>
+                  <v-icon>more_vert</v-icon>
+                </v-btn>
+                <v-list single-line light subheader>
+                  <v-list-tile>
+                    <v-list-tile-title>
+                      <v-icon @click="editTransaction(transaction.transactionId)">edit</v-icon>
+                    </v-list-tile-title>
+                  </v-list-tile>
+                  <v-list-tile>
+                    <v-list-tile-title>
+                      <v-icon @click="deleteTransaction(transaction.transactionId)">delete</v-icon>
+                    </v-list-tile-title>
+                  </v-list-tile>
+                </v-list>
+              </v-menu>
             </v-list-tile-action>
           </v-list-tile>
         </template>

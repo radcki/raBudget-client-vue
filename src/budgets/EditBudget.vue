@@ -1,6 +1,6 @@
 <template>
 
-<v-container  grid-list-md>     
+<v-container  grid-list-md v-if="budget">     
     <v-layout row wrap align-center justify-center >
       <v-flex xs12>
         
@@ -114,7 +114,8 @@ export default {
   methods: {
     ...mapActions({
       dispatchError: "alert/error",
-      dispatchSuccess: "alert/success"
+      dispatchSuccess: "alert/success",
+      budgetsFetch: "budgets/fetchBudgets"
     }),
     saveBudget() {
       var category = {};
@@ -146,16 +147,26 @@ export default {
         });
     },
     deleteBudget() {
-      budgetService.deleteBudget(this.$route.params.id).then(response => {
-        if (response.ok) {
-          this.$router.push("/");
-          this.$root.$emit("reloadBudgets");
-        } else {
-          response.json().then(data => {
-            this.dispatchError(data.message);
-          });
+      this.$root
+        .$confirm("general.remove", "budgets.deleteConfirm", {
+          color: "red",
+          buttons: { yes: true, no: true, cancel: false, ok: false }
+        })
+        .then(confirm => {
+          if (confirm) {
+            budgetService.deleteBudget(this.$route.params.id).then(response => {
+              if (response.ok) {
+                this.$router.push("/");
+                this.$root.$emit("reloadBudgets");
+              } else {
+                response.json().then(data => {
+                  this.dispatchError(data.message);
+                });
+              }
+            });
+          }
         }
-      });
+      );      
     },
     loadBudget(id) {
       budgetService.getBudget(id).then(response => {

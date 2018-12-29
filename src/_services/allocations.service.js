@@ -20,12 +20,8 @@ function createAllocation (allocationData) {
       description: allocationData.description,
       amount: allocationData.amount,
       date: allocationData.date,
-      destinationCategory: {
-        categoryId: allocationData.category
-      },
-      sourceCategory: {
-        categoryId: allocationData.sourceCategory
-      }
+      destinationCategory: allocationData.category,
+      sourceCategory: allocationData.sourceCategory
     })
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/create`, requestOptions)
@@ -48,9 +44,7 @@ function updateAllocation (allocationData) {
       description: allocationData.description,
       amount: allocationData.amount,
       date: allocationData.date,
-      destinationCategory: {
-        categoryId: allocationData.category
-      }
+      destinationCategory: allocationData.category
     })
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/${allocationData.allocationId}/update`, requestOptions)

@@ -93,7 +93,6 @@
                         :items="budget[selectedType+'Categories']" 
                         v-if="budget[selectedType+'Categories']"
                         :label="$t('categories.sourceCategory')"
-                        :rules="requiredRule"
                         v-model="editor.sourceCategory"></v-category-select>                       
                     </v-flex>
 
@@ -200,7 +199,7 @@
           color="amber darken-1"
           :title="$t('transactions.recentSpending')"
           :data-budget="budget"
-          :on-edit="editTransaction" :on-delete="deleteTransaction"
+          v-on:edit="editTransaction" v-on:delete="deleteTransaction"
           ></v-mini-transactions-list>        
       </v-flex>
 
@@ -210,7 +209,7 @@
           color="green darken-1"
           :title="$t('transactions.recentIncome')"
           :data-budget="budget"
-          :on-edit="editTransaction" :on-delete="deleteTransaction"
+          v-on:edit="editTransaction" v-on:delete="deleteTransaction"
           ></v-mini-transactions-list>  
         
       </v-flex>
@@ -221,7 +220,7 @@
           color="blue darken-1"
           :title="$t('transactions.recentSaving')"
           :data-budget="budget"
-          :on-edit="editTransaction" :on-delete="deleteTransaction"
+          v-on:edit="editTransaction" v-on:delete="deleteTransaction"
           ></v-mini-transactions-list>
       </v-flex>
 
@@ -305,7 +304,6 @@
                   :items="budget[selectedType+'Categories']" 
                   v-if="budget[selectedType+'Categories']"
                   :label="$t('categories.sourceCategory')"
-                  :rules="requiredRule"
                   v-model="editor.sourceCategory"></v-category-select>                
               </v-flex>
 

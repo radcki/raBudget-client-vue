@@ -110,7 +110,8 @@
         "unassignedFunds": "Niezagospodarowane środki",
         "availablefunds": "Środki w portfelu",
         "savingsStatus": "Status oszczędności",
-        "new": "Nowy budżet"
+        "new": "Nowy budżet",
+        "deleteConfirm": "Czy napewno chcesz usunąć budżet? Wszystkie związane z nim informacje zostaną usunięte bez możliwości ich przywrócenia!"
     },
     "categories": {
         "budgetCategories": "Kategorie budżetowe",
@@ -131,7 +132,8 @@
         "sourceCategory": "Kategoria źródłowa",
         "destinationCategory": "Kategoria docelowa",
         "categoryType": "Typ kategorii",
-        "monthPlanLeft": "Pozostała planowa kwota"
+        "monthPlanLeft": "Pozostała planowa kwota",
+        "categoryEdit": "Edycja kategorii"
     },
     "transactions": {
         "categoryTransfer": "Transfer transakcji",

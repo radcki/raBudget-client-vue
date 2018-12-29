@@ -10,7 +10,7 @@
         single-line
         append-icon="keyboard_arrow_down"
         :class="!multiple ? '' : 'caption'"
-        :rules="rules"
+        :rules="rules && rules.length > 0 ? rules : []"
         :persistent-hint="persistentHint"
         :hint="hint">
 

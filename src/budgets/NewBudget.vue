@@ -60,7 +60,7 @@
                           :close-on-content-click="false"
                           v-model="dateMenu"
                           :nudge-right="40"
-                          :return-value.sync="budget.startDate"
+                          :return-value.sync="budget.startingDate"
                           lazy
                           transition="scale-transition"
                           offset-y
@@ -69,13 +69,13 @@
                         >
                           <v-text-field
                             slot="activator"
-                            v-model="budget.startDate"
+                            v-model="budget.startingDate"
                             :label="$t('budgets.startDate')"
                             :rules="requiredRule"
                             prepend-icon="event"
                             readonly
                           ></v-text-field>
-                          <v-date-picker v-model="budget.startDate" @input="$refs.dateMenu.save(budget.startDate)"></v-date-picker>
+                          <v-date-picker v-model="budget.startingDate" @input="$refs.dateMenu.save(budget.startingDate)"></v-date-picker>
 
                         </v-menu>
                       </v-flex>
@@ -394,94 +394,49 @@
                      </v-list-tile-title>
 
                     <v-list-tile-sub-title>
-                      {{ $t('budgets.startDate') }}: {{ budget.startDate }}
+                      {{ $t('budgets.startDate') }}: {{ budget.startingDate }}
                     </v-list-tile-sub-title>
                   </v-list-tile-content>
                 </v-list-tile>
                 <v-container grid-list-md>
                   <v-layout row wrap>
-                    <v-flex xs12 md4>
-                      <v-list subheader>
-                        <v-subheader class="light-green darken-3" dark>
-                          {{ $t('categories.incomeCategories') }}
-                          <v-spacer></v-spacer>
-                          <v-chip color="light-green darken-4" text-color="white">{{ incomeCategoriesSum | currency($currencies[budget.currency]) }}</v-chip>
-                        </v-subheader>
+                    <v-flex xs12 md6 lg4>
+                      <categories-list
+                        color="amber darken-1"
+                        color-secondary="amber darken-3"
+                        :items="categories.spending"
+                        :data-budget="budget"
+                        hide-actions
+                        :title="$t('categories.spendingCategories')"
+                        >              
+                      </categories-list>
+                      
+                    </v-flex>
+                              
+                    <v-flex xs12 md6 lg4>
+                      <categories-list
+                        color="light-green darken-3"
+                        color-secondary="light-green darken-4"
+                        :items="categories.income"
+                        :data-budget="budget"
+                        hide-actions
+                        :title="$t('categories.incomeCategories')"
+                        >              
+                      </categories-list>
 
-                        <v-list-tile
-                          avatar
-                          v-for="(category, i) in categories.income"
-                          v-bind:data="category"
-                          v-bind:key="i">
-                        <v-list-tile-avatar color="light-green darken-3">
-                          <v-icon dark>{{ category.icon }}</v-icon>
-                        </v-list-tile-avatar>
-
-                        <v-list-tile-content>
-                          <v-list-tile-title>{{ category.name }}</v-list-tile-title>
-                          <v-list-tile-sub-title>
-                            {{ $t("categories.amount") }}: {{ category.amount | currency($currencies[budget.currency]) }}
-                          </v-list-tile-sub-title>
-                        </v-list-tile-content>
-
-                        </v-list-tile>
-                      </v-list>
                     </v-flex>
 
-                    <v-flex xs12 md4>
-                      <v-list subheader>
-                        <v-subheader class="amber darken-1" dark>                          
-                          {{ $t('categories.spendingCategories') }}
-                          <v-spacer></v-spacer>
-                          <v-chip color="amber darken-3" text-color="white">{{ spendingCategoriesSum | currency($currencies[budget.currency]) }}</v-chip>
-                        </v-subheader>
+                    <v-flex xs12 md6 lg4>
+                      <categories-list
+                        color="indigo"
+                        color-secondary="indigo darken-2"
+                        :items="categories.savings"
+                        :data-budget="budget"
+                        hide-actions
+                        :title="$t('categories.savingCategories')"
+                        >              
+                      </categories-list>
 
-                        <v-list-tile
-                          avatar
-                          v-for="(category, i) in categories.spending"
-                          v-bind:data="category"
-                          v-bind:key="i">
-                        <v-list-tile-avatar color="amber darken-1">
-                          <v-icon dark>{{ category.icon }}</v-icon>
-                        </v-list-tile-avatar>
-
-                        <v-list-tile-content>
-                          <v-list-tile-title>{{ category.name }}</v-list-tile-title>
-                          <v-list-tile-sub-title>
-                            {{ $t("categories.amount") }}: {{ category.amount | currency($currencies[budget.currency]) }}
-                          </v-list-tile-sub-title>
-                        </v-list-tile-content>
-
-                        </v-list-tile>
-                      </v-list>
-                    </v-flex>
-
-                    <v-flex xs12 md4>
-                      <v-list subheader>
-                        <v-subheader class="indigo" dark>
-                          {{ $t('categories.savingCategories') }}
-                          <v-spacer></v-spacer>
-                          <v-chip color="indigo darken-2" text-color="white">{{ savingsCategoriesSum | currency($currencies[budget.currency]) }}</v-chip>
-                        </v-subheader>
-
-                        <v-list-tile
-                          avatar
-                          v-for="(category, i) in categories.savings"
-                          v-bind:data="category"
-                          v-bind:key="i">
-                        <v-list-tile-avatar color="indigo">
-                          <v-icon dark>{{ category.icon }}</v-icon>
-                        </v-list-tile-avatar>
-
-                        <v-list-tile-content>
-                          <v-list-tile-title>{{ category.name }}</v-list-tile-title>
-                          <v-list-tile-sub-title>
-                            {{ $t("categories.amount") }}: {{ category.amount | currency($currencies[budget.currency]) }}
-                          </v-list-tile-sub-title>
-                        </v-list-tile-content>
-
-                        </v-list-tile>
-                      </v-list>
                     </v-flex>
                   </v-layout>                  
                 </v-container>             
@@ -501,14 +456,18 @@
 
 <script>
 import { budgetService } from "../_services/budget.service";
+import { mapActions } from "vuex";
 
 export default {
+  components: {
+    "categories-list": () => import("../components/CategoriesList"),
+  },
   data() {
     return {
       step: 1,
       budget: {
         name: null,
-        startDate: null,
+        startingDate: null,
         currency: "pln"
       },
       categories: {
@@ -567,6 +526,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions({
+      budgetsFetch: "budgets/fetchBudgets"
+    }),
     addIncome() {
       if (this.$refs.formIncomeCategory.validate()) {
         // unbind
@@ -619,9 +581,10 @@ export default {
         .createBudget(this.budget, this.categories)
         .then(response => {
           if (response.ok) {
-            response.json().then(data => {
-              this.$router.push("/");
-              this.$root.$emit("reloadBudgets");
+            response.json().then(data => {              
+              this.budgetsFetch().then(()=>{
+                this.$router.push("/");
+              })
             });
           } else {
             response.json().then(data => {

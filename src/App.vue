@@ -254,11 +254,16 @@ export default {
   watch: {
     "account.status.loggedIn": {
       handler: function(isLogged) {
+        var metaThemeColor = document.querySelector("meta[name=theme-color]");
         if(!isLogged){
+          metaThemeColor.setAttribute("content", "#90a4ae");
           return;
         }
+        metaThemeColor.setAttribute("content", "#455a64");
         this.$wait.start('budgets');
-        this.budgetsFetch().then(result=>{this.$wait.end('budgets')});
+        this.budgetsFetch()
+          .then(result=>{this.$wait.end('budgets')})
+          .catch(()=>{this.$wait.end('budgets')});
       },
       immediate: true
     },

@@ -110,7 +110,8 @@
         "unassignedFunds": "Unassigned funds",
         "availablefunds": "Available funds",
         "savingsStatus": "Status of savings",
-        "new": "New budget"
+        "new": "New budget",
+        "deleteConfirm": "Are you sure to delete budget? It is not possible to recover deleted data!"
     },
     "categories": {
         "budgetCategories": "Budget Categories",
@@ -131,7 +132,8 @@
         "sourceCategory": "Source category",
         "destinationCategory": "Destination docelowa",
         "categoryType": "Category type",
-        "monthPlanLeft": "Planned ammount left"
+        "monthPlanLeft": "Planned ammount left",
+        "categoryEdit": "Edit category"
     },
     "transactions": {
         "categoryTransfer": "Transactions transfer",

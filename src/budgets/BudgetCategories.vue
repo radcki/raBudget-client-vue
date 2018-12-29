@@ -1,5 +1,5 @@
 <template>
-<v-container  grid-list-md>     
+<v-container  grid-list-md v-if="budget">     
     <v-layout row wrap align-center justify-center>
       <v-flex xs12>
         <v-subheader class="headline">
@@ -7,7 +7,7 @@
         </v-subheader>
       </v-flex>
 
-      <v-flex xs12>
+      <v-flex xs12 >
         <v-card>
           <v-card-text>
               <div>Plan wydatków: {{ spendingCategoriesSum | currency($currencies[budget.currency]) }}</div>
@@ -19,225 +19,56 @@
         </v-card>
       </v-flex>
 
-      <v-flex xs12>    
+      <v-flex xs12 >    
         <v-container grid-list-md>
           <v-layout row wrap>   
             
-            <v-flex xs12 md6 lg4>
-              <v-list subheader class="elevation-3">
-                <v-subheader class="amber darken-1" dark>                          
-                  {{ $t('categories.spendingCategories') }}
-                  <v-spacer></v-spacer>
-                  <v-btn icon v-on:click="openEditor('spending')">
-                    <v-icon >add_circle_outline</v-icon>
-                  </v-btn>
-                  <v-chip color="amber darken-3" text-color="white">{{ spendingCategoriesSum | currency($currencies[budget.currency]) }}</v-chip>
-                </v-subheader>
-
-                <v-list-tile
-                  avatar
-                  v-for="(category, i) in categories.spending"
-                  v-bind:data="category"
-                  v-bind:key="i">
-                  <v-list-tile-avatar color="amber darken-1">
-                    <v-icon dark>{{ category.icon }}</v-icon>
-                  </v-list-tile-avatar>
-
-                  <v-list-tile-content>
-                    <v-list-tile-title>{{ category.name }}</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      {{ category.amount | currency($currencies[budget.currency]) }}
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-
-                  <v-list-tile-action>
-                    <v-btn icon @click="editCategory(category)">
-                      <v-icon color="primary darken-1">edit</v-icon>
-                    </v-btn>
-                  </v-list-tile-action>
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.mdAndUp">
-                    <v-menu>
-                      <v-btn slot="activator" icon>
-                        <v-icon>more_vert</v-icon>
-                      </v-btn>                      
-                      <v-list light dense subheader>
-                        <v-list-tile @click="transferTransactions(category)">
-                          <v-list-tile-action>
-                            <v-icon color="purple">reply_all</v-icon>
-                          </v-list-tile-action>
-                          <v-list-tile-title>{{ $t("transactions.categoryTransfer") }}</v-list-tile-title>            
-                        </v-list-tile>
-
-                        <v-list-tile @click="deleteCategory(category)">
-                          <v-list-tile-action>
-                            <v-icon color="red">cancel</v-icon>
-                          </v-list-tile-action>
-                          <v-list-tile-title>{{ $t("general.remove") }}</v-list-tile-title>            
-                        </v-list-tile>
-                      </v-list>
-                    </v-menu>
-                  </v-list-tile-action>     
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.smAndDown">                  
-                    <v-btn icon @click="editCategory(category)">                      
-                        <v-icon color="purple">reply_all</v-icon>                        
-                    </v-btn>                    
-                  </v-list-tile-action>                   
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.smAndDown">
-                    <v-btn icon @click="deleteCategory(category)"> 
-                      <v-icon color="red">cancel</v-icon>
-                    </v-btn>
-                  </v-list-tile-action>
-
-                </v-list-tile>
-              </v-list>
+            <v-flex xs12 md6 lg4 v-if="categories.spending">
+              <categories-list
+                color="amber darken-1"
+                color-secondary="amber darken-3"
+                :items="categories.spending"
+                :data-budget="budget"
+                v-on:new="openEditor('spending')"
+                v-on:edit="editCategory"
+                v-on:transfer="transferTransactions"
+                v-on:delete="deleteCategory"
+                :title="$t('categories.spendingCategories')"
+                >              
+              </categories-list>
+              
             </v-flex>
                        
             <v-flex xs12 md6 lg4>
-              <v-list subheader class="elevation-3">
-                <v-subheader class="light-green darken-3" dark>
-                  {{ $t('categories.incomeCategories') }}
-                  <v-spacer></v-spacer>
-                  <v-btn icon @click="openEditor('income')">
-                    <v-icon >add_circle_outline</v-icon>
-                  </v-btn>
-                  <v-chip color="light-green darken-4" text-color="white">{{ incomeCategoriesSum | currency($currencies[budget.currency]) }}</v-chip>
-                  
-                </v-subheader>
+              <categories-list
+                color="light-green darken-3"
+                color-secondary="light-green darken-4"
+                :items="categories.income"
+                :data-budget="budget"
+                v-on:new="openEditor('income')"
+                v-on:edit="editCategory"
+                v-on:transfer="transferTransactions"
+                v-on:delete="deleteCategory"
+                :title="$t('categories.incomeCategories')"
+                >              
+              </categories-list>
 
-                <v-list-tile
-                  avatar
-                  v-for="(category, i) in categories.income"
-                  v-bind:data="category"
-                  v-bind:key="i">
-                  <v-list-tile-avatar color="light-green darken-3">
-                    <v-icon dark>{{ category.icon }}</v-icon>
-                  </v-list-tile-avatar>
-
-                  <v-list-tile-content>
-                    <v-list-tile-title>{{ category.name }}</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      {{ category.amount | currency($currencies[budget.currency]) }}
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-
-                  <v-list-tile-action>
-                    <v-btn icon @click="editCategory(category)">
-                      <v-icon color="primary darken-1">edit</v-icon>
-                    </v-btn>
-                  </v-list-tile-action>
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.mdAndUp">
-                    <v-menu>
-                      <v-btn slot="activator" icon>
-                        <v-icon>more_vert</v-icon>
-                      </v-btn>                      
-                      <v-list light dense subheader>
-                        <v-list-tile @click="transferTransactions(category)">
-                          <v-list-tile-action>
-                            <v-icon color="purple">reply_all</v-icon>
-                          </v-list-tile-action>
-                          <v-list-tile-title>{{ $t("transactions.categoryTransfer") }}</v-list-tile-title>            
-                        </v-list-tile>
-
-                        <v-list-tile @click="deleteCategory(category)">
-                          <v-list-tile-action>
-                            <v-icon color="red">cancel</v-icon>
-                          </v-list-tile-action>
-                          <v-list-tile-title>{{ $t("general.remove") }}</v-list-tile-title>            
-                        </v-list-tile>
-                      </v-list>
-                    </v-menu>
-                  </v-list-tile-action>     
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.smAndDown">                  
-                    <v-btn icon @click="editCategory(category)">                      
-                        <v-icon color="purple">reply_all</v-icon>                        
-                    </v-btn>                    
-                  </v-list-tile-action>                   
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.smAndDown">
-                    <v-btn icon @click="deleteCategory(category)"> 
-                      <v-icon color="red">cancel</v-icon>
-                    </v-btn>
-                  </v-list-tile-action>
-
-                </v-list-tile>
-              </v-list>
             </v-flex>
 
             <v-flex xs12 md6 lg4>
-              <v-list subheader class="elevation-3">
-                <v-subheader class="indigo" dark>
-                  {{ $t('categories.savingCategories') }}
-                  <v-spacer></v-spacer>
-                  <v-btn icon @click="openEditor('saving')">
-                    <v-icon >add_circle_outline</v-icon>
-                  </v-btn>
-                  <v-chip color="indigo darken-2" text-color="white">{{ savingsCategoriesSum | currency($currencies[budget.currency]) }}</v-chip>
-                </v-subheader>
+              <categories-list
+                color="indigo"
+                color-secondary="indigo darken-2"
+                :items="categories.saving"
+                :data-budget="budget"
+                v-on:new="openEditor('saving')"
+                v-on:edit="editCategory"
+                v-on:transfer="transferTransactions"
+                v-on:delete="deleteCategory"
+                :title="$t('categories.savingCategories')"
+                >              
+              </categories-list>
 
-                <v-list-tile
-                  avatar
-                  v-for="(category, i) in categories.savings"
-                  v-bind:data="category"
-                  v-bind:key="i">
-                  <v-list-tile-avatar color="indigo">
-                    <v-icon dark>{{ category.icon }}</v-icon>
-                  </v-list-tile-avatar>
-
-                  <v-list-tile-content>
-                    <v-list-tile-title>{{ category.name }}</v-list-tile-title>
-                    <v-list-tile-sub-title>
-                      {{ category.amount | currency($currencies[budget.currency]) }}
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-
-                  <v-list-tile-action>
-                    <v-btn icon @click="editCategory(category)">
-                      <v-icon color="primary darken-1">edit</v-icon>
-                    </v-btn>
-                  </v-list-tile-action>
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.mdAndUp">
-                    <v-menu>
-                      <v-btn slot="activator" icon>
-                        <v-icon>more_vert</v-icon>
-                      </v-btn>                      
-                      <v-list light dense subheader>
-                        <v-list-tile @click="transferTransactions(category)">
-                          <v-list-tile-action>
-                            <v-icon color="purple">reply_all</v-icon>
-                          </v-list-tile-action>
-                          <v-list-tile-title>{{ $t("transactions.categoryTransfer") }}</v-list-tile-title>            
-                        </v-list-tile>
-
-                        <v-list-tile @click="deleteCategory(category)">
-                          <v-list-tile-action>
-                            <v-icon color="red">cancel</v-icon>
-                          </v-list-tile-action>
-                          <v-list-tile-title>{{ $t("general.remove") }}</v-list-tile-title>            
-                        </v-list-tile>
-                      </v-list>
-                    </v-menu>
-                  </v-list-tile-action>     
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.smAndDown">                  
-                    <v-btn icon @click="editCategory(category)">                      
-                        <v-icon color="purple">reply_all</v-icon>                        
-                    </v-btn>                    
-                  </v-list-tile-action>                   
-
-                  <v-list-tile-action v-if="$vuetify.breakpoint.smAndDown">
-                    <v-btn icon @click="deleteCategory(category)"> 
-                      <v-icon color="red">cancel</v-icon>
-                    </v-btn>
-                  </v-list-tile-action>
-
-                </v-list-tile>
-              </v-list>
             </v-flex>
           </v-layout>                  
         </v-container>
@@ -322,19 +153,11 @@ import { transactionsService } from "../_services/transactions.service";
 import { mapState, mapActions } from "vuex";
 
 export default {
+  components: {
+    "categories-list": () => import("../components/CategoriesList"),
+  },
   data() {
     return {
-      step: 1,
-      budget: {
-        name: null,
-        startDate: null,
-        currency: "pln"
-      },
-      categories: {
-        income: [],
-        spending: [],
-        savings: []
-      },
       categoryEditor: {
         categoryId: null,
         name: null,
@@ -345,34 +168,37 @@ export default {
       editor: false,
       icons: this.$categoryIcons,
       dateMenu: false,
-      validStep1: true,
-      validStep2: true,
-      validStep3: true,
-      validStep4: true,
       requiredRule: [v => !!v || this.$t("forms.requiredField")]
     };
   },
   computed: {
-    incomeCategoriesSum: function() {
-      var sum = 0;
-      for (var i = 0; i < this.categories.income.length; i++) {
-        sum += this.categories.income[i].amount * 1;
+    ...mapState({
+      budgets: state => state.budgets.budgets
+    }),
+    budget() {
+      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
+    },
+    categories() {
+      var saving = this.budget ? this.budget.savingCategories : [];
+      var income = this.budget ? this.budget.incomeCategories : [];
+      var spending = this.budget ? this.budget.spendingCategories : [];
+      return {        
+        income: income,
+        spending: spending,
+        saving: saving     
       }
-      return sum;
+    },
+    incomeCategoriesSum: function() {
+      if (this.categories.income.length == 0 ) {return 0}  
+      return this.categories.income.map(v=>v.amount).reduce(function(a,b){return 1*a+1*b})
     },
     spendingCategoriesSum: function() {
-      var sum = 0;
-      for (var i = 0; i < this.categories.spending.length; i++) {
-        sum += this.categories.spending[i].amount * 1;
-      }
-      return sum;
+      if (this.categories.spending.length == 0 ) {return 0}
+      return this.categories.spending.map(v=>v.amount).reduce(function(a,b){return 1*a+1*b})
     },
     savingsCategoriesSum: function() {
-      var sum = 0;
-      for (var i = 0; i < this.categories.savings.length; i++) {
-        sum += this.categories.savings[i].amount * 1;
-      }
-      return sum;
+      if (this.categories.saving.length == 0 ) {return 0}
+      return this.categories.saving.map(v=>v.amount).reduce(function(a,b){return 1*a+1*b})
     },
     categoriesBalance: function() {
       return (
@@ -386,7 +212,7 @@ export default {
     }
   },
   mounted: function() {
-    this.loadBudget(this.$route.params.id);
+
   },
   watch: {
     editor: function() {
@@ -394,9 +220,6 @@ export default {
         this.closeEditor();
       }
     },
-    $route(to, from) {
-      this.loadBudget(to.params.id);
-    }
   },
   methods: {
     ...mapActions({
@@ -433,7 +256,7 @@ export default {
                   ? "spending"
                   : data.type == 1
                     ? "income"
-                    : "savings";
+                    : "saving";
 
               category = this.categories[type].find(function(element) {
                 return element.categoryId == data.categoryId;
@@ -550,22 +373,6 @@ export default {
               });
           }
         });
-    },
-    loadBudget(id) {
-      budgetService.getBudget(id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.budget.currency = data.currency;
-            this.categories.spending = data.spendingCategories;
-            this.categories.savings = data.savingCategories;
-            this.categories.income = data.incomeCategories;
-          });
-        } else {
-          reponse.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
     }
   }
 };

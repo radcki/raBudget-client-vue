@@ -102,8 +102,8 @@
           </template>
         </v-data-table>
 
-        <v-list class="py-0 elevation-1" v-if="!$vuetify.breakpoint.smAndUp" dense subheader>     
-        <template  v-for="(transaction, index) in allocations[categoryType]">
+        <v-list class="py-0" v-if="!$vuetify.breakpoint.smAndUp" dense subheader>     
+        <template  v-for="(transaction, index) in allocations">
           <v-list-tile :key="index" avatar class="pb-1">
             <v-list-tile-avatar>
               <v-icon>{{ transaction.destinationCategory.icon }}</v-icon>
@@ -123,10 +123,23 @@
             </v-list-tile-content>
 
             <v-list-tile-action>
-              <v-icon @click="editAllocation(transaction.allocationId)">edit</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-action>
-              <v-icon @click="deleteAllocation(transaction.allocationId)">delete</v-icon>
+              <v-menu>
+                <v-btn slot="activator" icon>
+                  <v-icon>more_vert</v-icon>
+                </v-btn>
+                <v-list single-line light subheader>
+                  <v-list-tile>
+                    <v-list-tile-title>
+                      <v-icon @click="editAllocation(transaction.allocationId)">edit</v-icon>
+                    </v-list-tile-title>
+                  </v-list-tile>
+                  <v-list-tile>
+                    <v-list-tile-title>
+                      <v-icon @click="deleteAllocation(transaction.allocationId)">delete</v-icon>
+                    </v-list-tile-title>
+                  </v-list-tile>
+                </v-list>
+              </v-menu>
             </v-list-tile-action>
           </v-list-tile>
         </template>
