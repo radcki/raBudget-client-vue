@@ -9,6 +9,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const portfinder = require('portfinder')
 
 const HOST = process.env.HOST
@@ -48,6 +49,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     }
   },
   plugins: [
+    new VuetifyLoaderPlugin(),
     new webpack.DefinePlugin({
       'process.env': require('../config/dev.env'),
       config: JSON.stringify({
@@ -58,7 +60,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
     new webpack.NoEmitOnErrorsPlugin(),
     //new HardSourceWebpackPlugin(),
-    // https://github.com/ampedandwired/html-webpack-plugin
+
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: 'index.html',

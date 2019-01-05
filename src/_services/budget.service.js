@@ -55,7 +55,7 @@ function saveBudget (budgetId, budgetData) {
     },
     body: JSON.stringify({
       name: budgetData.name,
-      startingDate: budgetData.startingDate,
+      startingDate: budgetData.startingDate + '-01',
       currency: budgetData.currency,
       default: budgetData.default
     })
@@ -144,13 +144,7 @@ function saveCategory (budgetId, category) {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      categoryId: category.categoryId,
-      name: category.name,
-      icon: category.icon,
-      amount: category.amount,
-      type: category.type
-    })
+    body: JSON.stringify(category)
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/budgets/${budgetId}/savecategory`, requestOptions)
 }

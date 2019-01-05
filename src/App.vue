@@ -247,6 +247,7 @@ export default {
       locale = locale.substring(0, 2);
       this.locale = locale;
       localStorage.setItem('locale', locale);
+      document.getElementsByTagName('html')[0].setAttribute('lang', locale);
       this.$i18n.locale = locale
       this.$moment.locale(locale);  
     }

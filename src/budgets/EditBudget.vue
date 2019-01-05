@@ -55,7 +55,7 @@
                         prepend-icon="event"
                         readonly
                       ></v-text-field>
-                      <v-date-picker v-model="budget.startingDate" @input="$refs.dateMenu.save(budget.startingDate)"></v-date-picker>
+                      <v-date-picker v-model="budget.startingDate" type="month" @input="$refs.dateMenu.save(budget.startingDate)"></v-date-picker>
                     </v-menu>
                   </v-flex>
                   <v-flex xs12>
@@ -119,11 +119,12 @@ export default {
     }),
     saveBudget() {
       var category = {};
+      
       budgetService
         .saveBudget(this.$route.params.id, this.budget)
         .then(response => {
           if (response.ok) {
-            this.$root.$emit("reloadBudgets");
+            this.budgetsFetch();
             this.dispatchSuccess("general.changesSaved");
           } else {
             response.json().then(data => {
@@ -138,7 +139,7 @@ export default {
         .then(response => {
           if (response.ok) {
             this.dispatchSuccess("general.changesSaved");
-            this.loadBudget(this.$route.params.id);
+            this.budgetsFetch();
           } else {
             response.json().then(data => {
               this.dispatchError(data.message);
@@ -157,7 +158,7 @@ export default {
             budgetService.deleteBudget(this.$route.params.id).then(response => {
               if (response.ok) {
                 this.$router.push("/");
-                this.$root.$emit("reloadBudgets");
+                this.budgetsFetch();
               } else {
                 response.json().then(data => {
                   this.dispatchError(data.message);
@@ -168,24 +169,7 @@ export default {
         }
       );      
     },
-    loadBudget(id) {
-      budgetService.getBudget(id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.budget.currency = data.currency;
-            this.budget.name = data.name;
-            this.budget.startDate = this.$moment(data.startingDate).format(
-              "YYYY-MM-DD"
-            );
-            this.budget.default = data.default;
-          });
-        } else {
-          reponse.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
-    }
+    
   }
 };
 </script>

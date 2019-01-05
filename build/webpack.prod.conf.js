@@ -7,9 +7,12 @@ const merge = require('webpack-merge')
 const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
 const env = require('../config/prod.env')
 
@@ -20,14 +23,19 @@ const webpackConfig = merge(baseWebpackConfig, {
         test: /\.css$/,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              // you can specify a publicPath here
-              // by default it use publicPath in webpackOptions.output
-              // publicPath: '../'
-            }
+            loader: MiniCssExtractPlugin.loader
           },
-          "css-loader"
+          'css-loader'
+        ]
+      },
+      {
+        test: /\.styl$/,
+        loader: [
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
+          'css-loader',
+          'stylus-loader'
         ]
       }]
   },
@@ -37,7 +45,37 @@ const webpackConfig = merge(baseWebpackConfig, {
     path: config.build.assetsRoot,
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
-  }, 
+  },
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: true
+      }),
+      new OptimizeCSSAssetsPlugin({})
+    ],
+    splitChunks: {
+      chunks: 'async',
+      maxSize: 0,
+      minChunks: 1,
+      maxAsyncRequests: 5,
+      maxInitialRequests: 3,
+      name: true,
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          chunks: 'all'
+        },
+        default: {
+          minChunks: 2,
+          reuseExistingChunk: true,
+          chunks: 'all'
+        }
+      }
+    // eslint-disable-next-line no-trailing-spaces
+    }    
+  },
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
@@ -60,14 +98,10 @@ const webpackConfig = merge(baseWebpackConfig, {
     }),
     // extract css into its own file
     new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
       filename: '[name].[hash].css',
-      chunkFilename: '[id].[hash].css',
+      chunkFilename: '[id].[hash].css'
     }),
-    // generate dist index.html with correct asset hash for caching.
-    // you can customize output by editing /index.html
-    // see https://github.com/ampedandwired/html-webpack-plugin
+    
     new HtmlWebpackPlugin({
       filename: config.build.index,
       template: 'index.html',
@@ -79,15 +113,13 @@ const webpackConfig = merge(baseWebpackConfig, {
         // more options:
         // https://github.com/kangax/html-minifier#options-quick-reference
       },
-      // necessary to consistently work with multiple chunks via CommonsChunkPlugin
       chunksSortMode: 'dependency'
     }),
     // keep module.id stable when vendor modules does not change
     new webpack.HashedModuleIdsPlugin(),
     // enable scope hoisting
     new webpack.optimize.ModuleConcatenationPlugin(),
-    
-
+    new VuetifyLoaderPlugin(),
     // copy custom static assets
     new CopyWebpackPlugin([
       {
@@ -104,14 +136,13 @@ if (config.build.productionGzip) {
 
   webpackConfig.plugins.push(
     new CompressionWebpackPlugin({
-      asset: '[path].gz[query]',
+      filename: '[path].gz[query]',
       algorithm: 'gzip',
       test: new RegExp(
         '\\.(' +
         config.build.productionGzipExtensions.join('|') +
         ')$'
       ),
-      threshold: 10240,
       minRatio: 0.8
     })
   )

@@ -133,7 +133,10 @@
         "destinationCategory": "Destination docelowa",
         "categoryType": "Category type",
         "monthPlanLeft": "Planned ammount left",
-        "categoryEdit": "Edit category"
+        "categoryEdit": "Edit category",
+        "addPeriod": "Add period",
+        "daily": "Daily",
+        "annual": "Annual"
     },
     "transactions": {
         "categoryTransfer": "Transactions transfer",

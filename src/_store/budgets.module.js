@@ -15,8 +15,28 @@ const actions = {
             response.json().then(
               data => {
                 var budgets = data.map(budget => {
-                  return {...budget, startingDate: moment(budget.startingDate).format('YYYY-MM-DD')}
-                });
+                  return {...budget, startingDate: moment(budget.startingDate).format('YYYY-MM')}
+                })
+                for (var budget of budgets) {
+                  for (var category of budget.spendingCategories) {
+                    for (var config of category.amountConfigs) {
+                      config.validFrom = moment(config.validFrom).format('YYYY-MM')
+                      config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+                    }
+                  }
+                  for (var category of budget.incomeCategories) {
+                    for (var config of category.amountConfigs) {
+                      config.validFrom = moment(config.validFrom).format('YYYY-MM')
+                      config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+                    }
+                  }
+                  for (var category of budget.savingCategories) {
+                    for (var config of category.amountConfigs) {
+                      config.validFrom = moment(config.validFrom).format('YYYY-MM')
+                      config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+                    }
+                  }
+                }
                 commit('setBudgets', budgets)
                 dispatch('wait/end', 'budgets.loading', { root: true })
                 resolve(budgets)
@@ -29,7 +49,7 @@ const actions = {
           } else {
             commit('setBudgets', [])
             dispatch('wait/end', 'budgets.loading', { root: true })
-            reject(response);
+            reject(response)
           }
         })
         .catch(error => {
@@ -38,10 +58,10 @@ const actions = {
         })
     })
   },
-  fetchUnassignedFunds ({commit, dispatch}, budget) {    
+  fetchUnassignedFunds ({commit, dispatch}, budget) {
     return new Promise((resolve, reject) => {
-      if (!budget) {        
-        reject("Budget undefinied")
+      if (!budget) {
+        reject('Budget undefinied')
       }
       /*
       if (budget.unassignedFunds) {
@@ -75,7 +95,7 @@ const actions = {
 }
 
 const mutations = {
-  setUnassignedFunds (state, {budget, funds}) {    
+  setUnassignedFunds (state, {budget, funds}) {
     var matchingBudget = state.budgets.filter(v => v.id === budget.id)[0]
     if (matchingBudget) {
       matchingBudget.unassignedFunds = funds

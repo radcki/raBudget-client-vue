@@ -254,6 +254,7 @@ export default {
       this.fetchAllocations();
     }
   },
+  
   methods: {
     ...mapActions({
       dispatchError: "alert/error",

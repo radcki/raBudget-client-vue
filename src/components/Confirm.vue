@@ -56,6 +56,9 @@ export default {
       }
     }
   }),
+  beforeDestroy: function(){
+    this.$wait.end("dialog")
+  },  
   methods: {
     open(title, message, options) {
       this.input = null;
@@ -98,7 +101,8 @@ export default {
       this.dialog = false;
     },
     cancel() {
-      this.resolve(false);
+      this.resolve(false);      
+      
       this.dialog = false;
     }
   }

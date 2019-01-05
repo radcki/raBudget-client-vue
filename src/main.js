@@ -1,6 +1,6 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify'
-import VeeValidate from 'vee-validate'
+import Vuetify from 'vuetify/lib'
+
 import { store } from './_store'
 import { router } from './_helpers'
 import App from './App'
@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faSignOutAlt, faUserCircle, faDotCircle, faCircle } from '@fortawesome/free-solid-svg-icons'
 
-import 'vuetify/dist/vuetify.min.css'
+import 'vuetify/src/stylus/main.styl'
 const moment = require('moment')
 
 library.add(faSignOutAlt)
@@ -29,7 +29,7 @@ library.add(faCircle)
 
 Vue.use(VueWait)
 Vue.use(VueI18n)
-Vue.use(VeeValidate)
+
 Vue.use(Vuetify, {
   lang: {
     locales: { pl, en },

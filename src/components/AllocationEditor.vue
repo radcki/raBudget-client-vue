@@ -136,7 +136,20 @@ export default {
     }
   },
   mounted: function() {
+    this.$root.$on("closeDialogs", ()=> { this.dialog = false});
     this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
+  },
+  beforeDestroy: function(){
+    this.$wait.end("dialog")
+  },
+  watch:{
+    dialog(open){
+      if (open){
+        this.$wait.start("dialog")
+      } else {
+        this.$wait.end("dialog")
+      } 
+    }
   },
   methods: {
     open(allocationId) {

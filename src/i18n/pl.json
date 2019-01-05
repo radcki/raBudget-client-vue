@@ -133,7 +133,10 @@
         "destinationCategory": "Kategoria docelowa",
         "categoryType": "Typ kategorii",
         "monthPlanLeft": "Pozostała planowa kwota",
-        "categoryEdit": "Edycja kategorii"
+        "categoryEdit": "Edycja kategorii",
+        "addPeriod": "Dodaj okres",
+        "daily": "Dziennie",
+        "annual": "Rocznie"
     },
     "transactions": {
         "categoryTransfer": "Transfer transakcji",

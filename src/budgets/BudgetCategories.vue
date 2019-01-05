@@ -20,7 +20,7 @@
       </v-flex>
 
       <v-flex xs12 >    
-        <v-container grid-list-md>
+        <v-container grid-list-md class="pa-0">
           <v-layout row wrap>   
             
             <v-flex xs12 md6 lg4 v-if="categories.spending">
@@ -28,8 +28,8 @@
                 color="amber darken-1"
                 color-secondary="amber darken-3"
                 :items="categories.spending"
-                :data-budget="budget"
-                v-on:new="openEditor('spending')"
+                :data-budget="budget"                
+                categories-type="spending"
                 v-on:edit="editCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
@@ -45,7 +45,7 @@
                 color-secondary="light-green darken-4"
                 :items="categories.income"
                 :data-budget="budget"
-                v-on:new="openEditor('income')"
+                categories-type="income"
                 v-on:edit="editCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
@@ -61,7 +61,7 @@
                 color-secondary="indigo darken-2"
                 :items="categories.saving"
                 :data-budget="budget"
-                v-on:new="openEditor('saving')"
+                categories-type="saving"
                 v-on:edit="editCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
@@ -75,75 +75,7 @@
       </v-flex>
     </v-layout>
 
-    <v-dialog width="500" v-model="editor">
-      <v-card>
-        <v-card-text>
-          <v-form ref="editor">
-            <v-container grid-list-md>
-              <v-layout row wrap>
-                <v-flex xs3>
-                  <v-select
-                    v-model="categoryEditor.icon"
-                    :items="icons"
-                    :label="$t('general.icon')">
-                  >
-                    <template slot="selection" slot-scope="data">
-                      <v-icon>{{ data.item }}</v-icon>
-                    </template>
-                    <template slot="item" slot-scope="data">
-                      <v-icon>{{ data.item }}</v-icon>
-                    </template>
-                  </v-select>
-                </v-flex>
-                <v-flex xs9>
-                  <v-text-field 
-                    :rules="requiredRule"
-                    v-model="categoryEditor.name"
-                    :label="$t('categories.name')">
-                  </v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-text-field 
-                    prepend-icon="payment"
-                    type="number" 
-                    step="0.01"
-                    :rules="requiredRule"
-                    min="0"
-                    v-model="categoryEditor.amount"
-                    :label="$t('categories.monthlyAmount')">
-                  </v-text-field>
-                </v-flex>  
-                <v-flex xs12>
-                  <div>Kwota dziennie: {{ (categoryEditor.amount / 30) | currency($currencies[budget.currency]) }}</div>
-                  <div>Kwota rocznie: {{ (categoryEditor.amount * 12) | currency($currencies[budget.currency]) }}</div>
-                </v-flex>                
-              </v-layout>                  
-            </v-container>
-          </v-form>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>          
-          <v-btn
-            color="red"
-            flat
-            @click="closeEditor"
-          >
-            {{$t('general.cancel')}}
-          </v-btn>
-
-          <v-btn
-            color="primary"
-            flat
-            @click="saveCategory"
-          >
-            {{$t('general.save')}}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    
 </v-container>
 </template>
 
@@ -154,20 +86,10 @@ import { mapState, mapActions } from "vuex";
 
 export default {
   components: {
-    "categories-list": () => import("../components/CategoriesList"),
+    "categories-list": () => import("../components/CategoriesList"),    
   },
   data() {
     return {
-      categoryEditor: {
-        categoryId: null,
-        name: null,
-        amount: null,
-        icon: null,
-        type: null
-      },
-      editor: false,
-      icons: this.$categoryIcons,
-      dateMenu: false,
       requiredRule: [v => !!v || this.$t("forms.requiredField")]
     };
   },
@@ -190,15 +112,15 @@ export default {
     },
     incomeCategoriesSum: function() {
       if (this.categories.income.length == 0 ) {return 0}  
-      return this.categories.income.map(v=>v.amount).reduce(function(a,b){return 1*a+1*b})
+      return this.categories.income.map(v=>this.readCurrentAmount(v)).reduce(function(a,b){return 1*a+1*b})
     },
     spendingCategoriesSum: function() {
       if (this.categories.spending.length == 0 ) {return 0}
-      return this.categories.spending.map(v=>v.amount).reduce(function(a,b){return 1*a+1*b})
+      return this.categories.spending.map(v=>this.readCurrentAmount(v)).reduce(function(a,b){return 1*a+1*b})
     },
     savingsCategoriesSum: function() {
       if (this.categories.saving.length == 0 ) {return 0}
-      return this.categories.saving.map(v=>v.amount).reduce(function(a,b){return 1*a+1*b})
+      return this.categories.saving.map(v=>this.readCurrentAmount(v)).reduce(function(a,b){return 1*a+1*b})
     },
     categoriesBalance: function() {
       return (
@@ -211,73 +133,29 @@ export default {
       return Object.keys(this.$currencies);
     }
   },
-  mounted: function() {
 
-  },
-  watch: {
-    editor: function() {
-      if (this.editor == false) {
-        this.closeEditor();
-      }
-    },
-  },
   methods: {
     ...mapActions({
       dispatchError: "alert/error",
-      dispatchSuccess: "alert/success"
+      dispatchSuccess: "alert/success",
+      budgetsFetch: "budgets/fetchBudgets"
     }),
-    closeEditor() {
-      this.categoryEditor.type = null;
-      this.categoryEditor.categoryId = null;
-      this.$refs.editor.reset();
-      this.editor = false;
-    },
-    openEditor(type) {
-      this.editor = true;
-      this.categoryEditor.type = type;
-    },
-    editCategory(category, type) {
-      this.categoryEditor.categoryId = category.categoryId;
-      this.categoryEditor.icon = category.icon;
-      this.categoryEditor.amount = category.amount;
-      this.categoryEditor.name = category.name;
-      this.categoryEditor.type = category.type;
-      this.editor = true;
-    },
-    saveCategory() {
-      var category = {};
-      budgetService
-        .saveCategory(this.$route.params.id, this.categoryEditor)
-        .then(response => {
+
+    editCategory(category) {
+      budgetService.saveCategory(this.budget.id, category).then(response => {
           if (response.ok) {
             response.json().then(data => {
-              var type =
-                data.type == 0
-                  ? "spending"
-                  : data.type == 1
-                    ? "income"
-                    : "saving";
-
-              category = this.categories[type].find(function(element) {
-                return element.categoryId == data.categoryId;
-              });
-
-              if (category) {
-                category.name = this.categoryEditor.name;
-                category.amount = this.categoryEditor.amount;
-                category.icon = this.categoryEditor.icon;
-              } else {
-                this.categories[type].push(data);
-              }
-              this.closeEditor();
+              this.budgetsFetch();
             });
           } else {
             response.json().then(data => {
               this.dispatchError(data.message);
+              this.budgetsFetch();
             });
           }
         });
     },
+    
     deleteCategory(category) {
       this.$root
         .$confirm("general.remove", "categories.deleteConfirm", {
@@ -373,6 +251,12 @@ export default {
               });
           }
         });
+    },
+    readCurrentAmount(category) {
+      var matching = category.amountConfigs.filter( v => {
+        return this.$moment().startOf('month') >= this.$moment(v.validFrom, 'YYYY-MM') && (!v.validTo || this.$moment(v.validTo, 'YYYY-MM') >= this.$moment().startOf('month'))
+      });
+      return matching && matching.length > 0 ? matching[0].amount : null
     }
   }
 };

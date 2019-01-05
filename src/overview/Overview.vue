@@ -383,6 +383,14 @@ export default {
       requiredRule: [v => !!v || this.$t("forms.requiredField")]
     };
   },
+  beforeRouteLeave (to, from, next) {
+    if (this.editorDialog && !this.$vuetify.breakpoint.smAndUp) {
+      this.editorDialog = false;
+      next(false);
+    } else {
+      next(true);
+    }
+  },
   computed: {
     ...mapState({
       budgets: state => state.budgets.budgets
@@ -557,12 +565,7 @@ export default {
         });
     },
     getDate() {
-      const toTwoDigits = num => (num < 10 ? "0" + num : num);
-      let today = new Date();
-      let year = today.getFullYear();
-      let month = toTwoDigits(today.getMonth() + 1);
-      let day = toTwoDigits(today.getDate());
-      return `${year}-${month}-${day}`;
+      return this.$moment().format("YYYY-MM-DD");
     }
   }
 };
