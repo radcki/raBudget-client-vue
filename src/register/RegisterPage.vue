@@ -1,54 +1,55 @@
 <template>
-<v-container fill-height>     
+  <v-container fill-height>
     <v-layout wrap align-center justify-center>
-        <v-card raised width="400px">
-            <v-card-title 
-                primary-title 
-                class="blue-grey darken-2 headline white--text">
-                {{ $t('account.registering') }}
-            </v-card-title>
+      <v-card raised width="400px">
+        <v-card-title
+          primary-title
+          class="blue-grey darken-2 headline white--text"
+        >{{ $t('account.registering') }}</v-card-title>
 
-            <v-card-text>
-                <v-form ref="form" v-model="valid" >
-                    <v-text-field
-                    v-model="user.email"
-                    :rules="emailRule"
-                    :label="$t('account.email')"
-                    required
-                    ></v-text-field>
+        <v-card-text>
+          <v-form ref="form" v-model="valid">
+            <v-text-field
+              v-model="user.email"
+              :rules="emailRule"
+              :label="$t('account.email')"
+              required
+            ></v-text-field>
 
-                    <v-text-field
-                    v-model="user.username"
-                    :rules="requiredRule"
-                    autocomplete="username"
-                    :label="$t('account.username')"
-                    required
-                    ></v-text-field>
+            <v-text-field
+              v-model="user.username"
+              :rules="requiredRule"
+              autocomplete="username"
+              :label="$t('account.username')"
+              required
+            ></v-text-field>
 
-                    <v-text-field
-                        v-model="user.password"
-                        autocomplete="new-password"
-                        :append-icon="show ? 'visibility_off' : 'visibility'"
-                        :rules="passwordRule"
-                        :type="show ? 'text' : 'password'"
-                        :label="$t('account.password')"
-                        counter
-                        @click:append="show = !show"
-                    ></v-text-field>
+            <v-text-field
+              v-model="user.password"
+              autocomplete="new-password"
+              :append-icon="show ? 'visibility_off' : 'visibility'"
+              :rules="passwordRule"
+              :type="show ? 'text' : 'password'"
+              :label="$t('account.password')"
+              counter
+              @click:append="show = !show"
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
 
-                    <v-btn
-                    color="primary"
-                    :disabled="!valid"
-                    @click="handleSubmit"
-                    >{{ $t('account.register') }}</v-btn>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            :disabled="!valid"
+            @click="handleSubmit"
+          >{{ $t('account.register') }}</v-btn>
 
-                    <v-btn flat to="/login">{{ $t('account.logging') }}</v-btn>
-                </v-form>
-                
-            </v-card-text>
-        </v-card>
+          <v-btn flat to="/login">{{ $t('account.logging') }}</v-btn>
+          <v-progress-linear :indeterminate="true" v-if="$wait.is('register')"></v-progress-linear>
+        </v-card-actions>
+      </v-card>
     </v-layout>
-</v-container>
+  </v-container>
 </template>
 
 <script>
@@ -88,7 +89,15 @@ export default {
     handleSubmit(e) {
       this.submitted = true;
       if (this.$refs.form.validate()) {
-        this.register(this.user);
+        this.$wait.start("register");
+        this.register(this.user).then((success)=>{
+          this.$wait.end("register");
+          if (success) {
+            this.$router.push("login")
+          }
+        }).catch(()=>{
+          this.$wait.end("register");
+        });
       }
     }
   }

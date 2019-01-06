@@ -79,22 +79,27 @@ const actions = {
   },
   register ({dispatch, commit}, user) {
     commit('registerRequest')
-
-    userService.register(user)
-      .then(response => {
-        if (response.ok) {
-          commit('registerSuccess', user)
-          setTimeout(() => {
-            dispatch('alert/success', 'account.registerOk', {root: true})
-          })
-        } else {
-          return response.json()
-            .then(error => {
-              commit('registerFailure')
-              dispatch('alert/error', error.message, {root: true})
+    return new Promise((resolve, reject) => {
+      userService.register(user)
+        .then(response => {
+          if (response.ok) {
+            commit('registerSuccess', user)
+            resolve(true)
+            setTimeout(() => {
+              dispatch('alert/success', 'account.registerOk', {root: true})
             })
-        }
-      })
+          } else {
+            response.json()
+              .then(error => {
+                commit('registerFailure')
+                dispatch('alert/error', error.message, {root: true})
+              })
+            resolve(false)
+          }
+        }).catch(error => {
+          reject(error)
+        })
+    })
   },
   updateProfile ({dispatch, commit}, user) {
     userService.update(user)

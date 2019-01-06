@@ -13,6 +13,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const FilterWarningsPlugin = require('webpack-filter-warnings-plugin')
 
 const env = require('../config/prod.env')
 
@@ -63,8 +64,11 @@ const webpackConfig = merge(baseWebpackConfig, {
       maxInitialRequests: 3,
       name: true,
       cacheGroups: {
-        vendors: {
+        vendor: {
           test: /[\\/]node_modules[\\/]/,
+          enforce: true,
+          name: 'vendor',
+          reuseExistingChunk: true,
           chunks: 'all'
         },
         default: {
@@ -101,7 +105,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       filename: '[name].[hash].css',
       chunkFilename: '[id].[hash].css'
     }),
-    
+
     new HtmlWebpackPlugin({
       filename: config.build.index,
       template: 'index.html',
@@ -120,6 +124,9 @@ const webpackConfig = merge(baseWebpackConfig, {
     // enable scope hoisting
     new webpack.optimize.ModuleConcatenationPlugin(),
     new VuetifyLoaderPlugin(),
+    new FilterWarningsPlugin({
+      exclude: /mini-css-extract-plugin[^]*Conflicting order between:/
+    }),
     // copy custom static assets
     new CopyWebpackPlugin([
       {

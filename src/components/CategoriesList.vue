@@ -30,14 +30,14 @@
       </v-list-tile-content>
 
       <v-list-tile-action v-if="!hideActions">
-        <v-menu>
+        <v-menu ref="menu">
           <v-btn slot="activator" icon>
             <v-icon>more_vert</v-icon>
           </v-btn>
           <v-list light dense subheader>
             
-            <v-category-editor :data-budget="dataBudget" :value="category" v-on:save="emitSave">
-              <v-list-tile>
+            <v-category-editor :data-budget="dataBudget" :value="category" v-on:save="emitSave" >
+              <v-list-tile >
                 <v-list-tile-action>                
                     <v-icon color="primary darken-1">edit</v-icon>                             
                 </v-list-tile-action>
@@ -87,6 +87,9 @@ export default {
     colorSecondary: String,
     hideActions: Boolean
   },
+  data: function(){return{
+    menu: false
+  }},
   computed: {
       itemsSum: function() {
           if (this.items && this.items.length > 0){
@@ -95,6 +98,7 @@ export default {
           return 0;          
       }
   },
+
   methods: {
     emitSave: function(payload) {
       this.$emit('edit', payload);

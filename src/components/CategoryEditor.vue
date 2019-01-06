@@ -3,7 +3,7 @@
     <template slot="activator"><slot></slot></template>
     <v-spacer v-if="mobile" class="py-3"></v-spacer>
     <v-card>
-      <v-toolbar color="primary" dark dense flat :app="mobile && dialog">
+      <v-toolbar color="primary" dark dense flat :fixed="mobile">
         <v-btn v-if="mobile" icon dark @click="dialog = false">
           <v-icon>close</v-icon>
         </v-btn>

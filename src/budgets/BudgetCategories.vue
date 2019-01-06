@@ -129,9 +129,7 @@ export default {
         this.savingsCategoriesSum
       );
     },
-    currencies: function() {
-      return Object.keys(this.$currencies);
-    }
+
   },
 
   methods: {

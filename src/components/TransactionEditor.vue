@@ -1,7 +1,7 @@
 <template>
   <v-dialog :fullscreen="!$vuetify.breakpoint.smAndUp" v-model="dialog" v-if="transactionId" :max-width="800" @keydown.esc="cancel">
     <v-card>
-      <v-toolbar color="primary" dark dense flat>
+      <v-toolbar color="primary" dark dense flat :fixed="!$vuetify.breakpoint.smAndU">
         <v-btn v-if="!$vuetify.breakpoint.smAndUp" icon dark @click="cancel">
           <v-icon>close</v-icon>
         </v-btn>

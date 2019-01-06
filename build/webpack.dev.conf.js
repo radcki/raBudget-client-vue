@@ -8,7 +8,7 @@ const baseWebpackConfig = require('./webpack.base.conf')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
-const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const portfinder = require('portfinder')
 

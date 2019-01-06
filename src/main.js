@@ -1,3 +1,4 @@
+/* eslint-disable import/no-duplicates */
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 
@@ -15,17 +16,17 @@ import 'moment/locale/en-gb'
 import pl from 'vuetify/es5/locale/pl.js'
 import en from 'vuetify/es5/locale/en.js'
 
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSignOutAlt, faUserCircle, faDotCircle, faCircle } from '@fortawesome/free-solid-svg-icons'
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { faUserCircle } from '@fortawesome/free-solid-svg-icons'
+import { faDotCircle } from '@fortawesome/free-solid-svg-icons'
+import { faCircle } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import 'vuetify/src/stylus/main.styl'
 const moment = require('moment')
 
-library.add(faSignOutAlt)
-library.add(faUserCircle)
-library.add(faDotCircle)
-library.add(faCircle)
+library.add(faSignOutAlt, faUserCircle, faDotCircle, faCircle)
 
 Vue.use(VueWait)
 Vue.use(VueI18n)

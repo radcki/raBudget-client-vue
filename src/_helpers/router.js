@@ -2,19 +2,19 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import {store} from '../_store'
 
-import HomePage from '../home/HomePage'
-import LoginPage from '../login/LoginPage'
-import RegisterPage from '../register/RegisterPage'
-import ProfilePage from '../profile/Profile'
-import NewBudget from '../budgets/NewBudget'
-import BudgetCategories from '../budgets/BudgetCategories.vue'
-import EditBudget from '../budgets/EditBudget.vue'
-import Overview from '../overview/Overview.vue'
-import Transactions from '../history/Transactions.vue'
-import Allocations from '../history/Allocations.vue'
-import Reports from '../reports/Reports.vue'
-import Users from '../admin/Users.vue'
-import Logs from '../admin/Logs.vue'
+const HomePage = () => import('../home/HomePage.vue')
+const LoginPage = () => import('../login/LoginPage.vue')
+const RegisterPage = () => import('../register/RegisterPage.vue')
+const ProfilePage = () => import('../profile/Profile.vue')
+const NewBudget = () => import('../budgets/NewBudget.vue')
+const BudgetCategories = () => import('../budgets/BudgetCategories.vue')
+const EditBudget = () => import('../budgets/EditBudget.vue')
+const Overview = () => import('../overview/Overview.vue')
+const Transactions = () => import('../history/Transactions.vue')
+const Allocations = () => import('../history/Allocations.vue')
+const Reports = () => import('../reports/Reports.vue')
+const Users = () => import('../admin/Users.vue')
+const Logs = () => import('../admin/Logs.vue')
 
 Vue.use(Router)
 
@@ -45,7 +45,7 @@ export const router = new Router({
       if (store.state.account.user && store.state.account.user.roles.filter(function (v) {
         return v === 1
       }).length > 0) {
-        next()
+        next(true)
       } else {
         next(false)
       }
@@ -58,7 +58,7 @@ export const router = new Router({
       if (store.state.account.user && store.state.account.user.roles.filter(function (v) {
         return v === 1
       }).length > 0) {
-        next()
+        next(true)
       } else {
         next(false)
       }
@@ -109,7 +109,7 @@ export const router = new Router({
 
 router.beforeEach((to, from, next) => {
   if (router.app.$wait && router.app.$wait.is('dialog')) {
-    router.app.$root.$emit('closeDialogs', {})
+    router.app.$root.$emit('closeDialogs')
     return next(false)
   }
 
@@ -117,12 +117,12 @@ router.beforeEach((to, from, next) => {
   const publicPages = ['/login', '/register']
   const authRequired = !publicPages.includes(to.path)
   if (!authRequired) {
-    return next()
+    return next(true)
   }
   store.dispatch('account/checkLogin').then(() => {
     if (!store.state.account.status.loggedIn) {
       return next('/login')
     }
-    return next()
+    return next(true)
   })
 })
