@@ -14,6 +14,7 @@ const TerserPlugin = require('terser-webpack-plugin')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const FilterWarningsPlugin = require('webpack-filter-warnings-plugin')
+const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin')
 
 const env = require('../config/prod.env')
 
@@ -90,6 +91,12 @@ const webpackConfig = merge(baseWebpackConfig, {
     }),
     new CleanWebpackPlugin(['wwwroot'], {
       root: path.join(config.build.assetsRoot, '..')
+    }),
+    new SWPrecacheWebpackPlugin({
+      cacheId: 'ra-budget',
+      filename: 'service-worker.js',
+      minify: true,
+      stripPrefix: 'dist/'
     }),
     new UglifyJsPlugin({
       uglifyOptions: {

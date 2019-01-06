@@ -1,7 +1,15 @@
 <template>
-  <v-dialog :fullscreen="!$vuetify.breakpoint.smAndUp" v-model="dialog" v-if="allocationId" :max-width="800" @keydown.esc="cancel">
+  <v-dialog
+    :fullscreen="!$vuetify.breakpoint.smAndUp"
+    v-model="dialog"
+    v-if="allocationId"
+    :max-width="800"
+    @keydown.esc="cancel"
+    :transition="!$vuetify.breakpoint.smAndUp ? 'dialog-bottom-transition' : 'dialog-transition'"
+  >
+    <v-spacer v-if="!$vuetify.breakpoint.smAndUp" class="py-3"></v-spacer>
     <v-card>
-      <v-toolbar color="primary" dark dense flat :fixed="!$vuetify.breakpoint.smAndU">
+      <v-toolbar color="primary" dark dense flat :fixed="!$vuetify.breakpoint.smAndUp">
         <v-btn v-if="!$vuetify.breakpoint.smAndUp" icon dark @click="cancel">
           <v-icon>close</v-icon>
         </v-btn>
@@ -10,14 +18,16 @@
         <v-btn v-if="$vuetify.breakpoint.smAndUp" flat icon @click="cancel">
           <v-icon light>close</v-icon>
         </v-btn>
-        <v-btn  v-if="!$vuetify.breakpoint.smAndUp" 
-                flat="flat" 
-                @click.native="save">{{ $t('general.save') }}</v-btn>
+        <v-btn
+          v-if="!$vuetify.breakpoint.smAndUp"
+          flat="flat"
+          @click.native="save"
+        >{{ $t('general.save') }}</v-btn>
       </v-toolbar>
       <v-card-text>
-        <v-form ref="editorForm" v-model="valid" lazy-validation>          
-          <v-container  grid-list-md>     
-            <v-layout row wrap align-center justify-center>                
+        <v-form ref="editorForm" v-model="valid" lazy-validation>
+          <v-container grid-list-md>
+            <v-layout row wrap align-center justify-center>
               <v-flex xs12>
                 <v-menu
                   ref="dateMenu"
@@ -40,7 +50,6 @@
                     readonly
                   ></v-text-field>
                   <v-date-picker v-model="editor.date" @input="$refs.dateMenu.save(editor.date)"></v-date-picker>
-
                 </v-menu>
               </v-flex>
 
@@ -52,21 +61,20 @@
                   item-value="categoryId"
                   single-line
                   :rules="requiredRule"
-                  :label="$t('general.category')">
-
+                  :label="$t('general.category')"
+                >
                   <template slot="selection" slot-scope="data">
                     <v-list-tile-action>
                       <v-icon>{{ data.item.icon }}</v-icon>
-                    </v-list-tile-action>                      
+                    </v-list-tile-action>
                     <span>{{ data.item.name }}</span>
                   </template>
                   <template slot="item" slot-scope="data">
                     <v-list-tile-action v-if="data.item">
                       <v-icon>{{ data.item.icon }}</v-icon>
-                    </v-list-tile-action>                      
+                    </v-list-tile-action>
                     <span>{{ data.item.name }}</span>
                   </template>
-
                 </v-select>
               </v-flex>
 
@@ -74,31 +82,48 @@
                 <v-text-field
                   v-model="editor.description"
                   :rules="requiredRule"
-                  :label="$t('general.description')"></v-text-field>
+                  :label="$t('general.description')"
+                ></v-text-field>
               </v-flex>
 
               <v-flex xs12>
-                <v-text-field v-model="editor.modifyAmount" type="number" step="0.01" :label="$t('transactions.addOrDelete')"></v-text-field>
+                <v-text-field
+                  v-model="editor.modifyAmount"
+                  type="number"
+                  step="0.01"
+                  :label="$t('transactions.addOrDelete')"
+                ></v-text-field>
               </v-flex>
 
               <v-flex xs12>
-                <v-text-field v-model="editor.enteredAmount" type="number" step="0.01" :label="$t('transactions.baseAmount')"></v-text-field>
+                <v-text-field
+                  v-model="editor.enteredAmount"
+                  type="number"
+                  step="0.01"
+                  :label="$t('transactions.baseAmount')"
+                ></v-text-field>
               </v-flex>
             </v-layout>
           </v-container>
         </v-form>
-        <span class="subheading">
-          {{ $t("transactions.finalAmount") }}:
-        </span>
-        <span class="headline"> 
-          {{amount | currency($currencies[budget.currency])}}
-        </span>
+        <span class="subheading">{{ $t("transactions.finalAmount") }}:</span>
+        <span class="headline">{{amount | currency($currencies[budget.currency])}}</span>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        
-        <v-btn v-if="$vuetify.breakpoint.smAndUp" color="red" flat="flat" @click.native="cancel">{{ $t('general.cancel') }}</v-btn>
-        <v-btn v-if="$vuetify.breakpoint.smAndUp" color="primary darken-1" flat="flat" @click.native="save">{{ $t('general.save') }}</v-btn>
+
+        <v-btn
+          v-if="$vuetify.breakpoint.smAndUp"
+          color="red"
+          flat="flat"
+          @click.native="cancel"
+        >{{ $t('general.cancel') }}</v-btn>
+        <v-btn
+          v-if="$vuetify.breakpoint.smAndUp"
+          color="primary darken-1"
+          flat="flat"
+          @click.native="save"
+        >{{ $t('general.save') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -136,19 +161,21 @@ export default {
     }
   },
   mounted: function() {
-    this.$root.$on("closeDialogs", ()=> { this.dialog = false});
+    this.$root.$on("closeDialogs", () => {
+      this.dialog = false;
+    });
     this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
   },
-  beforeDestroy: function(){
-    this.$wait.end("dialog")
+  beforeDestroy: function() {
+    this.$wait.end("dialog");
   },
-  watch:{
-    dialog(open){
-      if (open){
-        this.$wait.start("dialog")
+  watch: {
+    dialog(open) {
+      if (open) {
+        this.$wait.start("dialog");
       } else {
-        this.$wait.end("dialog")
-      } 
+        this.$wait.end("dialog");
+      }
     }
   },
   methods: {
