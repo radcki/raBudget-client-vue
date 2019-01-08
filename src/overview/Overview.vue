@@ -130,7 +130,7 @@ export default {
   components: {
     "transaction-editor": () => import("../components/TransactionEditor"),
     "v-category-select": () => import("../components/CategorySelect"),
-    "v-mini-transactions-list": () => import("../components/MinitransactionsList"),
+    "v-mini-transactions-list": () => import("../components/MiniTransactionsList"),
     "v-mini-categories-summary": () => import("../components/MiniCategoriesSummary"),
     "v-large-categories-summary": () => import("../components/LargeCategoriesSummary"),
     "v-new-entry": () => import("./NewEntry")
