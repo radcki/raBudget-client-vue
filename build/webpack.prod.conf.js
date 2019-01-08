@@ -86,7 +86,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     new webpack.DefinePlugin({
       'process.env': env,
       config: JSON.stringify({
-        apiUrl: 'https://rabudget.azurewebsites.net'
+        apiUrl: '' // leave blank if hosting together
       })
     }),
     new CleanWebpackPlugin(['wwwroot'], {

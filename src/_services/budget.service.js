@@ -113,7 +113,7 @@ function getSavingCategoriesBalance (budgetId) {
 }
 
 function getPeriodReport (budgetId, startDate, endDate) {
-  var url = new URL(`${config.apiUrl}/budgets/${budgetId}/report/period`)
+  var url = new URL(`${config.apiUrl}/budgets/${budgetId}/report/period`, document.location)
   var params = {
     startDate: startDate,
     endDate: endDate
@@ -125,8 +125,8 @@ function getPeriodReport (budgetId, startDate, endDate) {
   })
 }
 
-function getMonthlyReport (budgetId, startDate, endDate) {
-  var url = new URL(`${config.apiUrl}/budgets/${budgetId}/report/monthly`)
+function getMonthlyReport(budgetId, startDate, endDate) {
+  var url = new URL(`${config.apiUrl}/budgets/${budgetId}/report/monthly`, document.location)
   var params = {
     startDate: startDate,
     endDate: endDate
