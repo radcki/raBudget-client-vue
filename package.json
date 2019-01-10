@@ -17,6 +17,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.4",
     "acorn": "^6.0.0",
     "axios": "^0.18.0",
+    "babel-polyfill": "^6.26.0",
     "config": "^3.0.1",
     "debounce": "^1.2.0",
     "vee-validate": "^2.1.5",
