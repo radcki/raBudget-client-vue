@@ -1,4 +1,5 @@
 /* eslint-disable import/no-duplicates */
+import 'babel-polyfill';
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 
