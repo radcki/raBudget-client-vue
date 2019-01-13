@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import {store} from '../_store'
+import { store } from '../_store'
 
 const HomePage = () => import('../home/HomePage.vue')
 const LoginPage = () => import('../login/LoginPage.vue')
+const EmailVerification = () => import('../login/EmailVerification.vue')
+const PasswordReset = () => import('../login/PasswordReset.vue')
 const RegisterPage = () => import('../register/RegisterPage.vue')
 const ProfilePage = () => import('../profile/Profile.vue')
 const NewBudget = () => import('../budgets/NewBudget.vue')
@@ -29,6 +31,16 @@ export const router = new Router({
     path: '/login',
     name: 'login',
     component: LoginPage
+  },
+  {
+    path: '/email-verification',
+    name: 'email-verification',
+    component: EmailVerification
+  },
+  {
+    path: '/password-reset',
+    name: 'password-reset',
+    component: PasswordReset
   },
   {
     path: '/register',
@@ -114,7 +126,7 @@ router.beforeEach((to, from, next) => {
   }
 
   // redirect to login page if not logged in and trying to access a restricted page
-  const publicPages = ['/login', '/register']
+  const publicPages = ['/login', '/register', '/password-reset']
   const authRequired = !publicPages.includes(to.path)
   if (!authRequired) {
     return next(true)
@@ -123,6 +135,11 @@ router.beforeEach((to, from, next) => {
     if (!store.state.account.status.loggedIn) {
       return next('/login')
     }
+
+    if (!store.state.account.user.emailVerified && to.name != 'email-verification') {
+      return next('/email-verification')
+    }
+
     return next(true)
   })
 })

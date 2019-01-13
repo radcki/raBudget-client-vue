@@ -34,7 +34,19 @@
         "userNotFound": "User not found.",
         "confirmRemove": "Enter your password to remove account",
         "creationDate": "Creation date",
-        "roles": "Roles"
+        "roles": "Roles",
+        "verificationCode": "Verification code",
+        "emailNotVerified": "You must verify email adress provided during registration. Enter code received in email in field below (it you have not received confirmation email, please check Spam folder)",
+        "sendEmailVerification": "Send new verification code",
+        "verifyEmail": "Verify email",
+        "emailVerificationSent": "Email with code was sent successfully",
+        "emailVerificationSendingError": "Error occurred - code was not sent. Have you entered correct email adress?",
+        "forgotPassord": "You forgot your password?",
+        "passwordReset": "Password reset",
+        "haveCode": "I have reset code",
+        "requestPasswordReset": "Send reset code",
+        "passwordResetError": "Unable to change password - are you sure that all fields are filled correctly?",
+        "passwordResetSuccess": "Password successfully changed, you can log in now"
     },
     "general": {
         "create": "Create",
@@ -94,7 +106,8 @@
         "passwordDontMatch": "Passwords are not the same"
     },
     "budgets": {
-        "loading": "Budget is loading...",
+        "loading": "Budget is loading...",        
+        "loadingError": "Error occured during loading of a budget.",
         "spendingBalance": "Spending balance",
         "budgetName": "Budget name",
         "setDefault": "Set as default",

@@ -2,7 +2,7 @@
  <v-app>
    
     <v-navigation-drawer
-      v-if="account.status.loggedIn"
+      v-if="account.status.loggedIn && account.user.emailVerified"
       v-model="drawer"
       width="260"      
       enable-resize-watcher
@@ -99,7 +99,7 @@
       :color="account.status.loggedIn ? 'blue-grey darken-2' : 'blue-grey lighten-2'"
       dark dense fixed clipped-left app>
       
-      <v-toolbar-side-icon v-if="account.status.loggedIn" @click.stop="drawer = !drawer">
+      <v-toolbar-side-icon v-if="account.status.loggedIn && account.user.emailVerified" @click.stop="drawer = !drawer">
         <v-icon>menu</v-icon>
       </v-toolbar-side-icon>
       <v-toolbar-title class="align-center">
@@ -263,7 +263,7 @@ export default {
         metaThemeColor.setAttribute("content", "#455a64");
         this.$wait.start('budgets');
         this.budgetsFetch()
-          .then(result=>{this.$wait.end('budgets')})
+          .then(()=>{this.$wait.end('budgets')})
           .catch(()=>{this.$wait.end('budgets')});
       },
       immediate: true

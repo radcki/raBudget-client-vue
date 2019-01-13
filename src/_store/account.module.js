@@ -1,5 +1,5 @@
-import {userService} from '../_services/user.service'
-import {apiHandler} from '../_services/apiHandler'
+import { userService } from '../_services/user.service'
+import { apiHandler } from '../_services/apiHandler'
 import moment from 'moment'
 
 var user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
@@ -16,8 +16,8 @@ const state = {
 }
 
 const actions = {
-  login ({dispatch, commit}, {username, password}) {
-    commit('loginRequest', {username})
+  login ({ dispatch, commit }, { username, password }) {
+    commit('loginRequest', { username })
 
     return new Promise((resolve, reject) => {
       userService.login(username, password)
@@ -37,7 +37,7 @@ const actions = {
             return response.json()
               .then(error => {
                 commit('loginFailure', error.message)
-                dispatch('alert/error', error.message, {root: true})
+                dispatch('alert/error', error.message, { root: true })
                 resolve(false)
               })
           } else {
@@ -47,11 +47,11 @@ const actions = {
         .catch((error) => {
           reject(error)
           commit('loginFailure')
-          dispatch('alert/error', 'account.loginFailed', {root: true})
+          dispatch('alert/error', 'account.loginFailed', { root: true })
         })
     })
   },
-  checkLogin ({state}) {
+  checkLogin ({ state }) {
     return new Promise((resolve, reject) => {
       if (state.user == null) {
         state.status.loggedIn = false
@@ -73,11 +73,11 @@ const actions = {
       })
     })
   },
-  logout ({commit}) {
+  logout ({ commit }) {
     userService.logout()
     commit('logout')
   },
-  register ({dispatch, commit}, user) {
+  register ({ dispatch, commit }, user) {
     commit('registerRequest')
     return new Promise((resolve, reject) => {
       userService.register(user)
@@ -86,13 +86,13 @@ const actions = {
             commit('registerSuccess', user)
             resolve(true)
             setTimeout(() => {
-              dispatch('alert/success', 'account.registerOk', {root: true})
+              dispatch('alert/success', 'account.registerOk', { root: true })
             })
           } else {
             response.json()
               .then(error => {
                 commit('registerFailure')
-                dispatch('alert/error', error.message, {root: true})
+                dispatch('alert/error', error.message, { root: true })
               })
             resolve(false)
           }
@@ -101,33 +101,51 @@ const actions = {
         })
     })
   },
-  updateProfile ({dispatch, commit}, user) {
+  updateProfile ({ dispatch, commit }, user) {
     userService.update(user)
       .then(response => {
         if (response.ok) {
-          dispatch('alert/success', 'general.changesSaved', {root: true})
+          dispatch('alert/success', 'general.changesSaved', { root: true })
         } else {
           return response.json()
             .then(error => {
-              dispatch('alert/error', error, {root: true})
+              dispatch('alert/error', error, { root: true })
             })
         }
       })
   },
-  changePassword ({dispatch, commit}, data) {
+  changePassword ({ dispatch, commit }, data) {
     return userService.changePassword(data.oldpassword, data.newpassword)
       .then(response => {
         if (response.ok) {
-          dispatch('alert/success', 'general.changesSaved', {root: true})
+          dispatch('alert/success', 'general.changesSaved', { root: true })
           return true
         } else {
           return response.json()
             .then(error => {
-              dispatch('alert/error', error.message, {root: true})
+              dispatch('alert/error', error.message, { root: true })
               return false
             })
         }
       })
+  },
+  verifyEmail ({ dispatch, commit, state }, verificationToken) {
+    return new Promise((resolve, reject) => {
+      userService.submitEmailConfirmationCode(verificationToken).then((response) => {
+        if (response.ok) {
+          state.user.emailVerified = true
+          localStorage.setItem('user', JSON.stringify(state.user))
+          resolve(true)
+        } else {
+          dispatch('alert/error', 'account.emailVerificationFailed', { root: true })
+          resolve(false)
+        }
+      }).catch((error) => {
+        reject(error)
+        commit('loginFailure')
+        dispatch('alert/error', 'account.loginFailed', { root: true })
+      })
+    })
   }
 }
 

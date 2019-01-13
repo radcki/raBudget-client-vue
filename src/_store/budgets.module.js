@@ -42,7 +42,7 @@ const actions = {
                 resolve(budgets)
               }
             )
-          } else if (response.status == 404) {
+          } else if (response.status == 404) {            
             commit('setBudgets', [])
             dispatch('wait/end', 'budgets.loading', { root: true })
             resolve([])
@@ -88,9 +88,6 @@ const actions = {
         reject(error)
       })
     })
-  },
-  saveBudget ({ commit }, budget) {
-
   }
 }
 

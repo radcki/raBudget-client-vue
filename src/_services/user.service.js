@@ -14,7 +14,11 @@ export const userService = {
   adminUpdate,
   changePassword,
   confirmAuthorization,
-  delete: _delete
+  delete: _delete,
+  requestEmailConfirmationCode,
+  submitEmailConfirmationCode,
+  requestPasswordReset,
+  submitPasswordResetCode
 }
 
 function login (username, password) {
@@ -123,4 +127,59 @@ function _delete (id, password) {
     })
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/users/${id}`, requestOptions)
+}
+
+function requestEmailConfirmationCode () {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+
+  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/request-email-confirmation`, requestOptions)
+}
+
+function submitEmailConfirmationCode (confirmCode) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      confirmCode: confirmCode
+    })
+  }
+
+  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/confirm-email`, requestOptions)
+}
+
+function requestPasswordReset (email) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email
+    })
+  }
+
+  return fetch(`${config.apiUrl}/users/request-password-reset`, requestOptions)
+}
+
+function submitPasswordResetCode (email, confirmCode, newPassword) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      email: email,
+      token: confirmCode,
+      newPassword: newPassword
+    })
+  }
+
+  return fetch(`${config.apiUrl}/users/submit-password-reset`, requestOptions)
 }

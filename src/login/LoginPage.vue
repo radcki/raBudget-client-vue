@@ -28,6 +28,7 @@
               @click:append="show = !show"
               @keydown.enter="handleSubmit"
             ></v-text-field>
+            <router-link :to="{name: 'password-reset'}">{{ $t('account.forgotPassord') }}</router-link>
           </v-form>
         </v-card-text>
         <v-card-actions>

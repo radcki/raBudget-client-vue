@@ -34,7 +34,19 @@
         "userNotFound": "Nie znaleziono użytkownika.",
         "confirmRemove": "Podaj hasło by usunąć konto",
         "creationDate": "Data utworzenia",
-        "roles": "Role"
+        "roles": "Role",
+        "verificationCode": "Kod weryfikacyjny",
+        "emailNotVerified": "Aby kontynuować, należy zweryfikować adres email podany podczas rejestracji. <br/>Wpisz w polu poniżej kod otrzymany w wiadomości email (jeżeli wiadomość nie dotarła pamiętaj również sprawdzić folder Spam)",
+        "sendEmailVerification": "Wyślij nową wiadomość z kodem weryfikacym",
+        "verifyEmail": "Zweryfikuj email",
+        "emailVerificationSent": "Wiadmość z kodem została pomyślnie wysłana",
+        "emailVerificationSendingError": "Wystąpił błąd - wiadomość nie została wysłana. Czy podałeś dobry email?",
+        "forgotPassord": "Zapomniałeś hasła?",
+        "passwordReset": "Resetowanie hasła",
+        "haveCode": "Mam już kod resetowania",
+        "requestPasswordReset": "Wyślij wiadomość z kodem",
+        "passwordResetError": "Niepowodzenie resetowania hasła. Czy uzupełniłeś wszystkie pola prawidłowo?",
+        "passwordResetSuccess": "Hasło zmienione pomyślnie, możesz się zalogować"
     },
     "general": {
         "create": "Stwórz",
@@ -95,6 +107,7 @@
     },
     "budgets": {
         "loading": "Trwa wczytywanie budżetu...",
+        "loadingError": "Niepowodzenie wczytywania budżetu.",
         "spendingBalance": "Bilans wydatków",
         "budgetName": "Nazwa budżetu",
         "setDefault": "Ustaw jako domyślny",
