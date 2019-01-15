@@ -237,7 +237,7 @@ export default {
           : this.$moment().subtract(1, 'month').format('YYYY-MM-DD')
     }    
   },
-  mounted: function(){
+  created: function(){
     this.activeBudgetChange(this.$route.params.id)
     if (this.budget){
       this.selectedCategories = this.budget[this.categoryType];
@@ -250,11 +250,14 @@ export default {
       if (from.params.id != to.params.id){
         this.activeBudgetChange(to.params.id)
         this.reloadInitialized();
-      }      
+      }
+      if (this.budget){
+        this.selectedRange = [this.monthAgoOrStart, this.today] 
+      }
     },
-    budget: function(budget) {
-        this.selectedRange = [this.monthAgoOrStart, this.today]        
+    budget: function(budget) {              
         if (this.budget && this.budget[this.categoryType]){
+          this.selectedRange = [this.monthAgoOrStart, this.today]  
           this.selectedCategories = this.budget[this.categoryType];
         }
         this.setFilters();    
