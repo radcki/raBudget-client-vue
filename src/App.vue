@@ -238,7 +238,7 @@ export default {
     ...mapActions({
       clearAlert: "alert/clear",
       logout: "account/logout",
-      budgetsFetch: "budgets/fetchBudgets"
+      budgetsFetch: "budgets/initializeBudgets"
     }),
     signOut(){
       this.logout().then(()=>{this.$router.push("/")});
@@ -261,15 +261,12 @@ export default {
           return;
         }
         metaThemeColor.setAttribute("content", "#455a64");
-        this.$wait.start('budgets');
-        this.budgetsFetch()
-          .then(()=>{this.$wait.end('budgets')})
-          .catch(()=>{this.$wait.end('budgets')});
+        this.budgetsFetch();
       },
       immediate: true
     },
     budgets: function(budgets){
-      if (budgets.length === 0) {
+      if (budgets && budgets.length === 0 && !this.$wait.is("loading.budgets")) {
         this.$router.push({name: "newBudget"});
       } else if (this.$route.name == "home") {
         var defaultBudgets = this.budgets.filter( v => v.default )

@@ -1,111 +1,257 @@
 import { budgetService } from '../_services/budget.service'
+
 import moment from 'moment'
 
 const state = {
-  budgets: []
+  budgets: [],
+  activeBudgetId: null
 }
 
 const actions = {
-  fetchBudgets ({dispatch, commit}) {
-    return new Promise((resolve, reject) => {
-      dispatch('wait/start', 'budgets.loading', { root: true })
-      budgetService.userBudgets()
-        .then(response => {
-          if (response.ok) {
-            response.json().then(
-              data => {
-                var budgets = data.map(budget => {
-                  return {...budget, startingDate: moment(budget.startingDate).format('YYYY-MM')}
-                })
-                for (var budget of budgets) {
-                  for (var category of budget.spendingCategories) {
-                    for (var config of category.amountConfigs) {
-                      config.validFrom = moment(config.validFrom).format('YYYY-MM')
-                      config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
-                    }
-                  }
-                  for (var category of budget.incomeCategories) {
-                    for (var config of category.amountConfigs) {
-                      config.validFrom = moment(config.validFrom).format('YYYY-MM')
-                      config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
-                    }
-                  }
-                  for (var category of budget.savingCategories) {
-                    for (var config of category.amountConfigs) {
-                      config.validFrom = moment(config.validFrom).format('YYYY-MM')
-                      config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
-                    }
-                  }
-                }
-                commit('setBudgets', budgets)
-                dispatch('wait/end', 'budgets.loading', { root: true })
-                resolve(budgets)
-              }
-            )
-          } else if (response.status == 404) {            
-            commit('setBudgets', [])
-            dispatch('wait/end', 'budgets.loading', { root: true })
-            resolve([])
-          } else {
-            commit('setBudgets', [])
-            dispatch('wait/end', 'budgets.loading', { root: true })
-            reject(response)
-          }
+  reloadInitialized ({ state, dispatch, commit }) {
+    var budget = state.budgets.find(v => v.id == state.activeBudgetId)
+    if (!budget) { return }
+    dispatch('fetchBudget', budget.id)
+    if (budget.unassignedFunds) {
+      dispatch('fetchUnassignedFunds', budget.id)
+    }
+    if (budget.spendingCategoriesBalance) {
+      dispatch('fetchSavingCategoriesBalance', budget.id)
+    }
+    if (budget.savingCategoriesBalance) {
+      dispatch('fetchSavingCategoriesBalance', budget.id)
+    }
+  },
+  fetchBudgets ({ dispatch, commit }) {
+    dispatch('wait/start', 'loading.budgets', { root: true })
+    budgetService.userBudgets()
+      .then(response => {
+        if (response.ok) {
+          response.json().then(
+            data => {
+              commit('setBudgets', data)
+              dispatch('wait/end', 'loading.budgets', { root: true })
+            }
+          )
+        } else if (response.status == 404) {
+          commit('setBudgets', [])
+          dispatch('wait/end', 'loading.budgets', { root: true })
+        } else {
+          commit('setBudgets', [])
+          dispatch('wait/end', 'loading.budgets', { root: true })
+        }
+      })
+      .catch(error => {
+        dispatch('wait/end', 'loading.budgets', { root: true })
+      })
+  },
+  fetchBudget ({ dispatch, commit }, budgetId) {
+    dispatch('wait/start', 'loading.budget', { root: true })
+    budgetService.getBudget(budgetId)
+      .then(response => {
+        if (response.ok) {
+          response.json().then(
+            data => {
+              commit('setBudget', data)
+              dispatch('wait/end', 'loading.budget', { root: true })
+            }
+          )
+        } else if (response.status == 404) {
+          dispatch('wait/end', 'loading.budget', { root: true })
+        } else {
+          dispatch('wait/end', 'loading.budget', { root: true })
+        }
+      })
+      .catch(error => {
+        dispatch('wait/end', 'loading.budget', { root: true })
+      })
+  },
+  fetchUnassignedFunds ({ commit, dispatch }, budgetId) {
+    dispatch('wait/start', 'loading.unassignedFunds', { root: true })
+    budgetService.getUnassigned(budgetId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          commit('setUnassignedFunds', data.funds)
+          dispatch('wait/end', 'loading.unassignedFunds', { root: true })
         })
-        .catch(error => {
-          dispatch('wait/end', 'budgets.loading', { root: true })
-          reject(error)
+      } else {
+        response.json().then(() => {
+          commit('setUnassignedFunds', null)
+          dispatch('wait/end', 'loading.unassignedFunds', { root: true })
         })
+      }
+    }).catch(error => {
+      dispatch('fetchBudgets')
     })
   },
-  fetchUnassignedFunds ({commit, dispatch}, budget) {
-    return new Promise((resolve, reject) => {
-      if (!budget) {
-        reject('Budget undefinied')
+  initializeBudgets ({ state, dispatch }) {
+    if (!state.budgets || state.budgets.length === 0) {
+      dispatch('fetchBudgets')
+    }
+  },
+  initializeCategoriesBalance ({ state, dispatch }) {
+    if (!state.activeBudgetId) { return }
+    var budget = state.budgets.find(v => v.id == state.activeBudgetId)
+    if (!budget) { return }
+
+    if (!budget.spendingCategoriesBalance) {
+      dispatch('fetchSpendingCategoriesBalance', state.activeBudgetId)
+    }
+    if (!budget.savingCategoriesBalance) {
+      dispatch('fetchSavingCategoriesBalance', state.activeBudgetId)
+    }
+  },
+  initializeUnassignedFunds ({ state, dispatch }) {
+    if (!state.activeBudgetId) { return }
+    var budget = state.budgets.find(v => v.id == state.activeBudgetId)
+    if (!budget) { return }
+
+    if (!budget.unassignedFunds) {
+      dispatch('fetchUnassignedFunds', state.activeBudgetId)
+    }
+  },
+  fetchSpendingCategoriesBalance ({ commit, dispatch }, budgetId) {
+    dispatch('wait/start', 'loading.spendingCategoriesBalance', { root: true })
+    budgetService.getSpendingCategoriesBalance(budgetId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          commit('setSpendingCategoriesBalance', data)
+          dispatch('wait/end', 'loading.spendingCategoriesBalance', { root: true })
+        })
+      } else {
+        response.json().then(data => {
+          commit('alert/error', data.message, { root: true })
+          dispatch('wait/end', 'loading.spendingCategoriesBalance', { root: true })
+        })
       }
-      /*
-      if (budget.unassignedFunds) {
-        resolve(budget.unassignedFunds)
-      }
-      */
-      dispatch('wait/start', 'unassignedFunds', { root: true })
-      budgetService.getUnassigned(budget.id).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            commit('setUnassignedFunds', {budget: budget, funds: data.funds})
-            dispatch('wait/end', 'unassignedFunds', { root: true })
-            resolve(data.funds)
-          })
-        } else {
-          response.json().then(() => {
-            commit('setUnassignedFunds', {budget: budget, funds: null})
-            dispatch('wait/end', 'unassignedFunds', { root: true })
-            resolve(null)
-          })
-        }
-      }).catch(error => {
-        dispatch('wait/end', 'unassignedFunds', { root: true })
-        reject(error)
-      })
     })
+  },
+  fetchSavingCategoriesBalance ({ commit, dispatch }, budgetId) {
+    dispatch('wait/start', 'loading.savingCategoriesBalance', { root: true })
+    budgetService.getSavingCategoriesBalance(budgetId).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          commit('setSavingCategoriesBalance', data)
+          dispatch('wait/end', 'loading.savingCategoriesBalance', { root: true })
+        })
+      } else {
+        response.json().then(data => {
+          commit('alert/error', data.message, { root: true })
+          dispatch('wait/end', 'loading.savingCategoriesBalance', { root: true })
+        })
+      }
+    })
+  },
+  activeBudgetChange ({ commit }, newActiveBudgetId) {
+    commit('changeActiveBudget', newActiveBudgetId)
+    commit('transactions/setBudgetFilter', newActiveBudgetId, { root: true })
   }
 }
 
+const getters = {
+  budget: state => { return state.budgets.find(v => v.id == state.activeBudgetId) },
+  spendingCategoriesBalance: (state, getters) => { return !getters.budget ? null : getters.budget.spendingCategoriesBalance },
+  unassignedFunds: (state, getters) => { return !getters.budget ? null : getters.budget.unassignedFunds },
+  savingCategoriesBalance: (state, getters) => { return !getters.budget ? null : getters.budget.savingCategoriesBalance },
+  incomeCategoriesBalance: (state, getters) => { return !getters.budget ? null : getters.budget.incomeCategoriesBalance }
+}
+
 const mutations = {
-  setUnassignedFunds (state, {budget, funds}) {
-    var matchingBudget = state.budgets.filter(v => v.id === budget.id)[0]
-    if (matchingBudget) {
-      matchingBudget.unassignedFunds = funds
+  changeActiveBudget (state, newActiveBudgetId) {
+    state.activeBudgetId = newActiveBudgetId
+  },
+  setUnassignedFunds (state, funds) {
+    state.budgets.find(v => v.id == state.activeBudgetId).unassignedFunds = funds
+  },
+  setBudgets (state, data) {
+    var budgets = data.map(budget => {
+      return {
+        ...budget,
+        startingDate: moment(budget.startingDate).format('YYYY-MM'),
+        ...{
+          unassignedFunds: null,
+          spendingCategoriesBalance: null,
+          savingCategoriesBalance: null,
+          incomeCategoriesBalance: null
+        }
+      }
+    })
+    for (var budget of budgets) {
+      for (var category of budget.spendingCategories) {
+        for (var config of category.amountConfigs) {
+          config.validFrom = moment(config.validFrom).format('YYYY-MM')
+          config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+        }
+      }
+      for (var category of budget.incomeCategories) {
+        for (var config of category.amountConfigs) {
+          config.validFrom = moment(config.validFrom).format('YYYY-MM')
+          config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+        }
+      }
+      for (var category of budget.savingCategories) {
+        for (var config of category.amountConfigs) {
+          config.validFrom = moment(config.validFrom).format('YYYY-MM')
+          config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+        }
+      }
+    }
+    state.budgets = budgets
+  },
+  setBudget (state, budget) {
+    budget.startingDate = moment(budget.startingDate).format('YYYY-MM')
+
+    for (var category of budget.spendingCategories) {
+      for (var config of category.amountConfigs) {
+        config.validFrom = moment(config.validFrom).format('YYYY-MM')
+        config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+      }
+    }
+    for (var category of budget.incomeCategories) {
+      for (var config of category.amountConfigs) {
+        config.validFrom = moment(config.validFrom).format('YYYY-MM')
+        config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+      }
+    }
+    for (var category of budget.savingCategories) {
+      for (var config of category.amountConfigs) {
+        config.validFrom = moment(config.validFrom).format('YYYY-MM')
+        config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
+      }
+    }
+    var stateBudget = state.budgets.find(v => v.id == budget.id)
+
+    if (stateBudget) {
+      for (var param in stateBudget) {
+        if (budget[param]) {
+          stateBudget[param] = budget[param]
+        }
+      }
+    } else {
+      state.budgets.push({
+        ...budget,
+        ...{
+          unassignedFunds: null,
+          spendingCategoriesBalance: null,
+          savingCategoriesBalance: null,
+          incomeCategoriesBalance: null
+        }
+      })
     }
   },
-  setBudgets (state, budgets) {
-    state.budgets = budgets
-  }
+  setSpendingCategoriesBalance (state, data) { state.budgets.find(v => v.id == state.activeBudgetId).spendingCategoriesBalance = data },
+  setSavingCategoriesBalance (state, data) { state.budgets.find(v => v.id == state.activeBudgetId).savingCategoriesBalance = data },
+  setIncomeCategoriesBalance (state, data) { state.budgets.find(v => v.id == state.activeBudgetId).incomeCategoriesBalance = data },
+  clearBudgets (state) { state.budgets = [] },
+  clearSpendingCategoriesBalance (state) { state.budgets.find(v => v.id == state.activeBudgetId).spendingCategoriesBalance = null },
+  clearSavingCategoriesBalance (state) { state.budgets.find(v => v.id == state.activeBudgetId).savingCategoriesBalance = null },
+  clearIncomeCategoriesBalance (state) { state.budgets.find(v => v.id == state.activeBudgetId).incomeCategoriesBalance = null }
 }
 
 export const budgets = {
   namespaced: true,
   state,
   actions,
+  getters,
   mutations
 }

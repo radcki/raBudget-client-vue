@@ -1,5 +1,5 @@
 /* eslint-disable import/no-duplicates */
-import 'babel-polyfill';
+import 'babel-polyfill'
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 
@@ -29,7 +29,7 @@ const moment = require('moment')
 
 library.add(faSignOutAlt, faUserCircle, faDotCircle, faCircle)
 
-Vue.use(VueWait)
+Vue.use(VueWait, { useVuex: true })
 Vue.use(VueI18n)
 
 Vue.use(Vuetify, {
@@ -38,7 +38,7 @@ Vue.use(Vuetify, {
     current: 'pl'
   }
 })
-Vue.use(VueMoment, {moment})
+Vue.use(VueMoment, { moment })
 
 Vue.prototype.$currencies = {
   PLN: {

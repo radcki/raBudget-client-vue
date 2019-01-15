@@ -1,25 +1,26 @@
 <template>
   <v-container grid-list-md :fill-height="$wait.is('budgets')">
-    <v-layout row wrap v-if="$wait.is('budgets')" align-center justify-center>
+    <v-layout row wrap v-if="$wait.is('loading.budgets')" align-center justify-center>
       <v-progress-circular :size="70" :width="7" color="grey darken-1" indeterminate></v-progress-circular>
       <br>
       <v-subheader class="headline">{{ $t("budgets.loading") }}</v-subheader>
     </v-layout>
 
-    <v-layout row wrap v-else>
+    <v-layout row wrap v-if="budget">
       <v-flex d-flex xs12 md8 lg5>
         <v-layout row wrap align-start align-content-start>
           <v-flex xs12 v-if="$vuetify.breakpoint.smAndUp">
             <v-subheader class="headline">{{$t('transactions.newtransaction')}}</v-subheader>
-            <v-new-entry :data-budget="budget" v-on:saved="refresh($route.params.id)"></v-new-entry>
+            <v-new-entry :data-budget="budget" v-on:saved="reloadInitialized();fetchTransactions();"></v-new-entry>
           </v-flex>
 
           <v-flex xs12 v-if="$vuetify.breakpoint.smAndUp">
             <v-subheader class="headline">{{$t('budgets.savingsStatus')}}</v-subheader>
             <v-mini-categories-summary
               color="white--text"
+              :loading="$wait.is('loading.savingCategoriesBalance')"
               background-color="blue darken-1"
-              :data-balance="savingBalance"
+              :data-balance="savingCategoriesBalance"
               :data-budget="budget"
             ></v-mini-categories-summary>
           </v-flex>
@@ -35,7 +36,7 @@
             <v-card class="text-sm-center" color="light-green darken-1" dark>
               <v-card-title>{{$t('budgets.availablefunds')}}</v-card-title>
               <v-card-text class="display-1">
-                <v-progress-circular v-if="$wait.is('budgets.loading')" indeterminate color="white"></v-progress-circular>
+                <v-progress-circular v-if="$wait.is('loading.budget*')" indeterminate color="white"></v-progress-circular>
                 <span v-else>{{budget.balance | currency($currencies[budget.currency]) }}</span>
               </v-card-text>
             </v-card>
@@ -45,14 +46,17 @@
             <v-card class="text-sm-center" color="blue-grey darken-1" dark>
               <v-card-title>{{$t('budgets.unassignedFunds')}}</v-card-title>
               <v-card-text class="display-1">
-                <v-progress-circular v-if="$wait.is('unassignedFunds')" indeterminate color="white"></v-progress-circular>
+                <v-progress-circular v-if="$wait.is('loading.unassignedFunds')" indeterminate color="white"></v-progress-circular>
                 <span v-else>{{ budget.unassignedFunds | currency($currencies[budget.currency]) }}</span>
               </v-card-text>
             </v-card>
           </v-flex>
 
           <v-flex xs12>
-            <v-large-categories-summary :data-balance="categoriesBalance" :data-budget="budget"></v-large-categories-summary>
+            <v-large-categories-summary 
+              :loading="$wait.is('loading.spendingCategoriesBalance)')" 
+              :data-balance="spendingCategoriesBalance" 
+              :data-budget="budget"></v-large-categories-summary>
           </v-flex>
         </v-layout>
       </v-flex>
@@ -61,8 +65,9 @@
         <v-subheader class="headline">{{$t('budgets.savingsStatus')}}</v-subheader>
         <v-mini-categories-summary
           color="white--text"
+          :loading="$wait.is('loading.savingCategoriesBalance')"
           background-color="blue darken-1"
-          :data-balance="savingBalance"
+          :data-balance="savingCategoriesBalance"
           :data-budget="budget"
         ></v-mini-categories-summary>
       </v-flex>
@@ -109,7 +114,7 @@
       v-if="$vuetify.breakpoint.xs"
       dialog
       :data-budget="budget"
-      v-on:saved="refresh($route.params.id)"
+      v-on:saved="reloadInitialized();fetchTransactions();"
     >
       <v-btn v-if="$vuetify.breakpoint.xs" fixed dark fab bottom right color="pink">
         <v-icon>add</v-icon>
@@ -124,9 +129,10 @@
 import { budgetService } from "../_services/budget.service";
 import { transactionsService } from "../_services/transactions.service";
 import { allocationsService } from "../_services/allocations.service";
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapGetters } from "vuex";
 
 export default {
+  name: "Overview",
   components: {
     "transaction-editor": () => import("../components/TransactionEditor"),
     "v-category-select": () => import("../components/CategorySelect"),
@@ -142,105 +148,72 @@ export default {
         spendings: [],
         savings: []
       },
-      transactions: {
-        incomes: null,
-        spendings: null,
-        savings: null
-      },
-      categoriesBalance: null,
-      savingBalance: null
+
     };
   },
   computed: {
     ...mapState({
-      budgets: state => state.budgets.budgets
+      spendingCategoriesBalance: state=>state.budgets.activeBudget.spendingCategoriesBalance,
+      savingCategoriesBalance: state=>state.budgets.activeBudget.savingCategoriesBalance,
+      budgets: state => state.budgets.budgets,
+      
+    }),
+    ...mapGetters("budgets", [
+        "budget",
+        "spendingCategoriesBalance",
+        "savingCategoriesBalance"
+    ]),
+    ...mapGetters({
+      transactions: "transactions/getTransactions"
     }),
 
-    budget() {
-      return this.budgets.filter(v => v.id == this.$route.params.id)[0];
-    }
+    budgetId(){return this.$route.params.id}
   },
   mounted: function() {
-    this.refresh(this.$route.params.id);
+    this.activeBudgetChange(this.$route.params.id)
+    this.initializeCategoriesBalance()
+    this.initializeUnassignedFunds();
+
+    this.$store.dispatch("transactions/setFilters", {
+      budgetId: this.$route.params.id,
+      limitCount: 8,
+      startDate: null,
+      endDate: null,
+      categories: null
+    })
   },
   watch: {
     $route(to, from) {
-      this.clear();
-      this.refresh(to.params.id);
+      if (from.params.id != to.params.id){
+        this.activeBudgetChange(to.params.id)
+        this.reloadInitialized();
+      }      
     },
-
-    budget: function(budget) {
-      this.fetchUnassignedFunds(budget);
+    budget: function(budget){
+      if (budget){
+        this.reloadInitialized();
+        this.fetchTransactions();
+      }
     }
+
   },
   methods: {
     ...mapActions({
       dispatchError: "alert/error",
       dispatchSuccess: "alert/success",
-      fetchUnassignedFunds: "budgets/fetchUnassignedFunds",
-      fetchBudgets: "budgets/fetchBudgets"
+      initializeCategoriesBalance: "budgets/initializeCategoriesBalance",
+      initializeUnassignedFunds: "budgets/initializeUnassignedFunds",
+      fetchCategoriesBalance: "budgets/fetchCategoriesBalance",
+      reloadInitialized: "budgets/reloadInitialized",
+      activeBudgetChange: "budgets/activeBudgetChange",
+      fetchTransactions: "transactions/fetchTransactions"
     }),
-    refresh(id) {
-      this.fetchLeatestTransactions(id);
-      this.fetchSpendingCategoriesBalance(id);
-      this.fetchSavingCategoriesBalance(id);
-      //this.fetchUnassignedFunds(this.budget);
-      this.fetchBudgets();
-    },
-    clear() {
-      this.transactions = {
-        incomes: null,
-        spendings: null,
-        savings: null
-      };
-      this.categoriesBalance = null;
-    },
 
-    fetchLeatestTransactions(budgetId) {
-      transactionsService
-        .listTransactions(budgetId, 8, null, null)
-        .then(response => {
-          if (response.ok) {
-            response.json().then(data => {
-              this.transactions = data;
-            });
-          } else {
-            reponse.json().then(data => {
-              this.dispatchError(data.message);
-            });
-          }
-        });
-    },
-    fetchSpendingCategoriesBalance(budgetId) {
-      budgetService.getSpendingCategoriesBalance(budgetId).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.categoriesBalance = data;
-          });
-        } else {
-          response.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
-    },
-    fetchSavingCategoriesBalance(budgetId) {
-      budgetService.getSavingCategoriesBalance(budgetId).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.savingBalance = data;
-          });
-        } else {
-          response.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
-    },
     editTransaction(id) {
       this.$refs.transactionEditor.open(id).then(response => {
         if (response && response.ok) {
-          this.refresh(this.$route.params.id);
+          this.reloadInitialized();
+          this.fetchTransactions();
         } else if (response) {
           response.json().then(data => {
             this.dispatchError(data.message);
@@ -258,7 +231,8 @@ export default {
           if (confirm) {
             transactionsService.deleteTransaction(id).then(response => {
               if (response.ok) {
-                this.refresh(this.$route.params.id);
+                this.reloadInitialized();
+                this.fetchTransactions();
               } else {
                 response.json().then(data => {
                   this.dispatchError(data.message);

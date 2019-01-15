@@ -548,7 +548,7 @@ export default {
     addSpending() {
       if (this.$refs.formSpendingCategory.validate()) {
         // unbind
-        const data = JSON.parse(JSON.stringify(this.newSpendingCategory));
+        var data = JSON.parse(JSON.stringify(this.newSpendingCategory));
         this.categories.spending.push(data);
         this.$refs.formSpendingCategory.reset();
       }

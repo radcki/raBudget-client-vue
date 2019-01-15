@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import { alert } from './alert.module'
 import { account } from './account.module'
 import { budgets } from './budgets.module'
+import { transactions } from './transactions.module'
 
 Vue.use(Vuex)
 
@@ -11,6 +12,7 @@ export const store = new Vuex.Store({
   modules: {
     alert,
     account,
-    budgets
+    budgets,
+    transactions
   }
 })

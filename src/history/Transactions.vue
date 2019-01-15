@@ -52,18 +52,18 @@
           <v-card-actions>
             <v-spacer>              
             </v-spacer>
-            <v-btn color="primary" @click="fetchTransactions()">{{ $t('general.search') }}</v-btn>
+            <v-btn color="primary" @click="setFilters();fetchTransactions()">{{ $t('general.search') }}</v-btn>
           </v-card-actions>
         </v-card> 
       </v-flex>
 
-       <v-flex xs12 v-if="transactions || loading">
+       <v-flex xs12 v-if="transactions || $wait.is('loading.*')">
          <v-subheader class="headline">
             {{$t('general.foundData')}}
         </v-subheader>
       </v-flex>
 
-      <v-flex xs12 v-if="loading" class="text-xs-center">
+      <v-flex xs12 v-if="$wait.is('loading.*') && !$vuetify.breakpoint.smAndUp" class="text-xs-center">
         <v-progress-circular
           :size="70"
           :width="7"
@@ -71,11 +71,6 @@
           indeterminate
         ></v-progress-circular>
       </v-flex>
-
-      <v-flex xs12 v-if="error" class="text-xs-center">
-        <v-icon color="red" size="80">error</v-icon>
-      </v-flex>
-
 
       <v-flex xs12 class="elevation-1 white" v-if="transactions">
         <v-layout row justify-end>
@@ -93,8 +88,8 @@
         <v-data-table
           v-if="$vuetify.breakpoint.smAndUp"
           :headers="headers"
-          :items="transactions[categoryType]"
-          :loading="loading"
+          :items="transactions[transactionTypes[categoryType]]"
+          :loading="$wait.is('loading.*')"
           :search="search"
           must-sort
           
@@ -117,7 +112,7 @@
         </v-data-table>
 
         <v-list  v-if="!$vuetify.breakpoint.smAndUp" dense subheader>     
-        <template  v-for="(transaction, index) in transactions[categoryType]">
+        <template  v-for="(transaction, index) in transactions[transactionTypes[categoryType]]">
           <v-list-tile :key="index" avatar class="pb-1">
             <v-list-tile-avatar>
               <v-icon>{{ transaction.category.icon }}</v-icon>
@@ -169,7 +164,7 @@
 <script>
 import { transactionsService } from "../_services/transactions.service";
 import { budgetService } from "../_services/budget.service";
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions, mapGetters } from "vuex";
 
 export default {
   components: {
@@ -179,11 +174,14 @@ export default {
   },
   data() {
     return {
-      loading: false,
-      error: false,
       search: null,
 
       categoryType: "spendingCategories",
+      transactionTypes: {
+        spendingCategories: "spendings",
+        incomeCategories: "incomes",
+        savingCategories: "savings",
+      },
       selectedRange: [null, null],
       selectedCategories: null,
 
@@ -214,7 +212,6 @@ export default {
         }
       ],
 
-      transactions: null,
       tab: 0,
       color: [
         "amber darken-1",
@@ -226,15 +223,11 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      budgets: state => state.budgets.budgets
+    ...mapGetters({
+      budget: "budgets/budget",
+      transactions: "transactions/getTransactions"
     }),
-    budget() {
-      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
-    },
-    currencies: function() {
-      return Object.keys(this.$currencies);
-    },
+    currencies: function() { return Object.keys(this.$currencies); },
     today: function() {
       return this.$moment().format("YYYY-MM-DD");
     },
@@ -244,69 +237,56 @@ export default {
           : this.$moment().subtract(1, 'month').format('YYYY-MM-DD')
     }    
   },
-  created: function(){           
+  mounted: function(){
+    this.activeBudgetChange(this.$route.params.id)
     if (this.budget){
       this.selectedCategories = this.budget[this.categoryType];
       this.selectedRange = [this.monthAgoOrStart, this.today] 
-      this.fetchTransactions();  
-    }     
+      this.setFilters();
+    }   
   },
-  watch: {    
+  watch: {
+    $route(to, from) {
+      if (from.params.id != to.params.id){
+        this.activeBudgetChange(to.params.id)
+        this.reloadInitialized();
+      }      
+    },
     budget: function(budget) {
-        this.selectedRange = [this.monthAgoOrStart, this.today]
-        
+        this.selectedRange = [this.monthAgoOrStart, this.today]        
         if (this.budget && this.budget[this.categoryType]){
           this.selectedCategories = this.budget[this.categoryType];
         }
-        this.fetchTransactions();      
+        this.setFilters();    
     },
     categoryType: function(value) {
-      this.transactions = null;
       if (this.budget && this.budget[value]){
         this.selectedCategories = this.budget[value];
-      }
-      
-      this.fetchTransactions();
+      }      
+      this.setFilters();
     }
   },
   methods: {
     ...mapActions({
       dispatchError: "alert/error",
-      dispatchSuccess: "alert/success"
+      dispatchSuccess: "alert/success",
+      activeBudgetChange: "budgets/activeBudgetChange",
+      reloadInitialized: "budgets/reloadInitialized",
+      fetchTransactions: "transactions/fetchTransactions"      
     }),
-    fetchTransactions() {
-      this.loading = true;
-      transactionsService
-        .listTransactions(
-          this.$route.params.id,
-          null,
-          this.selectedRange[0],
-          this.selectedRange[1],
-          this.selectedCategories
-        )
-        .then(response => {
-          if (response.ok) {
-            response.json().then(data => {
-              this.loading = false;
-              this.transactions = {
-                spendingCategories: data.spendings,
-                savingCategories: data.savings,
-                incomeCategories: data.incomes,
-              };
-            });
-          } else {
-            this.loading = false;
-            this.error = true;
-            this.transactions = null;
-            response.json().then(data => {
-              this.dispatchError(data.message);
-            });
-          }
-        });
+    setFilters(){
+      this.$store.dispatch("transactions/setFilters", {
+        budgetId: this.$route.params.id,
+        limitCount: null,
+        startDate: this.selectedRange[0],
+        endDate: this.selectedRange[1],
+        categories: this.selectedCategories
+      })
     },
     editTransaction(id) {
       this.$refs.transactionEditor.open(id).then(response => {
         if (response && response.ok) {
+          this.reloadInitialized();
           this.fetchTransactions();
         } else if (response) {
           response.json().then(data => {
@@ -325,6 +305,7 @@ export default {
           if (confirm) {
             transactionsService.deleteTransaction(id).then(response => {
               if (response.ok) {
+                this.reloadInitialized();
                 this.fetchTransactions();
               } else {
                 response.json().then(data => {

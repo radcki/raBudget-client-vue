@@ -1,6 +1,11 @@
 <template>
   <v-container :class="'elevation-1 '+ color + ' ' + backgroundColor">     
-    <v-layout row wrap >
+    <v-layout row wrap v-if="loading">
+      <v-flex xs12>
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+      </v-flex>
+    </v-layout>
+    <v-layout row wrap v-else>
       <v-flex xs4 align-center></v-flex>
       <v-flex xs4 align-center>{{ $t('categories.totalAmount') }}</v-flex>
       <v-flex xs4 align-center>{{ $t('categories.monthPlanLeft') }}</v-flex>
@@ -26,6 +31,7 @@
 export default {
   name: "VMiniCategoriesSummary",
   props: {
+    loading: Boolean,
     dataBalance: Array,
     dataBudget: {
         type: Object,

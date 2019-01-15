@@ -10,7 +10,7 @@
       >{{ date | moment("dddd, D.MM.YYYY") }}</v-list-tile-title>
       <v-divider :key="date + '_divider'" inset></v-divider>
       <v-list-tile
-        :key="date + '_' + i"
+        :key="'tr_' + transaction.transactionId"
         v-for="(transaction, i) in transactions"
         avatar
         class="pb-1"
