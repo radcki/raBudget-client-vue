@@ -18,9 +18,12 @@
         xs3
       >{{$t("categories.yearBalance")}}</v-flex>
       
-      <v-progress-circular v-if="loading" indeterminate color="primary"></v-progress-circular>
+      <v-flex xs12 style="min-width: 8px" >
+        <v-progress-linear class="pa-0 ma-0" v-show="loading" indeterminate color="primary"></v-progress-linear>
+      </v-flex>
+      
 
-      <template v-else v-for="(category, index) in dataBalance">
+      <template v-for="(category, index) in dataBalance">
         <v-flex :key="index+'_divider'" v-if="$vuetify.breakpoint.xsOnly && index > 0" xs12>
           <v-divider></v-divider>
         </v-flex>

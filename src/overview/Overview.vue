@@ -188,8 +188,11 @@ export default {
   },
   mounted: function() {
     this.activeBudgetChange(this.$route.params.id)
-    this.initializeCategoriesBalance()
-    this.initializeUnassignedFunds();
+    setTimeout(()=>{
+      this.initializeCategoriesBalance()
+      this.initializeUnassignedFunds();
+    }, 300)
+    
 
     this.$store.dispatch("transactions/setFilters", {
       budgetId: this.$route.params.id,
