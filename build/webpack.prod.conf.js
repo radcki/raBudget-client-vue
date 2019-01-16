@@ -50,6 +50,15 @@ const webpackConfig = merge(baseWebpackConfig, {
   },
   optimization: {
     minimizer: [
+      new UglifyJsPlugin({
+        uglifyOptions: {
+          compress: {
+            warnings: false
+          }
+        },
+        sourceMap: config.build.productionSourceMap,
+        parallel: true
+      }),
       new TerserPlugin({
         cache: true,
         parallel: true,
@@ -97,16 +106,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       filename: 'service-worker.js',
       minify: true,
       stripPrefix: 'dist/'
-    }),
-    new UglifyJsPlugin({
-      uglifyOptions: {
-        compress: {
-          warnings: false
-        }
-      },
-      sourceMap: config.build.productionSourceMap,
-      parallel: true
-    }),
+    }),    
     // extract css into its own file
     new MiniCssExtractPlugin({
       filename: '[name].[hash].css',

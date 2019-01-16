@@ -220,6 +220,7 @@ export default {
     }
   },
   mounted() {
+    this.initializeBudgets()
     this.drawer = this.$vuetify.breakpoint.lgAndUp;
     this.$root.$confirm = this.$refs.confirm.open
 
@@ -229,16 +230,18 @@ export default {
     } else {
       this.switchLocale(navigator.language);
     }
+    this.noBudgetsGuard()
     
   }, 
   created() {
-    this.$root.$on('reloadBudgets', this.budgetsFetch);
+    this.$root.$on('reloadBudgets', this.fetchBudgets);
   },
   methods: {
     ...mapActions({
       clearAlert: "alert/clear",
       logout: "account/logout",
-      budgetsFetch: "budgets/initializeBudgets"
+      initializeBudgets: "budgets/initializeBudgets",
+      fetchBudgets: "budgets/fetchBudgets"
     }),
     signOut(){
       this.logout().then(()=>{this.$router.push("/")});
@@ -250,6 +253,22 @@ export default {
       document.getElementsByTagName('html')[0].setAttribute('lang', locale);
       this.$i18n.locale = locale
       this.$moment.locale(locale);  
+    },
+    noBudgetsGuard(){
+      if (this.budgets.length === 0 && !this.$wait.is("loading.budgets")) {
+        this.$router.push({name: "newBudget"});
+        return;
+      } else if (this.$route.name == "home") {
+        var defaultBudget = this.budgets.find( v => v.default )
+        var activeBudget = null;
+
+        if (!defaultBudget){
+          activeBudget = defaultBudget
+        } else {
+          activeBudget = this.budgets[0]
+        }
+        this.$router.push({name: "overview", params: {id: activeBudget.id}})
+      }
     }
   },
   watch: {
@@ -261,25 +280,12 @@ export default {
           return;
         }
         metaThemeColor.setAttribute("content", "#455a64");
-        this.budgetsFetch();
+        this.fetchBudgets();
       },
       immediate: true
     },
-    budgets: function(budgets){
-      if (budgets && budgets.length === 0 && !this.$wait.is("loading.budgets")) {
-        this.$router.push({name: "newBudget"});
-      } else if (this.$route.name == "home") {
-        var defaultBudgets = this.budgets.filter( v => v.default )
-        var activeBudget = null;
-
-        if (defaultBudgets.length > 0){
-          activeBudget = defaultBudgets[0]
-        } else {
-          activeBudget = this.budgets[0]
-        }
-        this.$router.push({name: "overview", params: {id: activeBudget.id}})
-      }
-          
+    budgets: function(){
+      this.noBudgetsGuard()
     }
   }
 };

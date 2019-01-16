@@ -16,7 +16,7 @@ const actions = {
       dispatch('fetchUnassignedFunds', budget.id)
     }
     if (budget.spendingCategoriesBalance) {
-      dispatch('fetchSavingCategoriesBalance', budget.id)
+      dispatch('fetchSpendingCategoriesBalance', budget.id)
     }
     if (budget.savingCategoriesBalance) {
       dispatch('fetchSavingCategoriesBalance', budget.id)

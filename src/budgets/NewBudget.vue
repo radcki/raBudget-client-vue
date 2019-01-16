@@ -533,6 +533,10 @@ export default {
       if (this.$refs.formIncomeCategory.validate()) {
         // unbind
         const data = JSON.parse(JSON.stringify(this.newIncomeCategory));
+        data.amountConfigs= [{
+          validFrom: this.budget.startingDate,
+          amount: data.amount
+        }];
         this.categories.income.push(data);
         this.$refs.formIncomeCategory.reset();
       }
@@ -549,6 +553,10 @@ export default {
       if (this.$refs.formSpendingCategory.validate()) {
         // unbind
         var data = JSON.parse(JSON.stringify(this.newSpendingCategory));
+        data.amountConfigs= [{
+          validFrom: this.budget.startingDate,
+          amount: data.amount
+        }];
         this.categories.spending.push(data);
         this.$refs.formSpendingCategory.reset();
       }
@@ -565,6 +573,10 @@ export default {
       if (this.$refs.formSavingCategory.validate()) {
         // unbind
         const data = JSON.parse(JSON.stringify(this.newSavingCategory));
+        data.amountConfigs= [{
+          validFrom: this.budget.startingDate,
+          amount: data.amount
+        }];
         this.categories.savings.push(data);
         this.$refs.formSavingCategory.reset();
       }

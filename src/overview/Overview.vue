@@ -35,20 +35,36 @@
           <v-flex xs12 md6 class="pt-0">
             <v-card class="text-sm-center" color="light-green darken-1" dark>
               <v-card-title>{{$t('budgets.availablefunds')}}</v-card-title>
-              <v-card-text class="display-1">
-                <v-progress-circular v-if="$wait.is('loading.budget*')" indeterminate color="white"></v-progress-circular>
-                <span v-else>{{budget.balance | currency($currencies[budget.currency]) }}</span>
+              <v-card-text class="display-1 pb-1">
+                <v-animated-number
+                  v-if="budget.balance"
+                  :value="budget.balance"
+                  :formatValue="formatAmount"
+                  :duration="300"
+                />
+                <span v-else>-</span>
               </v-card-text>
+              <v-card-actions style="min-height: 7px" class="pa-0 ma-0">
+                <v-progress-linear class="pa-0 ma-0" v-show="$wait.is('loading.budget*')" indeterminate color="white"></v-progress-linear>
+              </v-card-actions>
             </v-card>
           </v-flex>
 
           <v-flex xs12 md6 class="pt-0">
             <v-card class="text-sm-center" color="blue-grey darken-1" dark>
               <v-card-title>{{$t('budgets.unassignedFunds')}}</v-card-title>
-              <v-card-text class="display-1">
-                <v-progress-circular v-if="$wait.is('loading.unassignedFunds')" indeterminate color="white"></v-progress-circular>
-                <span v-else>{{ budget.unassignedFunds | currency($currencies[budget.currency]) }}</span>
+              <v-card-text class="display-1  pb-1">
+                <v-animated-number
+                  v-if="budget.unassignedFunds"
+                  :value="budget.unassignedFunds"
+                  :formatValue="formatAmount"
+                  :duration="300"
+                />
+                <span v-else>-</span>
               </v-card-text>
+              <v-card-actions style="min-height: 7px" class="pa-0 ma-0">
+                <v-progress-linear class="pa-0 ma-0" v-show="$wait.is('loading.unassignedFunds*')" indeterminate color="white"></v-progress-linear>
+              </v-card-actions>
             </v-card>
           </v-flex>
 
@@ -139,7 +155,8 @@ export default {
     "v-mini-transactions-list": () => import("../components/MiniTransactionsList"),
     "v-mini-categories-summary": () => import("../components/MiniCategoriesSummary"),
     "v-large-categories-summary": () => import("../components/LargeCategoriesSummary"),
-    "v-new-entry": () => import("./NewEntry")
+    "v-new-entry": () => import("./NewEntry"),
+    "v-animated-number": () => import("../components/AnimatedNumber")
   },
   data() {
     return {
@@ -208,7 +225,9 @@ export default {
       activeBudgetChange: "budgets/activeBudgetChange",
       fetchTransactions: "transactions/fetchTransactions"
     }),
-
+    formatAmount(value) {
+      return this.$options.filters.currency(value, this.$currencies[this.budget.currency])
+    },
     editTransaction(id) {
       this.$refs.transactionEditor.open(id).then(response => {
         if (response && response.ok) {
