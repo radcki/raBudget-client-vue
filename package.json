@@ -21,12 +21,12 @@
     "babel-polyfill": "^6.26.0",
     "config": "^3.0.1",
     "debounce": "^1.2.0",
+    "moment": "^2.23.0",
     "vee-validate": "^2.1.5",
     "vue": "^2.5.22",
     "vue-currency-filter": "^3.2.0",
     "vue-google-charts": "^0.3.2",
     "vue-i18n": "^8.7.0",
-    "vue-moment": "^4.0.0",
     "vue-router": "^3.0.2",
     "vuetify": "^1.4.2",
     "vuex": "^3.0.1"

@@ -1,5 +1,6 @@
 /* eslint-disable import/no-duplicates */
 import 'babel-polyfill'
+
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib'
 
@@ -8,7 +9,6 @@ import { router } from './_helpers'
 import App from './App'
 import VueI18n from 'vue-i18n'
 import VueCurrencyFilter from 'vue-currency-filter'
-import VueMoment from 'vue-moment'
 import VueWait from 'vue-wait'
 
 import 'moment/locale/pl'
@@ -38,7 +38,11 @@ Vue.use(Vuetify, {
     current: 'pl'
   }
 })
-Vue.use(VueMoment, { moment })
+
+Vue.prototype.$moment = moment
+Vue.filter('moment', function (value, format) {
+  return moment(value).format(format || 'YYYY-MM-DD')
+})
 
 Vue.prototype.$currencies = {
   PLN: {
