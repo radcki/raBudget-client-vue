@@ -1,7 +1,9 @@
 <template>
   <v-container class="elevation-1 white">
     <v-layout row wrap justify-center>
-      <v-flex v-if="$vuetify.breakpoint.smAndUp" xs3></v-flex>
+      <v-flex v-if="$vuetify.breakpoint.smAndUp" xs3 style="min-height: 18px">
+        <v-progress-linear class="py-0 my-0" v-show="loading" indeterminate color="primary"></v-progress-linear>
+      </v-flex>
       <v-flex
         v-if="$vuetify.breakpoint.smAndUp"
         class="text-xs-center"
@@ -18,9 +20,7 @@
         xs3
       >{{$t("categories.yearBalance")}}</v-flex>
       
-      <v-flex xs12 style="min-width: 8px" >
-        <v-progress-linear class="pa-0 ma-0" v-show="loading" indeterminate color="primary"></v-progress-linear>
-      </v-flex>
+      
       
 
       <template v-for="(category, index) in dataBalance">
@@ -45,7 +45,13 @@
           <div
             class="text-xs-center caption"
             v-if="category.budgetSoFar != 0"
-          >{{category.overallBudgetBalance | currency($currencies[dataBudget.currency])}}</div>
+          >
+          <v-animated-number
+                    :value="category.overallBudgetBalance"
+                    :formatValue="formatAmount"
+                    :duration="300"
+                  />
+          </div>
           <v-tooltip bottom>
             <v-progress-linear
               class="ma-0"
@@ -64,11 +70,16 @@
           class="text-xs-center caption"
           xs6
           v-if="$vuetify.breakpoint.xsOnly"
-        >{{$t("categories.spendingThisMonth")}}</v-flex>
+        >
+        {{$t("categories.spendingThisMonth")}}       
+        </v-flex>
         <v-flex :key="index+'_month'" sm3 xs6>
-          <div
-            class="text-xs-center caption"
-          >{{category.thisMonthTransactionsSum | currency($currencies[dataBudget.currency])}}</div>
+          <div class="text-xs-center caption" >
+            <v-animated-number
+                    :value="category.thisMonthTransactionsSum"
+                    :formatValue="formatAmount"
+                    :duration="300"/>
+          </div>
           <v-tooltip bottom>
             <v-progress-linear
               class="ma-0"
@@ -92,7 +103,13 @@
           <div
             v-if="category.thisYearBudget != 0"
             class="text-xs-center caption"
-          >{{category.leftToEndOfYear | currency($currencies[dataBudget.currency])}}</div>
+          >
+          <v-animated-number
+                    :value="category.leftToEndOfYear"
+                    :formatValue="formatAmount"
+                    :duration="300"
+                  />
+          </div>
           <v-tooltip bottom>
             <v-progress-linear
               class="ma-0"
@@ -122,6 +139,9 @@ export default {
       }
     }
   },
+  components: {
+    "v-animated-number": () => import("../components/AnimatedNumber")
+  },
   methods: {
     conditionalColor(percentValue) {
       if (percentValue > 90) {
@@ -135,7 +155,10 @@ export default {
       } else if (percentValue < -1) {
         return "deep-orange darken-4";
       }
-    }
+    },
+    formatAmount(value) {
+      return this.$options.filters.currency(value, this.$currencies[this.dataBudget.currency])
+    },
   }
 };
 </script>

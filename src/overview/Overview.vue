@@ -14,7 +14,7 @@
             <v-new-entry :data-budget="budget" v-on:saved="reloadInitialized();fetchTransactions();"></v-new-entry>
           </v-flex>
 
-          <v-flex xs12 v-if="$vuetify.breakpoint.smAndUp">
+          <v-flex xs12 sm6 md12 v-if="$vuetify.breakpoint.smAndUp">
             <v-subheader class="headline">{{$t('budgets.savingsStatus')}}</v-subheader>
             <v-mini-categories-summary
               color="white--text"
@@ -32,7 +32,8 @@
           <v-flex xs12 class="pb-0 mb-0" v-if="$vuetify.breakpoint.smAndUp">
             <v-subheader class="headline">{{$t('budgets.spendingBalance')}}</v-subheader>
           </v-flex>
-          <v-flex xs12 md6 class="pt-0">
+
+          <v-flex xs12 sm6 class="pt-0">
             <v-card class="text-sm-center" color="light-green darken-1" dark>
               <v-card-title>{{$t('budgets.availablefunds')}}</v-card-title>
               <v-card-text class="display-1 pb-1">
@@ -50,7 +51,7 @@
             </v-card>
           </v-flex>
 
-          <v-flex xs12 md6 class="pt-0">
+          <v-flex xs12 sm6 class="pt-0">
             <v-card class="text-sm-center" color="blue-grey darken-1" dark>
               <v-card-title>{{$t('budgets.unassignedFunds')}}</v-card-title>
               <v-card-text class="display-1  pb-1">
@@ -70,7 +71,7 @@
 
           <v-flex xs12>
             <v-large-categories-summary 
-              :loading="$wait.is('loading.spendingCategoriesBalance)')" 
+              :loading="$wait.is('loading.spendingCategoriesBalance')" 
               :data-balance="spendingCategoriesBalance" 
               :data-budget="budget"></v-large-categories-summary>
           </v-flex>
@@ -165,15 +166,13 @@ export default {
         spendings: [],
         savings: []
       },
-
     };
   },
   computed: {
     ...mapState({
       spendingCategoriesBalance: state=>state.budgets.activeBudget.spendingCategoriesBalance,
       savingCategoriesBalance: state=>state.budgets.activeBudget.savingCategoriesBalance,
-      budgets: state => state.budgets.budgets,
-      
+      budgets: state => state.budgets.budgets,      
     }),
     ...mapGetters("budgets", [
         "budget",

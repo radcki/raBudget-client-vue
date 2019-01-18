@@ -36,14 +36,16 @@
           </v-btn>
           <v-list light dense subheader>
             
+
             <v-category-editor :data-budget="dataBudget" :value="category" v-on:save="emitSave" >
-              <v-list-tile >
+              <v-list-tile>
                 <v-list-tile-action>                
                     <v-icon color="primary darken-1">edit</v-icon>                             
                 </v-list-tile-action>
                 <v-list-tile-title>{{ $t("categories.categoryEdit") }}</v-list-tile-title>
-              </v-list-tile>
-            </v-category-editor>   
+              </v-list-tile> 
+            </v-category-editor> 
+
 
             <v-list-tile @click="$emit('transfer',category)">
               <v-list-tile-action>

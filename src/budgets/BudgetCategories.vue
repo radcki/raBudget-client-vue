@@ -98,7 +98,7 @@ export default {
       budgets: state => state.budgets.budgets
     }),
     budget() {
-      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
+      return this.budgets.find(v=>v.id == this.$route.params.id)
     },
     categories() {
       var saving = this.budget ? this.budget.savingCategories : [];
@@ -129,26 +129,41 @@ export default {
         this.savingsCategoriesSum
       );
     },
-
   },
-
+  mounted: function(){
+    this.activeBudgetChange(this.$route.params.id)
+    setTimeout(()=>{
+      this.initializeBudgets()
+    }, 300)
+    this.initializeBudgets()
+  },
+  watch: {
+    $route(to, from) {
+      if (from.params.id != to.params.id){
+        this.activeBudgetChange(to.params.id)
+        this.reloadInitialized();
+      }      
+    },
+  },
   methods: {
     ...mapActions({
       dispatchError: "alert/error",
       dispatchSuccess: "alert/success",
-      budgetsFetch: "budgets/fetchBudgets"
+      reloadInitialized: "budgets/reloadInitialized",
+      initializeBudgets: "budgets/initializeBudgets",
+      activeBudgetChange: "budgets/activeBudgetChange"
     }),
 
     editCategory(category) {
       budgetService.saveCategory(this.budget.id, category).then(response => {
           if (response.ok) {
             response.json().then(data => {
-              this.budgetsFetch();
+              this.reloadInitialized();
             });
           } else {
             response.json().then(data => {
               this.dispatchError(data.message);
-              this.budgetsFetch();
+              this.reloadInitialized();
             });
           }
         });
@@ -176,18 +191,7 @@ export default {
               .deleteCategory(this.$route.params.id, category.categoryId)
               .then(response => {
                 if (response.ok) {
-                  var type =
-                    category.type == 0
-                      ? "spending"
-                      : category.type == 1
-                        ? "income"
-                        : "savings";
-
-                  for (var i = 0; i < this.categories[type].length; i++)
-                    if (this.categories[type][i].name === category.name) {
-                      this.categories[type].splice(i, 1);
-                      break;
-                    }
+                  this.reloadInitialized();
                 } else {
                   response.json().then(data => {
                     this.dispatchError(data.message);
@@ -240,6 +244,7 @@ export default {
               )
               .then(response => {
                 if (response.ok) {
+                  this.reloadInitialized();
                   this.dispatchSuccess("general.changesSaved");
                 } else {
                   response.json().then(data => {

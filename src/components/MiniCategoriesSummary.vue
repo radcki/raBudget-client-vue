@@ -15,12 +15,18 @@
           </v-flex>
           <v-flex :key="index + '_savingsum'" xs4>
             <v-chip class="amber darken-3 elevation-3 white--text" small>
-              {{category.totalTransactionsSum | currency($currencies[dataBudget.currency])}}
+              <v-animated-number
+                    :value="category.totalTransactionsSum"
+                    :formatValue="formatAmount"
+                    :duration="300"/>
             </v-chip>
           </v-flex>
           <v-flex :key="index + '_savingplan'" xs4>
             <v-chip class="amber darken-3 elevation-3 white--text" small>
-              {{category.thisMonthBudgetBalance | currency($currencies[dataBudget.currency])}}
+              <v-animated-number
+                    :value="category.thisMonthBudgetBalance"
+                    :formatValue="formatAmount"
+                    :duration="300"/>
             </v-chip>
           </v-flex>
         </template>
@@ -39,6 +45,14 @@ export default {
     },
     backgroundColor: String,
     color: String,
+  },  
+  components: {
+    "v-animated-number": () => import("../components/AnimatedNumber")
+  },
+  methods: {
+    formatAmount(value) {
+      return this.$options.filters.currency(value, this.$currencies[this.dataBudget.currency])
+    },  
   }
 };
 </script>
