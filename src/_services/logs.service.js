@@ -14,7 +14,7 @@ function getAll () {
 }
 
 function getPeriod (from, to) {
-  var url = new URL(`${config.apiUrl}/logs/period`)
+  var url = new URL(`${config.apiUrl}/logs/period`, document.location)
   var params = {
     from: from,
     to: to
