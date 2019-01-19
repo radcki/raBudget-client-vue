@@ -197,7 +197,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import { budgetService } from "./_services/budget.service";
-import { newBudget } from "./budgets/NewBudget";
+
 import Confirm from "./components/Confirm.vue";
 
 export default {
@@ -220,17 +220,20 @@ export default {
     }
   },
   mounted() {
-    this.initializeBudgets()
-    this.drawer = this.$vuetify.breakpoint.lgAndUp;
-    this.$root.$confirm = this.$refs.confirm.open
-
     var savedLocale = localStorage.getItem('locale');
     if (savedLocale){
       this.switchLocale(savedLocale);
     } else {
       this.switchLocale(navigator.language);
     }
-    this.noBudgetsGuard()
+
+    this.drawer = this.$vuetify.breakpoint.lgAndUp;
+    this.$root.$confirm = this.$refs.confirm.open;
+    
+    if (this.account.status.loggedIn){
+      this.initializeBudgets()    
+      this.noBudgetsGuard()
+    }    
     
   }, 
   created() {

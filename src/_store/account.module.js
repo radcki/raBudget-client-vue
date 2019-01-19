@@ -51,24 +51,28 @@ const actions = {
         })
     })
   },
-  checkLogin ({ state }) {
+  checkLogin ({ state, commit }) {
     return new Promise((resolve, reject) => {
       if (state.user == null) {
-        state.status.loggedIn = false
-        resolve(state.status.loggedIn)
+        commit('logout')
+        resolve(false)
         return
       }
-      if (state.lastAuthCheck && state.lastAuthCheck.diff(moment(), 'minutes') < 5) {
-        state.status.loggedIn = true
+      if (state.status.loggedIn && state.lastAuthCheck && state.lastAuthCheck.diff(moment(), 'minutes') < 5) {
         resolve(state.status.loggedIn)
         return
       }
       userService.confirmAuthorization().then(response => {
-        state.status.loggedIn = !!response.ok
-        state.lastAuthCheck = moment()
+        if (response.ok) {
+          commit('setLoggedIn')
+        } else {
+          commit('setNotLoggedIn')
+        }
+        commit('setLastAuthCheck', moment())
+
         resolve(state.status.loggedIn)
       }).catch(() => {
-        state.status.loggedIn = false
+        commit('setNotLoggedIn')
         resolve(state.status.loggedIn)
       })
     })
@@ -150,6 +154,15 @@ const actions = {
 }
 
 const mutations = {
+  setLoggedIn (state) {
+    state.status.loggedIn = true
+  },
+  setNotLoggedIn (state) {
+    state.status.loggedIn = false
+  },
+  setLastAuthCheck (state, moment) {
+    state.lastAuthCheck = moment
+  },
   loginRequest (state) {
     state.status.loggingIn = true
     state.status.loggedIn = false

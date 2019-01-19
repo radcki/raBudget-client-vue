@@ -41,6 +41,11 @@ function logout () {
 function noRefreshPending () {
   return new Promise((resolve, reject) => {
     var i = 0
+    if (!localStorage.getItem('tokenRefreshing')) {
+      resolve()
+      return
+    }
+
     var finished = setInterval(() => {
       var isRefreshing = localStorage.getItem('tokenRefreshing')
       if (!isRefreshing || i > 50) {
@@ -57,7 +62,7 @@ function renewToken () {
     token: getAccessToken(),
     refreshToken: getRefreshToken(),
     clientId: getClientId()
-  })  
+  })
   return fetch(`${config.apiUrl}/users/renewtoken`, {
     method: 'POST',
     body: body,
@@ -77,6 +82,7 @@ function fetchAuthorized (url, options) {
       fetch(url, options).then(response => {
         if (response.ok) {
           // zapytanie udane
+          localStorage.removeItem('tokenRefreshing')
           resolve(response)
         } else {
           if (response.status === 401 && response.headers.has('Token-Expired')) {
@@ -94,10 +100,15 @@ function fetchAuthorized (url, options) {
                 logout()
                 resolve(response)
               }
+            }).catch(error => {
+              localStorage.removeItem('tokenRefreshing') // oznaczenie końca odświeżania
+              logout()
+              reject(error)
             })
           }
         }
       }).catch(error => {
+        localStorage.removeItem('tokenRefreshing') // oznaczenie końca odświeżania
         reject(error)
       })
     })
