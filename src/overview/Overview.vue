@@ -210,6 +210,8 @@ export default {
     },
     budget: function(budget){
       if (budget){
+        this.initializeCategoriesBalance()
+        this.initializeUnassignedFunds();
         this.reloadInitialized();
         this.fetchTransactions();
       }
