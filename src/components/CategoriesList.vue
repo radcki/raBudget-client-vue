@@ -30,7 +30,7 @@
       </v-list-tile-content>
 
       <v-list-tile-action v-if="!hideActions">
-        <v-menu ref="menu">
+        <v-menu ref="menu" :left="!$vuetify.breakpoint.smAndUp" nudge-bottom="42">
           <v-btn slot="activator" icon>
             <v-icon>more_vert</v-icon>
           </v-btn>
