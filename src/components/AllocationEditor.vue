@@ -54,28 +54,13 @@
               </v-flex>
 
               <v-flex xs12 md5>
-                <v-select
-                  v-model="editor.category"
-                  :items="categories[allocationType]"
-                  item-text="name"
-                  item-value="categoryId"
-                  single-line
-                  :rules="requiredRule"
-                  :label="$t('general.category')"
-                >
-                  <template slot="selection" slot-scope="data">
-                    <v-list-tile-action>
-                      <v-icon>{{ data.item.icon }}</v-icon>
-                    </v-list-tile-action>
-                    <span>{{ data.item.name }}</span>
-                  </template>
-                  <template slot="item" slot-scope="data">
-                    <v-list-tile-action v-if="data.item">
-                      <v-icon>{{ data.item.icon }}</v-icon>
-                    </v-list-tile-action>
-                    <span>{{ data.item.name }}</span>
-                  </template>
-                </v-select>
+                <v-category-select
+                    :items="categories[allocationType]"
+                    :label="$t('general.category')"
+                    :rules="requiredRule"
+                    v-model="editor.category"
+                  ></v-category-select>
+
               </v-flex>
 
               <v-flex xs12 md7>
@@ -132,6 +117,9 @@
 <script>
 import { allocationsService } from "../_services/allocations.service.js";
 export default {
+  components: {
+    "v-category-select": () => import("../components/CategorySelect")
+  },
   data: () => ({
     budget: { currency: "PLN" },
     dateMenu: false,
@@ -186,7 +174,7 @@ export default {
         if (response.ok) {
           this.dialog = true;
           response.json().then(allocation => {
-            this.editor.category = allocation.destinationCategory.categoryId;
+            this.editor.category = allocation.destinationCategory;
             this.allocationType = "spendings";
             this.categories = {
               spendings: allocation.budget.spendingCategories,
