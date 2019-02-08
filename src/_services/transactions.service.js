@@ -59,9 +59,7 @@ function updateTransaction (transactionData) {
       description: transactionData.description,
       amount: transactionData.amount,
       date: transactionData.date,
-      category: {
-        categoryId: transactionData.category
-      }
+      category: transactionData.category
     })
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/${transactionData.transactionId}/update`, requestOptions)
