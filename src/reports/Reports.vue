@@ -47,10 +47,10 @@
                 <v-layout row wrap class="pa-0">
                     <v-flex xs12>
                       <v-select :label="$t('categories.categoryType')" :items="categoryTypes" v-model="categoryType">
-                        <template slot="selection" slot-scope="{ item, index }">
+                        <template slot="selection" slot-scope="{ item  }">
                             {{ $t(item.text) }}
                         </template>
-                        <template slot="item" slot-scope="{ item, index }">
+                        <template slot="item" slot-scope="{ item }">
                             {{ $t(item.text) }}
                         </template>
                       </v-select>
@@ -105,7 +105,7 @@
                               <span>{{ props.item.transactionsSum/periodTotals.transactionsSum | percentage }}</span>
                             </v-tooltip>
                           </td>
-                          <td class="py-1">
+                          <td class="py-1" v-if="categoryType=='spendingCategories'">
                             {{props.item.allocationsSum | currency($currencies[budget.currency])}}
                             <v-tooltip bottom>
                               <v-progress-linear
@@ -156,7 +156,7 @@
                           <td class="text-xs-right"><strong>{{ $t("general.sum") }}</strong></td>
                           <td class="py-1">{{periodTotals.budgetAmount | currency($currencies[budget.currency])}}</td>
                           <td class="py-1">{{periodTotals.transactionsSum | currency($currencies[budget.currency])}}</td>
-                          <td class="py-1">{{periodTotals.allocationsSum | currency($currencies[budget.currency])}}</td>
+                          <td class="py-1" v-if="categoryType=='spendingCategories'">{{periodTotals.allocationsSum | currency($currencies[budget.currency])}}</td>
                           <td class="py-1">{{periodTotals.averagePerDay | currency($currencies[budget.currency])}}</td>
                           <td class="py-1">{{periodTotals.averagePerMonth | currency($currencies[budget.currency])}}</td>
                       </template>
@@ -296,14 +296,14 @@
                                   <v-icon>keyboard_arrow_right</v-icon>
                                 </v-list-tile-action>
                               </v-list-tile>
-                              <v-list-tile @click="chartDataType = 'allocationsSum'" :class="chartDataType == 'allocationsSum' ? 'primary--text':''">
+                              <v-list-tile v-if="categoryType=='spendingCategories'" @click="chartDataType = 'allocationsSum'" :class="chartDataType == 'allocationsSum' ? 'primary--text':''">
                                 <v-list-tile-title>{{ $t("reports.allocationsSum") }}</v-list-tile-title>
                                 <v-list-tile-action>
                                   <v-icon>keyboard_arrow_right</v-icon>
                                 </v-list-tile-action>
                               </v-list-tile>
                               <v-list-tile @click="chartDataType = 'averagePerDay'" :class="chartDataType == 'averagePerDay' ? 'primary--text':''">
-                                <v-list-tile-title>{{ $t("reports.averagePerMonth") }}</v-list-tile-title>
+                                <v-list-tile-title>{{ $t("reports.averagePerDay") }}</v-list-tile-title>
                                 <v-list-tile-action>
                                   <v-icon>keyboard_arrow_right</v-icon>
                                 </v-list-tile-action>
@@ -396,11 +396,38 @@ export default {
 
       categoryTypes: [
         { text: "general.spendings", value: "spendingCategories" },
-        { text: "general.incomes", value: "incomeCategories" }
+        { text: "general.incomes", value: "incomeCategories" },
+        { text: "general.savings", value: "savingCategories" }
       ],
-      categoryType: "spendingCategories",
-
-      headers: [
+      categoryType: "spendingCategories",      
+    };
+  },
+  computed: {
+    ...mapState({
+      budgets: state => state.budgets.budgets
+    }),
+    budget() {
+      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
+    },
+    loading: function() {
+      return this.budgetLoading || this.periodLoading || this.monthlyLoading;
+    },
+    currencies: function() {
+      return Object.keys(this.$currencies);
+    },
+    thisMonth: function() {
+      return this.$moment().format("YYYY-MM");
+    },
+    locale: function() {
+      return this.$i18n.locale;
+    },
+    periodReport: function() { return this.periodData[this.categoryType] },
+    monthlyReport: function() {
+      var type = this.categoryType;
+      return this.monthlyData[type];
+    },
+    headers: function() {
+      var headers = [
         {
           text: "categories.name",
           align: "left",
@@ -438,31 +465,10 @@ export default {
           value: "averagePerMonth"
         }
       ]
-    };
-  },
-  computed: {
-    ...mapState({
-      budgets: state => state.budgets.budgets
-    }),
-    budget() {
-      return this.budgets.filter(v=>v.id == this.$route.params.id)[0]
-    },
-    loading: function() {
-      return this.budgetLoading || this.periodLoading || this.monthlyLoading;
-    },
-    currencies: function() {
-      return Object.keys(this.$currencies);
-    },
-    thisMonth: function() {
-      return this.$moment().format("YYYY-MM");
-    },
-    locale: function() {
-      return this.$i18n.locale;
-    },
-    periodReport: function() { return this.periodData[this.categoryType];},
-    monthlyReport: function() {
-      var type = this.categoryType;
-      return this.monthlyData[type];
+      if (this.categoryType !="spendingCategories") {
+        headers = headers.filter(v=>v.value != 'allocationsSum')
+      }
+      return headers
     },
     periodTotals: function() {
       var data = {
@@ -529,6 +535,10 @@ export default {
   watch: {
     categoryType: function(type) {
       this.selectedCategories = [];
+
+      if (this.chartDataType == "allocationsSum" && type != "spendingCategories"){
+        this.chartDataType = "transactionsSum"
+      }
     },
     budget: function(budget) {
       if (!budget){
