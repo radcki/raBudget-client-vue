@@ -8,6 +8,7 @@
         item-value="categoryId"
         return-object
         single-line
+        :disabled="disabled"
         append-icon="keyboard_arrow_down"
         :class="!multiple ? '' : 'caption'"
         :rules="rules && rules.length > 0 ? rules : []"
@@ -70,6 +71,10 @@ export default {
             type: [Array, Object]
         },
         multiple: {
+            type: Boolean,
+            default: false
+        },
+        disabled: {
             type: Boolean,
             default: false
         }

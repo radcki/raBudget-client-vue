@@ -64,6 +64,15 @@
             </v-list-tile-action>
           </v-list-tile>
 
+          <v-list-tile class="grey--text text--darken-1" :to="{ name: 'transactionSchedules', params: { id: budget.id }}">
+            <v-list-tile-content>
+              <v-list-tile-title>{{ $t("transactionSchedules.transactionSchedules") }}</v-list-tile-title>
+            </v-list-tile-content>
+            <v-list-tile-action>
+              <v-icon>date_range</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+
           <v-list-tile class="grey--text text--darken-1" :to="{ name: 'reports', params: { id: budget.id }}">
             <v-list-tile-content>
               <v-list-tile-title>{{ $t("reports.reports") }}</v-list-tile-title>

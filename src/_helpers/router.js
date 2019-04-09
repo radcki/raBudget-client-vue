@@ -17,6 +17,7 @@ const Allocations = () => import('../history/Allocations.vue')
 const Reports = () => import('../reports/Reports.vue')
 const Users = () => import('../admin/Users.vue')
 const Logs = () => import('../admin/Logs.vue')
+const TransactionSchedules = () => import('../transactionSchedules/TransactionSchedules.vue')
 
 Vue.use(Router)
 
@@ -110,6 +111,11 @@ export const router = new Router({
     path: '/budget/:id/edit',
     name: 'editBudget',
     component: EditBudget
+  },
+  {
+    path: '/budget/:id/transaction-schedules',
+    name: 'transactionSchedules',
+    component: TransactionSchedules
   },
 
   {

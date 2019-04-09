@@ -55,12 +55,12 @@
 
               <v-flex xs12 md5>
                 <v-category-select
-                    :items="categories[transactionType]"
-                    :label="$t('general.category')"
-                    :rules="requiredRule"
-                    v-model="editor.category"
-                  ></v-category-select>
-
+                  :items="categories[transactionType]"
+                  :label="$t('general.category')"
+                  :rules="requiredRule"
+                  v-model="editor.category"
+                >                  
+                </v-category-select>
               </v-flex>
 
               <v-flex xs12 md7>

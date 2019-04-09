@@ -203,5 +203,20 @@
         "selectCategory": "Wybierz co najmniej jedną kategorie aby pokazać wykres",
         "periodSummary": "Podsumowanie okresu",
         "monthByMonth": "Miesiąc po miesiącu"
+    },
+    "transactionSchedules": {
+        "transactionSchedules": "Zaplanowane transakcje",
+        "editing": "Edycja planu transakcji",
+        "periodic": "Cyklicznie",
+        "once": "Jedno wystąpienie",
+        "day": "Dzień",
+        "week": "Tydzień",
+        "month": "Miesiąc",
+        "anually": "rocznie",
+        "frequency": "Częstotliwość",
+        "startDate": "Data początkowa",
+        "endDate": "Data końcowa",
+        "totalAmount": "Kwota całkowita",
+        "invalidPeriodStep": "Niepoprawna wartość częstotliwości"
     }
 }

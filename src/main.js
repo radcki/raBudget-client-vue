@@ -41,7 +41,7 @@ Vue.use(Vuetify, {
 
 Vue.prototype.$moment = moment
 Vue.filter('moment', function (value, format) {
-  return moment(value).format(format || 'YYYY-MM-DD')
+  return !value ? '-' : moment(value).format(format || 'YYYY-MM-DD')
 })
 
 Vue.prototype.$currencies = {
