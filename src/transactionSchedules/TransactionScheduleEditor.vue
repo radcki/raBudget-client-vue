@@ -36,7 +36,7 @@
                 >
                   <template slot="item" slot-scope="data">{{$t(data.item.text)}}</template>
 
-                  <template slot="selection" slot-scope="{ item, index }">{{$t(item.text)}}</template>
+                  <template slot="selection" slot-scope="{ item }">{{$t(item.text)}}</template>
                 </v-select>
               </v-flex>
               <v-flex xs12 md5>

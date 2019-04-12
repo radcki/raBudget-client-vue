@@ -1,4 +1,5 @@
 import { transactionsService } from '../_services/transactions.service'
+import { transactionSchedulesService } from '../_services/transactionSchedules.service'
 import moment from 'moment'
 
 const state = {
@@ -7,6 +8,7 @@ const state = {
     savings: [],
     spending: []
   },
+  closestScheduledTransactions: [],
   loadFilters: null,
   filters: {
     budgetId: null,
@@ -88,6 +90,24 @@ const actions = {
           })
         }
       })
+  },
+
+  fetchClosestScheduledTransactions ({ commit, dispatch }) {
+    dispatch('wait/start', 'loading.scheduledTransactions', { root: true })
+    transactionSchedulesService.listClosestOccurrences(state.filters.budgetId, moment().add(1, 'M').format('YYYY-MM-DD'))
+      .then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            commit('setClosestScheduledTransactions', data)
+            dispatch('wait/end', 'loading.scheduledTransactions', { root: true })
+          })
+        } else {
+          response.json().then(data => {
+            commit('alert/error', data.message, { root: true })
+            dispatch('wait/end', 'loading.scheduledTransactions', { root: true })
+          })
+        }
+      })
   }
 }
 
@@ -139,6 +159,9 @@ const mutations = {
   },
   setTransactions (state, data) {
     state.transactions = data
+  },
+  setClosestScheduledTransactions (state, data) {
+    state.closestScheduledTransactions = data
   }
 }
 

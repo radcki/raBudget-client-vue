@@ -81,6 +81,9 @@
                     step="0.01"
                   ></v-text-field>
                 </v-flex>
+                <v-flex xs12>
+                  <v-checkbox hide-details v-model="createSchedule" :label="$t('transactionSchedules.create')"></v-checkbox>
+                </v-flex>
               </v-layout>
             </v-container>
           </v-form>
@@ -219,6 +222,9 @@ export default {
       default: () => {
         return { currency: "PLN" };
       }
+    },
+    inputData: {
+      type: Object
     }
   },
   data() {
@@ -234,6 +240,7 @@ export default {
         description: null,
         amount: null
       },
+      createSchedule: false,
       tab: 0,
       color: [
         "amber darken-1",
@@ -246,7 +253,10 @@ export default {
   },
   computed: {
     selectedType: function() {
-      this.editor.category = null;
+      if (this.editor.category && this.editor.category.type != this.tab) {
+        this.editor.category = null;
+      }
+
       return this.tab == 0 || this.tab == 3
         ? "spending"
         : this.tab == 1
@@ -260,19 +270,30 @@ export default {
     tab: function(value) {
       this.$refs.editorForm.resetValidation();
     },
-    editorDialog(open){
-      if (open){
-        this.$wait.start("dialog")
+    editorDialog(open) {
+      if (open) {
+        this.$wait.start("dialog");
       } else {
-        this.$wait.end("dialog")
-      }    
+        this.$wait.end("dialog");
+      }
+    },
+    inputData: function(data) {
+      if (!data) {
+        return;
+      }
+      this.tab = data.category.type;
+      this.editor = JSON.parse(JSON.stringify(data));
+      this.editor.date = this.$moment(this.editor.date).format("YYYY-MM-DD");
+      this.editor.category = data.category;
     }
   },
-  beforeDestroy: function(){
-    this.$wait.end("dialog")
+  beforeDestroy: function() {
+    this.$wait.end("dialog");
   },
-  mounted: function(){
-      this.$root.$on("closeDialogs", ()=> { this.editorDialog = false});
+  mounted: function() {
+    this.$root.$on("closeDialogs", () => {
+      this.editorDialog = false;
+    });
   },
   methods: {
     getDate() {

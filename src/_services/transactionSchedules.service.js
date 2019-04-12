@@ -28,6 +28,7 @@ function createTransactionSchedule (data) {
       step: data.step
     })
   }
+  
   return apiHandler.fetchAuthorized(`${config.apiUrl}/transactionSchedules/create`, requestOptions)
 }
 
@@ -86,5 +87,10 @@ function listClosestOccurrences (budgetId, endDate) {
     method: 'GET',
     params: { endDate: endDate, budgetId: budgetId }
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactionSchedules/closest-transactions`, requestOptions)
+  var url = new URL(`${config.apiUrl}/transactionSchedules/closest-transactions`)
+  var params = { endDate: endDate, budgetId: budgetId }
+
+  url.search = new URLSearchParams(params)
+
+  return apiHandler.fetchAuthorized(url, requestOptions)
 }

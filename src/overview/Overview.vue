@@ -10,8 +10,33 @@
       <v-flex d-flex xs12 md8 lg5>
         <v-layout row wrap align-start align-content-start>
           <v-flex xs12 v-if="$vuetify.breakpoint.smAndUp">
-            <v-subheader class="headline">{{$t('transactions.newtransaction')}}</v-subheader>
-            <v-new-entry :data-budget="budget" v-on:saved="reloadInitialized();fetchTransactions();"></v-new-entry>
+            <v-subheader>
+              <a :class="(newEntryVisible == 'manual' ? 'headline ' : '') + 'mr-3 grey--text text--darken-1'"
+                @click="newEntryVisible = 'manual'"
+              >{{$t('transactions.newtransaction')}}</a>
+              <v-badge right color="purple">
+                <template v-slot:badge>
+                  <span>{{closestScheduledTransactions.length}}</span>
+                </template>
+                <a :class="(newEntryVisible == 'scheduled' ? 'headline ' : '') + 'mr-1 grey--text text--darken-1'"
+                  @click="newEntryVisible = 'scheduled'"
+                >{{$t('transactionSchedules.transactionSchedules')}}</a>
+              </v-badge>
+            </v-subheader>
+            <v-new-entry
+              :data-budget="budget"
+              v-show="newEntryVisible == 'manual' "
+              :input-data="newEntryInputData"
+              v-on:saved="reloadInitialized();fetchTransactions();"
+            ></v-new-entry>
+
+            <v-scheduled-transactions-list
+              :items="closestScheduledTransactions"
+              v-show="newEntryVisible == 'scheduled' "
+              :data-budget="budget"
+              :title="$t('transactionSchedules.transactionSchedules')"
+              v-on:create="passScheduledToEditor"
+            ></v-scheduled-transactions-list>
           </v-flex>
 
           <v-flex xs12 sm6 md12 v-if="$vuetify.breakpoint.smAndUp">
@@ -46,7 +71,12 @@
                 <span v-else>-</span>
               </v-card-text>
               <v-card-actions style="min-height: 7px" class="pa-0 ma-0">
-                <v-progress-linear class="pa-0 ma-0" v-show="$wait.is('loading.budget*')" indeterminate color="white"></v-progress-linear>
+                <v-progress-linear
+                  class="pa-0 ma-0"
+                  v-show="$wait.is('loading.budget*')"
+                  indeterminate
+                  color="white"
+                ></v-progress-linear>
               </v-card-actions>
             </v-card>
           </v-flex>
@@ -54,7 +84,7 @@
           <v-flex xs12 sm6 class="pt-0">
             <v-card class="text-sm-center" color="blue-grey darken-1" dark>
               <v-card-title>{{$t('budgets.unassignedFunds')}}</v-card-title>
-              <v-card-text class="display-1  pb-1">
+              <v-card-text class="display-1 pb-1">
                 <v-animated-number
                   v-if="budget.unassignedFunds"
                   :value="budget.unassignedFunds"
@@ -64,16 +94,22 @@
                 <span v-else>-</span>
               </v-card-text>
               <v-card-actions style="min-height: 7px" class="pa-0 ma-0">
-                <v-progress-linear class="pa-0 ma-0" v-show="$wait.is('loading.unassignedFunds*')" indeterminate color="white"></v-progress-linear>
+                <v-progress-linear
+                  class="pa-0 ma-0"
+                  v-show="$wait.is('loading.unassignedFunds*')"
+                  indeterminate
+                  color="white"
+                ></v-progress-linear>
               </v-card-actions>
             </v-card>
           </v-flex>
 
           <v-flex xs12>
-            <v-large-categories-summary 
-              :loading="$wait.is('loading.spendingCategoriesBalance')" 
-              :data-balance="spendingCategoriesBalance" 
-              :data-budget="budget"></v-large-categories-summary>
+            <v-large-categories-summary
+              :loading="$wait.is('loading.spendingCategoriesBalance')"
+              :data-balance="spendingCategoriesBalance"
+              :data-budget="budget"
+            ></v-large-categories-summary>
           </v-flex>
         </v-layout>
       </v-flex>
@@ -153,9 +189,14 @@ export default {
   components: {
     "transaction-editor": () => import("../components/TransactionEditor"),
     "v-category-select": () => import("../components/CategorySelect"),
-    "v-mini-transactions-list": () => import("../components/MiniTransactionsList"),
-    "v-mini-categories-summary": () => import("../components/MiniCategoriesSummary"),
-    "v-large-categories-summary": () => import("../components/LargeCategoriesSummary"),
+    "v-mini-transactions-list": () =>
+      import("../components/MiniTransactionsList"),
+    "v-scheduled-transactions-list": () =>
+      import("../components/ScheduledTransactionsList"),
+    "v-mini-categories-summary": () =>
+      import("../components/MiniCategoriesSummary"),
+    "v-large-categories-summary": () =>
+      import("../components/LargeCategoriesSummary"),
     "v-new-entry": () => import("./NewEntry"),
     "v-animated-number": () => import("../components/AnimatedNumber")
   },
@@ -166,57 +207,65 @@ export default {
         spendings: [],
         savings: []
       },
+      newEntryVisible: 'manual',
+      newEntryInputData: null
     };
   },
   computed: {
     ...mapState({
-      spendingCategoriesBalance: state=>state.budgets.activeBudget.spendingCategoriesBalance,
-      savingCategoriesBalance: state=>state.budgets.activeBudget.savingCategoriesBalance,
-      budgets: state => state.budgets.budgets,      
+      spendingCategoriesBalance: state =>
+        state.budgets.activeBudget.spendingCategoriesBalance,
+      savingCategoriesBalance: state =>
+        state.budgets.activeBudget.savingCategoriesBalance,
+      budgets: state => state.budgets.budgets,
+      closestScheduledTransactions: state =>
+        state.transactions.closestScheduledTransactions
     }),
     ...mapGetters("budgets", [
-        "budget",
-        "spendingCategoriesBalance",
-        "savingCategoriesBalance"
+      "budget",
+      "spendingCategoriesBalance",
+      "savingCategoriesBalance"
     ]),
     ...mapGetters({
       transactions: "transactions/getTransactions"
     }),
 
-    budgetId(){return this.$route.params.id}
+    budgetId() {
+      return this.$route.params.id;
+    }
   },
   mounted: function() {
-    this.activeBudgetChange(this.$route.params.id)
-    setTimeout(()=>{
-      this.initializeCategoriesBalance()
+    this.activeBudgetChange(this.$route.params.id);
+    setTimeout(() => {
+      this.initializeCategoriesBalance();
       this.initializeUnassignedFunds();
-    }, 300)
-    
+    }, 300);
 
+    this.fetchClosestScheduledTransactions();
     this.$store.dispatch("transactions/setFilters", {
       budgetId: this.$route.params.id,
       limitCount: 8,
       startDate: null,
       endDate: null,
       categories: null
-    })
+    });
   },
   watch: {
     $route(to, from) {
-      if (from.params.id != to.params.id){
-        this.activeBudgetChange(to.params.id)
+      if (from.params.id != to.params.id) {
+        this.activeBudgetChange(to.params.id);
         this.reloadInitialized();
-      }      
+      }
     },
-    budget: function(budget){
-      if (budget){
-        this.initializeCategoriesBalance()
+    budget: function(budget) {
+      if (budget) {
+        this.initializeCategoriesBalance();
         this.initializeUnassignedFunds();
         this.reloadInitialized();
         this.fetchTransactions();
+        this.fetchClosestScheduledTransactions();
       }
     }
-
   },
   methods: {
     ...mapActions({
@@ -225,12 +274,17 @@ export default {
       initializeCategoriesBalance: "budgets/initializeCategoriesBalance",
       initializeUnassignedFunds: "budgets/initializeUnassignedFunds",
       fetchCategoriesBalance: "budgets/fetchCategoriesBalance",
+      fetchClosestScheduledTransactions:
+        "transactions/fetchClosestScheduledTransactions",
       reloadInitialized: "budgets/reloadInitialized",
       activeBudgetChange: "budgets/activeBudgetChange",
       fetchTransactions: "transactions/fetchTransactions"
     }),
     formatAmount(value) {
-      return this.$options.filters.currency(value, this.$currencies[this.budget.currency])
+      return this.$options.filters.currency(
+        value,
+        this.$currencies[this.budget.currency]
+      );
     },
     editTransaction(id) {
       this.$refs.transactionEditor.open(id).then(response => {
@@ -264,6 +318,10 @@ export default {
             });
           }
         });
+    },
+    passScheduledToEditor(transaction){
+      this.newEntryInputData = transaction
+      this.newEntryVisible = 'manual'
     }
   }
 };

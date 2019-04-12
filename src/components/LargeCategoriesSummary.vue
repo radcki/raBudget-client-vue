@@ -19,9 +19,6 @@
         class="text-xs-center"
         xs3
       >{{$t("categories.yearBalance")}}</v-flex>
-      
-      
-      
 
       <template v-for="(category, index) in dataBalance">
         <v-flex :key="index+'_divider'" v-if="$vuetify.breakpoint.xsOnly && index > 0" xs12>
@@ -42,27 +39,44 @@
           v-if="$vuetify.breakpoint.xsOnly"
         >{{$t("categories.currentBalance")}}</v-flex>
         <v-flex :key="index+'_balance'" sm3 xs6>
-          <div
-            class="text-xs-center caption"
-            v-if="category.budgetSoFar != 0"
-          >
-          <v-animated-number
-                    :value="category.overallBudgetBalance"
-                    :formatValue="formatAmount"
-                    :duration="300"
-                  />
+          <div class="text-xs-center caption" v-if="category.budgetSoFar != 0">
+            <v-animated-number
+              :value="category.overallBudgetBalance"
+              :formatValue="formatAmount"
+              :duration="300"
+            />
+            <span v-if="category.thisMonthYetScheduledSum > 0" class="grey--text font-italic"> (
+              <v-animated-number              
+              :value="category.overallBudgetBalance-category.thisMonthYetScheduledSum"
+              :formatValue="formatAmount"
+              :duration="300"
+            />)
+            </span>
+            
           </div>
           <v-tooltip bottom>
             <v-progress-linear
               class="ma-0"
               slot="activator"
-              :height="15"
+              :height="category.thisMonthYetScheduledSum > 0 ? 9 : 15"
               v-if="category.budgetSoFar != 0"
               :value="100*category.overallBudgetBalance/category.thisMonthBudget"
               :color="conditionalColor(100*category.overallBudgetBalance/category.thisMonthBudget)"
             ></v-progress-linear>
-            <span>{{ category.overallBudgetBalance/category.thisMonthBudget | percentage }}</span>
+            <span>
+              {{ category.overallBudgetBalance/category.thisMonthBudget | percentage }}
+              <span
+                v-if="category.thisYearYetScheduledSum > 0"
+              >({{$t('transactionSchedules.inclScheduled')}}: {{ (category.overallBudgetBalance-category.thisMonthYetScheduledSum)/category.thisMonthBudget | percentage }})</span>
+            </span>
           </v-tooltip>
+          <v-progress-linear
+            class="ma-0"
+            :height="6"
+            v-if="category.budgetSoFar != 0 && category.thisMonthYetScheduledSum > 0"
+            :value="100*(category.overallBudgetBalance-category.thisMonthYetScheduledSum)/category.thisMonthBudget"
+            :color="conditionalColor(100*(category.overallBudgetBalance-category.thisMonthYetScheduledSum)/category.thisMonthBudget)"
+          ></v-progress-linear>
         </v-flex>
 
         <v-flex
@@ -70,27 +84,44 @@
           class="text-xs-center caption"
           xs6
           v-if="$vuetify.breakpoint.xsOnly"
-        >
-        {{$t("categories.spendingThisMonth")}}       
-        </v-flex>
+        >{{$t("categories.spendingThisMonth")}}</v-flex>
         <v-flex :key="index+'_month'" sm3 xs6>
-          <div class="text-xs-center caption" >
+          <div class="text-xs-center caption">
             <v-animated-number
-                    :value="category.thisMonthTransactionsSum"
-                    :formatValue="formatAmount"
-                    :duration="300"/>
+              :value="category.thisMonthTransactionsSum"
+              :formatValue="formatAmount"
+              :duration="300"
+            />
+            <span v-if="category.thisMonthYetScheduledSum > 0" class="grey--text font-italic"> (
+              <v-animated-number              
+              :value="category.thisMonthYetScheduledSum"
+              :formatValue="formatAmount"
+              :duration="300"
+            />)
+            </span>            
           </div>
           <v-tooltip bottom>
             <v-progress-linear
               class="ma-0"
               slot="activator"
-              :height="15"
+              :height="category.thisMonthYetScheduledSum > 0 ? 9 : 15"
               v-if="category.thisMonthBudget != 0"
               :value="100*category.thisMonthTransactionsSum/category.thisMonthBudget"
               :color="conditionalColor(100*(1-category.thisMonthTransactionsSum/category.thisMonthBudget))"
             ></v-progress-linear>
-            <span>{{ category.thisMonthTransactionsSum/category.thisMonthBudget | percentage }}</span>
+            <span>{{ category.thisMonthTransactionsSum/category.thisMonthBudget | percentage }}
+              <span
+                v-if="category.thisYearYetScheduledSum > 0"
+              >({{$t('transactionSchedules.inclScheduled')}}: {{ (category.thisMonthTransactionsSum+category.thisMonthYetScheduledSum)/category.thisMonthBudget | percentage }})</span>
+            </span>
           </v-tooltip>
+          <v-progress-linear
+            class="ma-0"
+            :height="6"
+            v-if="category.budgetSoFar != 0 && category.thisMonthYetScheduledSum > 0"
+            :value="100*(category.thisMonthTransactionsSum+category.thisMonthYetScheduledSum)/category.thisMonthBudget"
+            :color="conditionalColor(100*(1-(category.thisMonthTransactionsSum+category.thisMonthYetScheduledSum)/category.thisMonthBudget))"
+          ></v-progress-linear>
         </v-flex>
 
         <v-flex
@@ -100,27 +131,44 @@
           v-if="$vuetify.breakpoint.xsOnly"
         >{{$t("categories.yearBalance")}}</v-flex>
         <v-flex :key="index+'_year'" sm3 xs6>
-          <div
-            v-if="category.thisYearBudget != 0"
-            class="text-xs-center caption"
-          >
-          <v-animated-number
-                    :value="category.leftToEndOfYear"
-                    :formatValue="formatAmount"
-                    :duration="300"
-                  />
+          <div v-if="category.thisYearBudget != 0" class="text-xs-center caption">
+            <v-animated-number
+              :value="category.leftToEndOfYear"
+              :formatValue="formatAmount"
+              :duration="300"
+            />
+            <span v-if="category.thisYearYetScheduledSum > 0" class="grey--text font-italic"> (
+              <v-animated-number              
+              :value="category.leftToEndOfYear-category.thisYearYetScheduledSum"
+              :formatValue="formatAmount"
+              :duration="300"
+            />)
+            </span>
           </div>
           <v-tooltip bottom>
             <v-progress-linear
               class="ma-0"
               v-if="category.thisYearBudget != 0"
               slot="activator"
-              :height="15"
+              :height="category.thisYearYetScheduledSum > 0 ? 9 : 15"
               :value="100*category.leftToEndOfYear/category.thisYearBudget"
               :color="conditionalColor(100*category.leftToEndOfYear/category.thisYearBudget)"
             ></v-progress-linear>
-            <span>{{ category.leftToEndOfYear/category.thisYearBudget | percentage }}</span>
+            <span>
+              {{ category.leftToEndOfYear/category.thisYearBudget | percentage }}
+              <span
+                v-if="category.thisYearYetScheduledSum > 0"
+              >({{$t('transactionSchedules.inclScheduled')}}: {{ (category.leftToEndOfYear-category.thisYearYetScheduledSum)/category.thisYearBudget | percentage }})</span>
+            </span>
           </v-tooltip>
+
+          <v-progress-linear
+            class="ma-0"
+            :height="6"
+            v-if="category.budgetSoFar != 0 && category.thisYearYetScheduledSum > 0"
+            :value="100*(category.leftToEndOfYear-category.thisYearYetScheduledSum)/category.thisYearBudget"
+            :color="conditionalColor(100*(category.leftToEndOfYear-category.thisYearYetScheduledSum)/category.thisYearBudget)"
+          ></v-progress-linear>
         </v-flex>
       </template>
     </v-layout>
@@ -157,8 +205,11 @@ export default {
       }
     },
     formatAmount(value) {
-      return this.$options.filters.currency(value, this.$currencies[this.dataBudget.currency])
-    },
+      return this.$options.filters.currency(
+        value,
+        this.$currencies[this.dataBudget.currency]
+      );
+    }
   }
 };
 </script>
