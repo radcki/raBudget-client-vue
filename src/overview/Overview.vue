@@ -27,7 +27,7 @@
               :data-budget="budget"
               v-show="newEntryVisible == 'manual' "
               :input-data="newEntryInputData"
-              v-on:saved="reloadInitialized();fetchTransactions();"
+              v-on:saved="reloadInitialized();fetchTransactions();fetchClosestScheduledTransactions();"
             ></v-new-entry>
 
             <v-scheduled-transactions-list
@@ -320,7 +320,9 @@ export default {
         });
     },
     passScheduledToEditor(transaction){
-      this.newEntryInputData = transaction
+      this.newEntryInputData = null
+      this.$nextTick(function(){this.newEntryInputData = transaction})
+      
       this.newEntryVisible = 'manual'
     }
   }

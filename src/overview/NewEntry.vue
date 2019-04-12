@@ -81,8 +81,47 @@
                     step="0.01"
                   ></v-text-field>
                 </v-flex>
-                <v-flex xs12>
-                  <v-checkbox hide-details v-model="createSchedule" :label="$t('transactionSchedules.create')"></v-checkbox>
+                <v-flex xs12 v-if="tab!=3">
+                  <v-checkbox
+                    hide-details
+                    :disabled="addScheduleDisabled"
+                    v-model="createSchedule"
+                    :label="$t('transactionSchedules.create')"
+                  ></v-checkbox>
+                </v-flex>
+                <v-flex xs12 align-self-end v-if="createSchedule == true && tab!=3">
+                  <v-layout row align-end>
+                    <v-flex>{{$t("general.every")}}</v-flex>
+                    <v-flex>
+                      <v-text-field
+                        hide-details
+                        type="number"
+                        :rules="createSchedule == true ? requiredRule : []"
+                        min="1"
+                        step="1"
+                        v-model="editor.periodStep"
+                      ></v-text-field>
+                    </v-flex>
+                    <v-flex>
+                      <v-select
+                        hide-details
+                        :rules="createSchedule == true ? requiredRule : []"
+                        v-model="editor.frequency"
+                        :items="occurrenceFrequencies"
+                      >
+                        <template slot="selection" slot-scope="{item}">{{ $t(item.text) }}</template>
+                        <template slot="item" slot-scope="data">{{ $t(data.item.text) }}</template>
+                      </v-select>
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+                <v-flex xs12 v-if="createSchedule == true && tab!=3">
+                  <v-date-field
+                    v-model="editor.endDate"
+                    :label="$t('transactionSchedules.endDate')"
+                    hide-details
+                    clearable
+                  ></v-date-field>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -90,6 +129,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
+          <v-btn :color="color[tab]" flat dark @click="resetForm">{{ $t('general.reset') }}</v-btn>
           <v-btn
             :color="color[tab]"
             dark
@@ -210,10 +250,12 @@
 <script>
 import { transactionsService } from "../_services/transactions.service";
 import { allocationsService } from "../_services/allocations.service";
+import { transactionSchedulesService } from "../_services/transactionSchedules.service"; 
 
 export default {
   components: {
-    "v-category-select": () => import("../components/CategorySelect")
+    "v-category-select": () => import("../components/CategorySelect"),
+    "v-date-field": () => import("../components/DateField")
   },
   props: {
     dialog: Boolean,
@@ -238,15 +280,24 @@ export default {
         sourceCategory: null,
         date: this.getDate(),
         description: null,
-        amount: null
+        amount: null,
+        endDate: null,
+        frequency: 3,
+        periodStep: 1
       },
       createSchedule: false,
+      addScheduleDisabled: false,
       tab: 0,
       color: [
         "amber darken-1",
         "green darken-1",
         "blue darken-1",
         "purple darken-1"
+      ],
+      occurrenceFrequencies: [
+        { value: 1, text: "transactionSchedules.day" },
+        { value: 2, text: "transactionSchedules.week" },
+        { value: 3, text: "transactionSchedules.month" }
       ],
       requiredRule: [v => !!v || this.$t("forms.requiredField")]
     };
@@ -256,7 +307,6 @@ export default {
       if (this.editor.category && this.editor.category.type != this.tab) {
         this.editor.category = null;
       }
-
       return this.tab == 0 || this.tab == 3
         ? "spending"
         : this.tab == 1
@@ -277,7 +327,7 @@ export default {
         this.$wait.end("dialog");
       }
     },
-    inputData: function(data) {
+    inputData: function(data) {    
       if (!data) {
         return;
       }
@@ -285,6 +335,8 @@ export default {
       this.editor = JSON.parse(JSON.stringify(data));
       this.editor.date = this.$moment(this.editor.date).format("YYYY-MM-DD");
       this.editor.category = data.category;
+      this.createSchedule = false;
+      this.addScheduleDisabled = true;
     }
   },
   beforeDestroy: function() {
@@ -301,17 +353,15 @@ export default {
     },
     createTransaction() {
       if (this.$refs.editorForm.validate()) {
+
+        if (this.createSchedule && !this.editor.transactionSchedule) {
+          this.createTransactionSchedule(this.editor)
+        }
         transactionsService.createTransaction(this.editor).then(response => {
           if (response.ok) {
             this.$emit("saved");
             this.editorDialog = false;
-            this.editor = {
-              category: null,
-              date: this.getDate(),
-              description: null,
-              amount: null
-            };
-            this.$refs.editorForm.resetValidation();
+            this.resetForm();
           } else {
             response.json().then(data => {
               this.dispatchError(data.message);
@@ -320,19 +370,31 @@ export default {
         });
       }
     },
+    createTransactionSchedule: function(scheduleData) {
+      this.$wait.start("saving.transactionSchedules");
+
+      scheduleData.budgetCategory = scheduleData.category
+      scheduleData.startDate = scheduleData.date
+      transactionSchedulesService
+        .createTransactionSchedule(scheduleData)
+        .then(response => {
+          if (response.ok) {
+            this.$wait.end("saving.transactionSchedules");
+          } else {
+            response.json().then(data => {
+              this.$wait.end("saving.transactionSchedules");
+              this.dispatchError(data.message);
+            });
+          }
+        });
+    },
     createAllocation() {
       if (this.$refs.editorForm.validate()) {
         allocationsService.createAllocation(this.editor).then(response => {
           if (response.ok) {
             this.$emit("saved");
             this.editorDialog = false;
-            this.editor = {
-              category: null,
-              date: this.getDate(),
-              description: null,
-              amount: null
-            };
-            this.$refs.editorForm.resetValidation();
+            this.resetForm();
           } else {
             response.json().then(data => {
               this.dispatchError(data.message);
@@ -340,6 +402,21 @@ export default {
           }
         });
       }
+    },
+    resetForm() {
+      this.editor = {
+        category: null,
+        sourceCategory: null,
+        date: this.getDate(),
+        description: null,
+        amount: null,
+        endDate: null,
+        frequency: 3,
+        periodStep: 1
+      };
+      this.createSchedule = false;
+      this.addScheduleDisabled = false;
+      this.$refs.editorForm.resetValidation();
     }
   }
 };

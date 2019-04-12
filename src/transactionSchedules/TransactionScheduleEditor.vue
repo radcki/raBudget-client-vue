@@ -77,14 +77,14 @@
               </v-flex>
               <v-flex xs6 align-self-end>
                 <v-layout row align-end>
-                  <v-flex>Co</v-flex>
+                  <v-flex>{{$t("general.every")}}</v-flex>
                   <v-flex>
                     <v-text-field
                       hide-details
                       :disabled="frequencyCombo == 'once'"
                       type="number"
                       :rules="requiredRule"
-                      min="0"
+                      min="1"
                       step="1"
                       v-model="editor.periodStep"
                     ></v-text-field>

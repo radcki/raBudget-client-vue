@@ -97,7 +97,9 @@
         "budgets": "Budgets",
         "sum": "Sum",
         "refresh": "Refresh",
-        "selectAll": "Select all"
+        "selectAll": "Select all",
+        "every": "Every",
+        "reset": "Reset"
     },
     "forms": {
         "requiredField": "Field is required.",
@@ -164,7 +166,8 @@
         "baseAmount": "Base amount",
         "addOrDelete": "Add or subtract from ammount",
         "finalAmount": "Final amount",
-        "deleteConfirm": "Are you sure to remove transaction? Operation cannot be undone!"
+        "deleteConfirm": "Are you sure to remove transaction? Operation cannot be undone!",
+        "saveTransaction": "Save transaction"
     },
     "allocations": {
         "recentAllocations": "Recent allocations",
@@ -203,5 +206,23 @@
         "selectCategory": "Select at least one category to view chart",
         "periodSummary": "Period summary",
         "monthByMonth": "Month by month"
+    },    
+    "transactionSchedules": {
+        "transactionSchedules": "Scheduled transactions",
+        "editing": "Transaction schedule edit",
+        "periodic": "Periodically",
+        "once": "Once",
+        "day": "Day",
+        "week": "Week",
+        "month": "Month",
+        "anually": "anually",
+        "frequency": "Frequency",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "totalAmount": "Total amount",
+        "invalidPeriodStep": "Invalid period step",
+        "inclScheduled": "inc. scheduled",
+        "create": "Create transaction schedule",
+        "deleteConfirm": "Are you sure to delete transaction schedule? This operation cannnot be undone!"
     }
 }

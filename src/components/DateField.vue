@@ -14,6 +14,7 @@
                         :clearable="clearable"
                         :label="label"
                         :rules="rules"
+                        :hide-details="hideDetails"
                         prepend-icon="event"
                         :prepend-inner-icon="readonly ? 'lock' : ''"
                         readonly>
@@ -26,7 +27,7 @@
  
 export default {
   name: "VDateField",
-  props: ["value", "label", "rules", "clearable","readonly"],
+  props: ["value", "label", "rules", "clearable","readonly","hideDetails"],
  
   data: () => ({
       date: null,

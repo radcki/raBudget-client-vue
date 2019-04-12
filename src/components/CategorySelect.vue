@@ -81,7 +81,7 @@ export default {
     },
     data() {
         return {
-            model : this.value,
+            model: this.value,
             requiredRule: [v => !!v || this.$t("forms.requiredField")]
         }        
     },

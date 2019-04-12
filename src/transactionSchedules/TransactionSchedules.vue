@@ -140,7 +140,7 @@
 
               <v-icon
                 color="red darken-1"
-                @click="deleteTransaction(props.item.transactionId)"
+                @click="deleteSchedule(props.item.transactionScheduleId)"
               >delete</v-icon>
             </td>
           </template>
@@ -151,7 +151,7 @@
 </template>
 
 <script>
-import { transactionSchedulesService } from "../_services/transactionSchedules.service";
+import { transactionSchedulesService } from "../_services/transactionSchedules.service"; 
 import { mapState, mapActions } from "vuex";
 
 export default {
@@ -306,6 +306,26 @@ export default {
             response.json().then(data => {
               this.$wait.end("saving.transactionSchedules");
               this.dispatchError(data.message);
+            });
+          }
+        });
+    },
+    deleteSchedule: function(scheduleId){
+      this.$root
+        .$confirm("general.remove", "transactionSchedules.deleteConfirm", {
+          color: "red",
+          buttons: { yes: true, no: true, cancel: false, ok: false }
+        })
+        .then(confirm => {
+          if (confirm) {
+            transactionSchedulesService.deleteTransactionSchedule(scheduleId, false).then(response => {
+              if (response.ok) {
+                this.fetchTransactionSchedules();
+              } else {
+                response.json().then(data => {
+                  this.dispatchError(data.message);
+                });
+              }
             });
           }
         });

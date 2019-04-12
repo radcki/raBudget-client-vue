@@ -5,7 +5,7 @@
     </v-list-tile>
 
       <v-list-tile
-        :key="'tr_' + transaction.transactionId"
+        :key="'tr_' + transaction.transactionSchedule.transactionScheduleId  + transaction.date"
         v-for="(transaction, i) in items"
         avatar
         class="pb-1"

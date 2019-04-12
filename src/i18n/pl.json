@@ -97,7 +97,9 @@
         "budgets": "Budżety",
         "sum": "Suma",
         "refresh": "Odśwież",
-        "selectAll": "Wszystko"
+        "selectAll": "Wszystko",
+        "every": "Co",
+        "reset": "Resetuj"
     },
     "forms": {
         "requiredField": "Pole jest wymagane.",
@@ -220,6 +222,7 @@
         "totalAmount": "Kwota całkowita",
         "invalidPeriodStep": "Niepoprawna wartość częstotliwości",
         "inclScheduled": "uwzgl. zaplanowane",
-        "create": "Utwórz zaplanowaną transakcję"
+        "create": "Utwórz zaplanowaną transakcję",
+        "deleteConfirm": "Czy napewno chcesz usunąć zaplanowaną transakcję? Operacji nie można cofnąć!"
     }
 }
