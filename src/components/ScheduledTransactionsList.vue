@@ -3,7 +3,7 @@
     <v-list-tile class="grey darken-2 py-1">
       <v-list-tile-title class="subheading white--text">{{ title }}</v-list-tile-title>
     </v-list-tile>
-
+    <div :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
       <v-list-tile
         :key="'tr_' + transaction.transactionSchedule.transactionScheduleId  + transaction.date"
         v-for="(transaction, i) in items"
@@ -22,11 +22,15 @@
         </v-list-tile-content>
         <v-list-tile-action>
           <v-tooltip top>
-          <v-icon slot="activator" color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
-          <span>{{$t('transactions.saveTransaction')}}</span>
+            <v-icon slot="activator" color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
+            <span>{{$t('transactions.saveTransaction')}}</span>
           </v-tooltip>
         </v-list-tile-action>
       </v-list-tile>
+    </div>
+  </v-list>
+</template>
+      
   </v-list>
 </template>
 <script>
@@ -42,7 +46,8 @@ export default {
     },
     title: {
       type: String
-    }
+    },
+    maxHeight: { type: String }
   },
   data: function() {
     return {
@@ -50,9 +55,8 @@ export default {
         0: "amber darken-1",
         1: "green darken-1",
         2: "blue darken-1"
-      },
-
+      }
     };
-  },
+  }
 };
 </script>

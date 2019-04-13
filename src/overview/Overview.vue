@@ -31,8 +31,19 @@
             ></v-new-entry>
 
             <v-scheduled-transactions-list
+              max-height="350"
               :items="closestScheduledTransactions"
               v-show="newEntryVisible == 'scheduled' "
+              :data-budget="budget"
+              :title="$t('transactionSchedules.transactionSchedules')"
+              v-on:create="passScheduledToEditor"
+            ></v-scheduled-transactions-list>
+          </v-flex>
+
+          <v-flex xs12 v-if="$vuetify.breakpoint.xsOnly" class="py-3">
+            <v-scheduled-transactions-list
+              max-height="150"
+              :items="closestScheduledTransactions"
               :data-budget="budget"
               :title="$t('transactionSchedules.transactionSchedules')"
               v-on:create="passScheduledToEditor"
@@ -165,9 +176,11 @@
 
     <v-new-entry
       v-if="$vuetify.breakpoint.xs"
+      ref="newEntryDialog"
       dialog
       :data-budget="budget"
       v-on:saved="reloadInitialized();fetchTransactions();"
+      :input-data="newEntryInputData"
     >
       <v-btn v-if="$vuetify.breakpoint.xs" fixed dark fab bottom right color="pink">
         <v-icon>add</v-icon>
@@ -236,12 +249,7 @@ export default {
   },
   mounted: function() {
     this.activeBudgetChange(this.$route.params.id);
-    setTimeout(() => {
-      this.initializeCategoriesBalance();
-      this.initializeUnassignedFunds();
-    }, 300);
 
-    this.fetchClosestScheduledTransactions();
     this.$store.dispatch("transactions/setFilters", {
       budgetId: this.$route.params.id,
       limitCount: 8,
@@ -249,6 +257,14 @@ export default {
       endDate: null,
       categories: null
     });
+    
+    setTimeout(() => {
+      this.initializeCategoriesBalance();
+      this.initializeUnassignedFunds();
+    }, 300);
+
+    this.fetchClosestScheduledTransactions();
+    
   },
   watch: {
     $route(to, from) {
@@ -324,6 +340,9 @@ export default {
       this.$nextTick(function(){this.newEntryInputData = transaction})
       
       this.newEntryVisible = 'manual'
+      if (this.$vuetify.breakpoint.xs){
+          this.$refs.newEntryDialog.editorDialog = true;
+      }
     }
   }
 };

@@ -223,6 +223,7 @@
         "invalidPeriodStep": "Niepoprawna wartość częstotliwości",
         "inclScheduled": "uwzgl. zaplanowane",
         "create": "Utwórz zaplanowaną transakcję",
-        "deleteConfirm": "Czy napewno chcesz usunąć zaplanowaną transakcję? Operacji nie można cofnąć!"
+        "deleteConfirm": "Czy napewno chcesz usunąć zaplanowaną transakcję? Operacji nie można cofnąć!",
+        "start": "Data pocz."
     }
 }

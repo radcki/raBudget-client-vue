@@ -223,6 +223,7 @@
         "invalidPeriodStep": "Invalid period step",
         "inclScheduled": "inc. scheduled",
         "create": "Create transaction schedule",
-        "deleteConfirm": "Are you sure to delete transaction schedule? This operation cannnot be undone!"
+        "deleteConfirm": "Are you sure to delete transaction schedule? This operation cannnot be undone!",
+        "start": "Start"
     }
 }

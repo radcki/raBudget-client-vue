@@ -23,8 +23,8 @@ function createTransactionSchedule (data) {
       startDate: data.startDate,
       endDate: data.endDate,
       budgetCategory: data.budgetCategory,
-      frequency: data.frequency,
-      periodStep: data.periodStep,
+      frequency: data.frequency || 0,
+      periodStep: data.periodStep || 1,
       step: data.step
     })
   }
@@ -44,8 +44,8 @@ function updateTransactionSchedule (data) {
       startDate: data.startDate,
       endDate: data.endDate,
       budgetCategory: data.budgetCategory,
-      frequency: data.frequency,
-      periodStep: data.periodStep,
+      frequency: data.frequency || 0,
+      periodStep: data.periodStep || 1,
       transactionScheduleId: data.transactionScheduleId,
       step: data.step
     })
@@ -87,7 +87,7 @@ function listClosestOccurrences (budgetId, endDate) {
     method: 'GET',
     params: { endDate: endDate, budgetId: budgetId }
   }
-  var url = new URL(`${config.apiUrl}/transactionSchedules/closest-transactions`)
+  var url = new URL(`${config.apiUrl}/transactionSchedules/closest-transactions`, document.location)
   var params = { endDate: endDate, budgetId: budgetId }
 
   url.search = new URLSearchParams(params)

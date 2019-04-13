@@ -239,6 +239,48 @@
                   step="0.01"
                 ></v-text-field>
               </v-flex>
+              <v-flex xs12 v-if="tab!=3">
+                  <v-checkbox
+                    hide-details
+                    :disabled="addScheduleDisabled"
+                    v-model="createSchedule"
+                    :label="$t('transactionSchedules.create')"
+                  ></v-checkbox>
+                </v-flex>
+                <v-flex xs12 align-self-end v-if="createSchedule == true && tab!=3">
+                  <v-layout row align-end>
+                    <v-flex>{{$t("general.every")}}</v-flex>
+                    <v-flex>
+                      <v-text-field
+                        hide-details
+                        type="number"
+                        :rules="createSchedule == true ? requiredRule : []"
+                        min="1"
+                        step="1"
+                        v-model="editor.periodStep"
+                      ></v-text-field>
+                    </v-flex>
+                    <v-flex>
+                      <v-select
+                        hide-details
+                        :rules="createSchedule == true ? requiredRule : []"
+                        v-model="editor.frequency"
+                        :items="occurrenceFrequencies"
+                      >
+                        <template slot="selection" slot-scope="{item}">{{ $t(item.text) }}</template>
+                        <template slot="item" slot-scope="data">{{ $t(data.item.text) }}</template>
+                      </v-select>
+                    </v-flex>
+                  </v-layout>
+                </v-flex>
+                <v-flex xs12 v-if="createSchedule == true && tab!=3">
+                  <v-date-field
+                    v-model="editor.endDate"
+                    :label="$t('transactionSchedules.endDate')"
+                    hide-details
+                    clearable
+                  ></v-date-field>
+                </v-flex>
             </v-layout>
           </v-container>
         </v-form>
@@ -323,6 +365,7 @@ export default {
     editorDialog(open) {
       if (open) {
         this.$wait.start("dialog");
+        this.resetForm(); 
       } else {
         this.$wait.end("dialog");
       }
@@ -416,7 +459,9 @@ export default {
       };
       this.createSchedule = false;
       this.addScheduleDisabled = false;
-      this.$refs.editorForm.resetValidation();
+      if (this.$refs.editorForm){
+        this.$refs.editorForm.resetValidation();
+      }
     }
   }
 };

@@ -75,11 +75,12 @@
         </v-card>
       </v-flex>
 
-      <v-flex xs9 v-if="transactionSchedules || $wait.is('loading.*')">
+      <v-flex xs12 v-if="transactionSchedules || $wait.is('loading.*')">
         <v-subheader class="headline">{{$t('general.foundData')}}</v-subheader>
       </v-flex>
 
-      <v-flex xs3 class="text-xs-right">
+      <v-flex xs12 class="text-xs-right">
+        <v-spacer></v-spacer>
         <v-transaction-schedule-editor v-on:save="createSchedule" :data-budget="budget">
           <v-btn color="green darken-1" dark>
             <v-icon left>add_circle_outline</v-icon>
@@ -127,31 +128,109 @@
             </td>
             <td>{{ props.item.startDate | moment("dddd, D.MM.YYYY") }}</td>
             <td>{{ props.item.endDate | moment("dddd, D.MM.YYYY") }}</td>
-            <td>Co {{ props.item.periodStep }}: {{ $t(occurrenceFrequencies.find(v=>v.value==props.item.frequency).text) }}</td>
+            <td>
+              <span
+                v-if="props.item.frequency > 0"
+              >{{$t('general.every')}} {{ props.item.periodStep }}:</span>
+              {{ $t(occurrenceFrequencies.find(v=>v.value==props.item.frequency).text) }}
+            </td>
             <td>{{ props.item.description }}</td>
 
             <td>{{ props.item.amount | currency($currencies[budget.currency]) }}</td>
             <td>
-              <v-transaction-schedule-editor v-on:save="updateSchedule" :value="props.item" :data-budget="budget">
+              <v-transaction-schedule-editor
+                v-on:save="updateSchedule"
+                :value="props.item"
+                :data-budget="budget"
+              >
                 <v-btn color="primary" dark icon flat>
                   <v-icon>edit</v-icon>
                 </v-btn>
               </v-transaction-schedule-editor>
 
-              <v-icon
+              <v-btn
                 color="red darken-1"
+                dark
+                icon
+                flat
                 @click="deleteSchedule(props.item.transactionScheduleId)"
-              >delete</v-icon>
+              >
+                <v-icon>delete</v-icon>
+              </v-btn>
             </td>
           </template>
         </v-data-table>
+
+        <v-list v-if="!$vuetify.breakpoint.smAndUp" dense subheader>
+          <template v-for="(transaction, index) in transactionSchedules">
+            <v-list-tile :key="index" avatar class="pb-1">
+              <v-list-tile-avatar>
+                <v-icon>{{ transaction.budgetCategory.icon }}</v-icon>
+              </v-list-tile-avatar>
+
+              <v-list-tile-content>
+                <v-list-tile-title class="font-weight-medium">
+                  {{ transaction.description}} - <span class="grey--text text--darken-1 caption">{{$t('transactionSchedules.start')}}: {{transaction.startDate | moment("D.MM.YYYY")}}</span>
+                </v-list-tile-title>
+
+                <v-list-tile-sub-title
+                  class="text--primary"
+                >{{transaction.amount | currency($currencies[budget.currency])}}
+                <span class="grey--text text--lighten-1 caption">
+                    -
+                    <span v-if="transaction.frequency > 0">
+                      {{$t('general.every')}} {{ transaction.periodStep }}:
+                      </span>
+                    {{ $t(occurrenceFrequencies.find(v=>v.value==transaction.frequency).text) }}
+                  </span>
+                </v-list-tile-sub-title>
+              </v-list-tile-content>
+
+              <v-list-tile-action>
+                <v-menu>
+                  <v-btn slot="activator" icon>
+                    <v-icon>more_vert</v-icon>
+                  </v-btn>
+                  <v-list single-line dense light>
+                    <v-list-tile>
+                      <v-list-tile-avatar>
+                        <v-transaction-schedule-editor
+                          v-on:save="updateSchedule"
+                          :value="transaction"
+                          :data-budget="budget"
+                        >
+                          <v-btn color="primary" dark icon flat>
+                            <v-icon small>edit</v-icon>
+                          </v-btn>
+                        </v-transaction-schedule-editor>
+                      </v-list-tile-avatar>
+                    </v-list-tile>
+                    <v-list-tile>
+                      <v-list-tile-avatar>
+                        <v-btn
+                          color="red darken-1"
+                          dark
+                          icon
+                          flat
+                          @click="deleteSchedule(props.item.transactionScheduleId)"
+                        >
+                          <v-icon>delete</v-icon>
+                        </v-btn>
+                      </v-list-tile-avatar>
+                    </v-list-tile>
+                  </v-list>
+                </v-menu>
+              </v-list-tile-action>
+            </v-list-tile>
+          </template>
+        </v-list>
       </v-flex>
     </v-layout>
   </v-container>
 </template>
 
 <script>
-import { transactionSchedulesService } from "../_services/transactionSchedules.service"; 
+import { transactionSchedulesService } from "../_services/transactionSchedules.service";
 import { mapState, mapActions } from "vuex";
 
 export default {
@@ -173,6 +252,7 @@ export default {
       startDateMenu: false,
       endDateMenu: false,
       occurrenceFrequencies: [
+        { value: 0, text: "transactionSchedules.once" },
         { value: 1, text: "transactionSchedules.day" },
         { value: 2, text: "transactionSchedules.week" },
         { value: 3, text: "transactionSchedules.month" }
@@ -310,7 +390,7 @@ export default {
           }
         });
     },
-    deleteSchedule: function(scheduleId){
+    deleteSchedule: function(scheduleId) {
       this.$root
         .$confirm("general.remove", "transactionSchedules.deleteConfirm", {
           color: "red",
@@ -318,15 +398,17 @@ export default {
         })
         .then(confirm => {
           if (confirm) {
-            transactionSchedulesService.deleteTransactionSchedule(scheduleId, false).then(response => {
-              if (response.ok) {
-                this.fetchTransactionSchedules();
-              } else {
-                response.json().then(data => {
-                  this.dispatchError(data.message);
-                });
-              }
-            });
+            transactionSchedulesService
+              .deleteTransactionSchedule(scheduleId, false)
+              .then(response => {
+                if (response.ok) {
+                  this.fetchTransactionSchedules();
+                } else {
+                  response.json().then(data => {
+                    this.dispatchError(data.message);
+                  });
+                }
+              });
           }
         });
     }

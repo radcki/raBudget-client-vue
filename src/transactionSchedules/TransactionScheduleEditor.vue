@@ -75,25 +75,25 @@
                   <v-radio :label="$t('transactionSchedules.periodic')" value="periodic"></v-radio>
                 </v-radio-group>
               </v-flex>
-              <v-flex xs6 align-self-end>
+              <v-flex xs12 md6 align-self-end>
                 <v-layout row align-end>
-                  <v-flex>{{$t("general.every")}}</v-flex>
-                  <v-flex>
+                  <v-flex xs>{{$t("general.every")}}</v-flex>
+                  <v-flex xs>
                     <v-text-field
                       hide-details
                       :disabled="frequencyCombo == 'once'"
                       type="number"
-                      :rules="requiredRule"
+                      :rules="frequencyCombo != 'once' ? requiredRule : []"
                       min="1"
                       step="1"
                       v-model="editor.periodStep"
                     ></v-text-field>
                   </v-flex>
-                  <v-flex>
+                  <v-flex xs>
                     <v-select
                       hide-details
                       :disabled="frequencyCombo == 'once'"
-                      :rules="requiredRule"
+                      :rules="frequencyCombo != 'once' ? requiredRule : []"
                       v-model="editor.frequency"
                       :items="occurrenceFrequencies"
                     >
@@ -286,8 +286,11 @@ export default {
   },
   methods: {
     save() {
+        console.log("save")
+
       if (this.$refs.editor.validate()) {
         this.dialog = false;
+        console.log("emit")
         this.$emit("save", this.editor);
       }
     },
