@@ -123,7 +123,7 @@
         >
           <template slot="items" slot-scope="props">
             <td>
-              <v-icon class="px-2">{{ props.item.budgetCategory.icon }}</v-icon>
+              <v-icon class="px-2" :color="typeColors[props.item.budgetCategory.type]">{{ props.item.budgetCategory.icon }}</v-icon>
               {{ props.item.budgetCategory.name }}
             </td>
             <td>{{ props.item.startDate | moment("dddd, D.MM.YYYY") }}</td>
@@ -165,7 +165,7 @@
           <template v-for="(transaction, index) in transactionSchedules">
             <v-list-tile :key="index" avatar class="pb-1">
               <v-list-tile-avatar>
-                <v-icon>{{ transaction.budgetCategory.icon }}</v-icon>
+                <v-icon :color="typeColors[transaction.budgetCategory.type]">{{ transaction.budgetCategory.icon }}</v-icon>
               </v-list-tile-avatar>
 
               <v-list-tile-content>
@@ -251,6 +251,11 @@ export default {
       search: null,
       startDateMenu: false,
       endDateMenu: false,
+      typeColors: {
+        0: "amber darken-1",
+        1: "green darken-1",
+        2: "blue darken-1"
+      },
       occurrenceFrequencies: [
         { value: 0, text: "transactionSchedules.once" },
         { value: 1, text: "transactionSchedules.day" },
