@@ -253,6 +253,22 @@ export default {
     dialog(open) {
       if (open) {
         this.$wait.start("dialog");
+        this.editor = {
+          ...{
+            transactionScheduleId: null,
+            description: null,
+            budgetCategory: null,
+            amount: null,
+            startDate: this.$moment().format("YYYY-MM-DD"),
+            endDate: null,
+            frequency: 0,
+            periodStep: null
+          },
+          ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
+        }
+        if (this.$refs.editor){
+          this.$refs.editor.resetValidation()
+        }
       } else {
         this.$wait.end("dialog");
       }
@@ -286,11 +302,8 @@ export default {
   },
   methods: {
     save() {
-        console.log("save")
-
       if (this.$refs.editor.validate()) {
         this.dialog = false;
-        console.log("emit")
         this.$emit("save", this.editor);
       }
     },

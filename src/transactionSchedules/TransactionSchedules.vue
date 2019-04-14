@@ -89,12 +89,13 @@
         </v-transaction-schedule-editor>
       </v-flex>
 
-      <v-flex
-        xs12
-        v-if="$wait.is('loading.*') && !$vuetify.breakpoint.smAndUp"
-        class="text-xs-center"
-      >
-        <v-progress-circular :size="70" :width="7" color="amber darken-3" indeterminate></v-progress-circular>
+      <v-flex xs12 v-if="$wait.is('loading.*') && !$vuetify.breakpoint.smAndUp" class="text-xs-center">
+        <v-progress-circular
+          :size="70"
+          :width="7"
+          color="amber darken-3"
+          indeterminate
+        ></v-progress-circular>
       </v-flex>
 
       <v-flex xs12 class="elevation-1 white" v-if="transactionSchedules">
@@ -123,7 +124,10 @@
         >
           <template slot="items" slot-scope="props">
             <td>
-              <v-icon class="px-2" :color="typeColors[props.item.budgetCategory.type]">{{ props.item.budgetCategory.icon }}</v-icon>
+              <v-icon
+                class="px-2"
+                :color="typeColors[props.item.budgetCategory.type]"
+              >{{ props.item.budgetCategory.icon }}</v-icon>
               {{ props.item.budgetCategory.name }}
             </td>
             <td>{{ props.item.startDate | moment("dddd, D.MM.YYYY") }}</td>
@@ -163,24 +167,30 @@
 
         <v-list v-if="!$vuetify.breakpoint.smAndUp" dense subheader>
           <template v-for="(transaction, index) in transactionSchedules">
-            <v-list-tile :key="index" avatar class="pb-1">
+            <v-list-tile :key="transaction.transactionScheduleId + '.' + index" avatar class="pb-1">
               <v-list-tile-avatar>
-                <v-icon :color="typeColors[transaction.budgetCategory.type]">{{ transaction.budgetCategory.icon }}</v-icon>
+                <v-icon
+                  :color="typeColors[transaction.budgetCategory.type]"
+                >{{ transaction.budgetCategory.icon }}</v-icon>
               </v-list-tile-avatar>
 
               <v-list-tile-content>
                 <v-list-tile-title class="font-weight-medium">
-                  {{ transaction.description}} - <span class="grey--text text--darken-1 caption">{{$t('transactionSchedules.start')}}: {{transaction.startDate | moment("D.MM.YYYY")}}</span>
+                  {{ transaction.description}} -
+                  <span
+                    class="grey--text text--darken-1 caption"
+                  >{{$t('transactionSchedules.start')}}: {{transaction.startDate | moment("D.MM.YYYY")}}</span>
                 </v-list-tile-title>
 
-                <v-list-tile-sub-title
-                  class="text--primary"
-                >{{transaction.amount | currency($currencies[budget.currency])}}
-                <span class="grey--text text--lighten-1 caption">
+                <v-list-tile-sub-title class="text--primary">
+                  {{transaction.amount | currency($currencies[budget.currency])}}
+                  <span
+                    class="grey--text text--lighten-1 caption"
+                  >
                     -
-                    <span v-if="transaction.frequency > 0">
-                      {{$t('general.every')}} {{ transaction.periodStep }}:
-                      </span>
+                    <span
+                      v-if="transaction.frequency > 0"
+                    >{{$t('general.every')}} {{ transaction.periodStep }}:</span>
                     {{ $t(occurrenceFrequencies.find(v=>v.value==transaction.frequency).text) }}
                   </span>
                 </v-list-tile-sub-title>
@@ -246,7 +256,7 @@ export default {
         startDate: null,
         endDate: null
       },
-      transactionSchedules: null,
+      transactionSchedules: [],
 
       search: null,
       startDateMenu: false,
@@ -377,6 +387,12 @@ export default {
               this.dispatchError(data.message);
             });
           }
+        })
+        .catch(error => {
+          this.$wait.end("saving.transactionSchedules");
+          error.json().then(data => {
+            this.dispatchError(data.message);
+          });
         });
     },
     updateSchedule: function(scheduleData) {
@@ -393,6 +409,12 @@ export default {
               this.dispatchError(data.message);
             });
           }
+        })
+        .catch(error => {
+          this.$wait.end("saving.transactionSchedules");
+          error.json().then(data => {
+            this.dispatchError(data.message);
+          });
         });
     },
     deleteSchedule: function(scheduleId) {
@@ -413,6 +435,12 @@ export default {
                     this.dispatchError(data.message);
                   });
                 }
+              })
+              .catch(error => {
+                this.$wait.end("saving.transactionSchedules");
+                error.json().then(data => {
+                  this.dispatchError(data.message);
+                });
               });
           }
         });
