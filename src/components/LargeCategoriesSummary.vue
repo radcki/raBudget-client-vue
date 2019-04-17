@@ -111,7 +111,7 @@
             ></v-progress-linear>
             <span>{{ category.thisMonthTransactionsSum/category.thisMonthBudget | percentage }}
               <span
-                v-if="category.thisYearYetScheduledSum > 0"
+                v-if="category.thisMonthYetScheduledSum > 0"
               >({{$t('transactionSchedules.inclScheduled')}}: {{ (category.thisMonthTransactionsSum+category.thisMonthYetScheduledSum)/category.thisMonthBudget | percentage }})</span>
             </span>
           </v-tooltip>
