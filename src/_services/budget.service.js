@@ -139,6 +139,7 @@ function getMonthlyReport(budgetId, startDate, endDate) {
 }
 
 function saveCategory (budgetId, category) {
+  category.categoryId = category.categoryId || 0
   const requestOptions = {
     method: 'POST',
     headers: {

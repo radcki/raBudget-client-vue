@@ -29,7 +29,7 @@
                 color-secondary="amber darken-3"
                 :items="categories.spending"
                 :data-budget="budget"                
-                categories-type="spending"
+                categories-type="0"
                 v-on:edit="editCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
@@ -45,7 +45,7 @@
                 color-secondary="light-green darken-4"
                 :items="categories.income"
                 :data-budget="budget"
-                categories-type="income"
+                categories-type="1"
                 v-on:edit="editCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
@@ -61,7 +61,7 @@
                 color-secondary="indigo darken-2"
                 :items="categories.saving"
                 :data-budget="budget"
-                categories-type="saving"
+                categories-type="2"
                 v-on:edit="editCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
@@ -182,7 +182,7 @@ export default {
                 ? "spending"
                 : category.type == 1
                   ? "income"
-                  : "savings";
+                  : "saving";
             if (this.categories[type].length == 1) {
               this.dispatchError("categories.oneRequired");
               return;

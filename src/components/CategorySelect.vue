@@ -8,6 +8,7 @@
         item-value="categoryId"
         return-object
         single-line
+        :clearable="clearable"
         :disabled="disabled"
         append-icon="keyboard_arrow_down"
         :class="!multiple ? '' : 'caption'"
@@ -77,7 +78,8 @@ export default {
         disabled: {
             type: Boolean,
             default: false
-        }
+        },
+        clearable: Boolean
     },
     data() {
         return {

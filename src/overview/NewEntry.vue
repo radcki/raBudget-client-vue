@@ -181,28 +181,10 @@
             <v-layout row wrap align-center justify-center>
               <v-flex xs12 class="mt-5"></v-flex>
               <v-flex xs12 class="mt-5">
-                <v-menu
-                  ref="dateMenu"
-                  :close-on-content-click="false"
-                  v-model="dateMenu"
-                  :nudge-right="40"
-                  :return-value.sync="editor.date"
-                  lazy
-                  transition="scale-transition"
-                  offset-y
-                  full-width
-                  min-width="290px"
-                >
-                  <v-text-field
-                    slot="activator"
+                <v-date-field
                     v-model="editor.date"
-                    :label="$t('transactions.date')"
-                    :rules="requiredRule"
-                    prepend-icon="event"
-                    readonly
-                  ></v-text-field>
-                  <v-date-picker v-model="editor.date" @input="$refs.dateMenu.save(editor.date)"></v-date-picker>
-                </v-menu>
+                    :label="$t('transactions.date')"                  
+                  ></v-date-field>
               </v-flex>
               <v-flex xs12 v-if="dataBudget">
                 <v-category-select
@@ -219,6 +201,7 @@
                   :items="dataBudget[selectedType+'Categories']"
                   v-if="dataBudget[selectedType+'Categories']"
                   :label="$t('categories.sourceCategory')"
+                  clearable
                   v-model="editor.sourceCategory"
                 ></v-category-select>
               </v-flex>
@@ -346,7 +329,7 @@ export default {
   },
   computed: {
     selectedType: function() {
-      if (this.editor.category && this.editor.category.type != this.tab) {
+      if (this.editor.category && this.editor.category.type != this.tab && (this.tab == 3 && this.editor.category.type != 0)) {
         this.editor.category = null;
       }
       return this.tab == 0 || this.tab == 3

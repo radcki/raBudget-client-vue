@@ -381,6 +381,7 @@ export default {
           if (response.ok) {
             this.$wait.end("saving.transactionSchedules");
             this.fetchTransactionSchedules();
+            this.reloadInitialized();
           } else {
             response.json().then(data => {
               this.$wait.end("saving.transactionSchedules");
@@ -403,6 +404,7 @@ export default {
           if (response.ok) {
             this.$wait.end("saving.transactionSchedules");
             this.fetchTransactionSchedules();
+            this.reloadInitialized();
           } else {
             response.json().then(data => {
               this.$wait.end("saving.transactionSchedules");
@@ -430,6 +432,7 @@ export default {
               .then(response => {
                 if (response.ok) {
                   this.fetchTransactionSchedules();
+                  this.reloadInitialized();
                 } else {
                   response.json().then(data => {
                     this.dispatchError(data.message);
