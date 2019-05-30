@@ -36,7 +36,8 @@ function createTransaction (transactionData) {
       description: transactionData.description,
       amount: transactionData.amount,
       date: transactionData.date,
-      category: transactionData.category
+      category: transactionData.category,
+      transactionSchedule: transactionData.transactionSchedule
     })
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/create`, requestOptions)
