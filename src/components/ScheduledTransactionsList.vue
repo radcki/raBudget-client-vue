@@ -2,7 +2,7 @@
   <v-list class="py-0 elevation-1" dense subheader>
     
 
-    <template v-if="$vuetify.breakpoint.lgAndUp">
+    <template v-if="$vuetify.breakpoint.mdAndUp">
       <v-list-tile class="grey darken-2 py-1">
         <v-list-tile-title class="subheading white--text">{{ title }}</v-list-tile-title>
       </v-list-tile>
@@ -67,8 +67,8 @@
   </v-list>
 </template>
       
-<style>
-.v-list__group__header__append-icon .v-icon {
+<style scoped>
+>>>.v-list__group__header__append-icon .v-icon {
   color: #ffffff;
 }
 </style>
@@ -98,6 +98,9 @@ export default {
       },
       expanded: true
     };
+  },
+  mounted: function() {
+    this.expanded = this.$vuetify.breakpoint.lgAndUp
   },
   watch: {
     "$vuetify.breakpoint.lgAndUp": function(desktop) {
