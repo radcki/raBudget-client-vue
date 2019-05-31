@@ -203,6 +203,12 @@
  </v-app>
 </template>
 
+<style>
+.white--icon .v-icon {
+  color: #ffffff;
+}
+</style>
+
 <script>
 import { mapState, mapActions } from "vuex";
 import { budgetService } from "./_services/budget.service";

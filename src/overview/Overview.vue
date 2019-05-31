@@ -197,6 +197,7 @@ import { transactionsService } from "../_services/transactions.service";
 import { allocationsService } from "../_services/allocations.service";
 import { mapState, mapActions, mapGetters } from "vuex";
 
+
 export default {
   name: "Overview",
   components: {

@@ -83,6 +83,14 @@ const webpackConfig = merge(baseWebpackConfig, {
           minChunks: 2,
           reuseExistingChunk: true,
           chunks: 'all'
+        },
+        styles: {
+          name: 'styles',
+          test: /\.s?css$/,
+          chunks: 'all',
+          minChunks: 1,
+          reuseExistingChunk: true,
+          enforce: true
         }
       }
     // eslint-disable-next-line no-trailing-spaces
@@ -104,7 +112,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       filename: 'service-worker.js',
       minify: true,
       stripPrefix: 'dist/'
-    }),    
+    }),
     // extract css into its own file
     new MiniCssExtractPlugin({
       filename: '[name].[hash].css',

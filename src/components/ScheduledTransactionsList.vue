@@ -33,7 +33,7 @@
       </div>
     </template>
 
-    <v-list-group class="grey darken-2" :value="expanded" v-else>
+    <v-list-group class="grey darken-2 white--icon" :value="expanded" v-else>
       <v-list-tile class="py-1" slot="activator">
         <v-list-tile-title class="subheading white--text">{{ title }}</v-list-tile-title>
       </v-list-tile>
@@ -67,12 +67,6 @@
   </v-list>
 </template>
       
-<style scoped>
->>>.v-list__group__header__append-icon .v-icon {
-  color: #ffffff;
-}
-</style>
-
 <script>
 export default {
   name: "VScheduledTransactionsList",
