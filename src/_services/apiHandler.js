@@ -4,7 +4,8 @@ export const apiHandler = {
   saveRefreshToken,
   saveClientId,
   logout,
-  fetchAuthorized
+  fetchAuthorized,
+  getAccessToken
 }
 
 function getAccessToken () {

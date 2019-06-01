@@ -27,7 +27,7 @@
               :data-budget="budget"
               v-show="newEntryVisible == 'manual' "
               :input-data="newEntryInputData"
-              v-on:saved="reloadInitialized();fetchTransactions();fetchClosestScheduledTransactions();"
+              v-on:saved="fetchClosestScheduledTransactions();"
             ></v-new-entry>
 
             <v-scheduled-transactions-list
@@ -295,7 +295,8 @@ export default {
         "transactions/fetchClosestScheduledTransactions",
       reloadInitialized: "budgets/reloadInitialized",
       activeBudgetChange: "budgets/activeBudgetChange",
-      fetchTransactions: "transactions/fetchTransactions"
+      fetchTransactions: "transactions/fetchTransactions",
+      unloadTransactionFromStore: "transactions/unloadTransactionFromStore"
     }),
     formatAmount(value) {
       return this.$options.filters.currency(
@@ -306,8 +307,6 @@ export default {
     editTransaction(id) {
       this.$refs.transactionEditor.open(id).then(response => {
         if (response && response.ok) {
-          this.reloadInitialized();
-          this.fetchTransactions();
         } else if (response) {
           response.json().then(data => {
             this.dispatchError(data.message);
@@ -325,8 +324,7 @@ export default {
           if (confirm) {
             transactionsService.deleteTransaction(id).then(response => {
               if (response.ok) {
-                this.reloadInitialized();
-                this.fetchTransactions();
+                this.unloadTransactionFromStore(id)
               } else {
                 response.json().then(data => {
                   this.dispatchError(data.message);

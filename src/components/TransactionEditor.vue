@@ -116,6 +116,8 @@
 
 <script>
 import { transactionsService } from "../_services/transactions.service.js";
+import { mapActions } from "vuex";
+
 export default {
   components: {
     "v-category-select": () => import("../components/CategorySelect")
@@ -167,6 +169,9 @@ export default {
     this.$wait.end("dialog");
   },
   methods: {
+    ...mapActions({
+      updateTransactionInStore: "transactions/updateTransactionInStore"
+    }),
     open(transactionId) {
       this.transactionId = transactionId;
       this.editor.modifyAmount = 0.0;
@@ -209,7 +214,12 @@ export default {
           description: this.editor.description,
           amount: this.amount
         };
-        transactionsService.updateTransaction(transaction).then(response => {
+        transactionsService.updateTransaction(transaction).then(response => {  
+          if (response.ok) {
+            response.json(data => {
+              this.updateTransactionInStore(data)
+            })
+          }        
           this.resolve(response);
         });
         this.dialog = false;

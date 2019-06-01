@@ -276,6 +276,7 @@
 import { transactionsService } from "../_services/transactions.service";
 import { allocationsService } from "../_services/allocations.service";
 import { transactionSchedulesService } from "../_services/transactionSchedules.service"; 
+import { mapActions } from "vuex";
 
 export default {
   components: {
@@ -374,6 +375,9 @@ export default {
     });
   },
   methods: {
+    ...mapActions({
+      loadTransactionToStore: "transactions/loadTransactionToStore"
+    }),
     getDate() {
       return this.$moment().format("YYYY-MM-DD");
     },
@@ -387,6 +391,8 @@ export default {
           if (response.ok) {
             this.$emit("saved");
             this.editorDialog = false;
+            this.editor.budget = {...this.dataBudget}
+            this.loadTransactionToStore(this.editor)
             this.resetForm();
           } else {
             response.json().then(data => {

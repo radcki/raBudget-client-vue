@@ -6,7 +6,7 @@ const state = {
   transactions: {
     incomes: [],
     savings: [],
-    spending: []
+    spendings: []
   },
   closestScheduledTransactions: [],
   loadFilters: null,
@@ -108,6 +108,40 @@ const actions = {
           })
         }
       })
+  },
+
+  unloadTransactionFromStore ({ state, commit, dispatch }, transactionId) {
+    var filteredSpendings = state.transactions.spendings.filter(v => v.transactionId != transactionId)
+    var filteredSavings = state.transactions.savings.filter(v => v.transactionId != transactionId)
+    var filteredIncomes = state.transactions.incomes.filter(v => v.transactionId != transactionId)
+
+    var countChanged = filteredSpendings.length < state.transactions.spendings.length ||
+      filteredSavings.length < state.transactions.savings.length ||
+      filteredIncomes.length < state.transactions.incomes.length
+
+    commit('setTransactions', {
+      incomes: filteredIncomes,
+      savings: filteredSavings,
+      spendings: filteredSpendings
+    })
+
+    if (state.filters.limitCount && countChanged) {
+      dispatch('fetchTransactions')
+    }
+    dispatch('budgets/reloadInitialized', null, { root: true })
+  },
+
+  loadTransactionToStore ({ state, dispatch }, newTransaction) {
+    var filters = state.filters
+    if (!newTransaction.budget || filters.budgetId == newTransaction.budget.id) {
+      dispatch('fetchTransactions')
+    }
+    dispatch('budgets/reloadInitialized', newTransaction.budget.id, { root: true })
+  },
+
+  updateTransactionInStore ({ state, commit, dispatch }, updatedTransaction) {
+    dispatch('fetchTransactions')
+    dispatch('budgets/reloadInitialized', updatedTransaction.budget.id, { root: true })
   }
 }
 
@@ -158,7 +192,9 @@ const mutations = {
     state.loadFilters.categories = filter
   },
   setTransactions (state, data) {
-    state.transactions = data
+    state.transactions.spendings = data.spendings
+    state.transactions.savings = data.savings
+    state.transactions.incomes = data.incomes
   },
   setClosestScheduledTransactions (state, data) {
     state.closestScheduledTransactions = data

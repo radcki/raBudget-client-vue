@@ -8,18 +8,23 @@ const state = {
 }
 
 const actions = {
-  reloadInitialized ({ state, dispatch, commit }) {
+  reloadInitialized ({ state, dispatch }, budgetId) {
     var budget = state.budgets.find(v => v.id == state.activeBudgetId)
-    if (!budget) { return }
-    dispatch('fetchBudget', budget.id)
-    if (budget.unassignedFunds) {
-      dispatch('fetchUnassignedFunds', budget.id)
-    }
-    if (budget.spendingCategoriesBalance) {
-      dispatch('fetchSpendingCategoriesBalance', budget.id)
-    }
-    if (budget.savingCategoriesBalance) {
-      dispatch('fetchSavingCategoriesBalance', budget.id)
+    if (budgetId && budgetId != budget.id) {
+      dispatch('fetchBudget', budgetId)
+    } else {
+      state.budgets.forEach(b => {
+        dispatch('fetchBudget', b.id)
+      })
+      if (budget.unassignedFunds) {
+        dispatch('fetchUnassignedFunds', budget.id)
+      }
+      if (budget.spendingCategoriesBalance) {
+        dispatch('fetchSpendingCategoriesBalance', budget.id)
+      }
+      if (budget.savingCategoriesBalance) {
+        dispatch('fetchSavingCategoriesBalance', budget.id)
+      }
     }
   },
   fetchBudgets ({ dispatch, commit }) {
@@ -145,6 +150,24 @@ const actions = {
   activeBudgetChange ({ commit }, newActiveBudgetId) {
     commit('changeActiveBudget', newActiveBudgetId)
     commit('transactions/setBudgetFilter', newActiveBudgetId, { root: true })
+  },
+
+  unloadBudgetFromStore ({ state, commit, dispatch }, budgetId) {
+    var filteredBudgets = state.budgets.filter(v => v.id != budgetId)
+
+    if (state.activeBudgetId == budgetId && filteredBudgets > 1) {
+      dispatch('activeBudgetChange', filteredBudgets[0].id)
+    }
+
+    commit('setBudgets', filteredBudgets)
+  },
+
+  loadBudgetToStore ({ commit }, newBudget) {
+    commit('setBudget', newBudget)
+  },
+
+  updateBudgetInStore ({ commit }, updatedTransaction) {
+    commit('setBudget', updatedTransaction)
   }
 }
 

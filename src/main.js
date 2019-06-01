@@ -6,6 +6,8 @@ import Vuetify from 'vuetify/lib'
 
 import { store } from './_store'
 import { router } from './_helpers'
+import signalrPlugin from './_plugins/signalr.plugin'
+
 import App from './App'
 import VueI18n from 'vue-i18n'
 import VueCurrencyFilter from 'vue-currency-filter'
@@ -31,6 +33,7 @@ library.add(faSignOutAlt, faUserCircle, faDotCircle, faCircle)
 
 Vue.use(VueWait, { useVuex: true })
 Vue.use(VueI18n)
+Vue.use(signalrPlugin)
 
 Vue.use(Vuetify, {
   lang: {
