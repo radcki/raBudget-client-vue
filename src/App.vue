@@ -197,6 +197,19 @@
         </v-btn>
     </v-snackbar>   
     <confirm ref="confirm"></confirm>
+    <v-dialog fullscreen v-model="loadingOverlay">
+      <div class="centered-overlay">
+        <div>
+          <v-progress-circular
+              :size="400"
+              :width="15"
+              class=""              
+              color="purple"
+              indeterminate
+            ></v-progress-circular>
+        </div>
+      </div>    
+    </v-dialog>
     <v-content>                          
         <router-view></router-view>
     </v-content>    
@@ -206,6 +219,19 @@
 <style>
 .white--icon .v-icon {
   color: #ffffff;
+}
+
+.centered-overlay {
+  background-color: rgba(0,0,0,0.27); 
+  width: 100%; 
+  height: 100%
+}
+
+.centered-overlay > div {
+  position: fixed; 
+  top: 50%;  
+  left: 50%; 
+  transform: translate(-50%, -50%);
 }
 </style>
 
@@ -222,7 +248,8 @@ export default {
   },
   data: () => ({
     locale: 'pl',
-    drawer: null
+    drawer: null,
+    loadingOverlay: false
   }),
   computed: {
     ...mapState({
@@ -232,6 +259,9 @@ export default {
     }),
     isAdmin: function() {
       return this.account.user && this.account.user.roles && this.account.user.roles.filter(function(v){return v == 1}).length > 0;
+    },
+    loginRefreshInProgress: function() {
+      return this.$wait.is("login-check")       
     }
   },
   mounted() {
@@ -244,6 +274,7 @@ export default {
 
     this.drawer = this.$vuetify.breakpoint.lgAndUp;
     this.$root.$confirm = this.$refs.confirm.open;
+    this.loginCheckTimout = null;
     
     if (this.account.status.loggedIn){
       this.initializeBudgets()    
@@ -304,6 +335,23 @@ export default {
     },
     budgets: function(){
       this.noBudgetsGuard()
+    },
+    loginRefreshInProgress: function(isInProgress) {
+      /*
+      Debounced display of token refresh overlay
+      */
+      if (isInProgress) {
+        var t = this;
+        this.loginCheckTimout = setTimeout(function(){
+          t.loadingOverlay = true
+        }, 300)
+      } else {
+        if (this.loginCheckTimout != null) {
+          clearTimeout(this.loginCheckTimout);
+        }
+        this.loginCheckTimout = null;
+        this.loadingOverlay = false;
+      }
     }
   }
 };
