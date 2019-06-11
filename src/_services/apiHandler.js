@@ -74,20 +74,9 @@ function renewToken () {
   })
 }
 
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
-}
-
 function fetchAuthorized (url, options) {
   return new Promise((resolve, reject) => {
     noRefreshPending().then(() => { // potwierdzenie czy aktualnie w toku nie jest odświeżenie tokenu
-      store.dispatch('wait/start', 'login-check', { root: true })
-            sleep(2000)
       var jwtToken = getAccessToken()
       options = options || {}
       options.headers = options.headers || {}
@@ -96,14 +85,11 @@ function fetchAuthorized (url, options) {
         if (response.ok) {
           // zapytanie udane
           localStorage.removeItem('tokenRefreshing')
-      store.dispatch('wait/end', 'login-check', { root: true })
-
           resolve(response)
         } else {
           if (response.status === 401 && response.headers.has('Token-Expired')) {
             localStorage.setItem('tokenRefreshing', true) // oznaczenie że token jest własnie odświeżany
             store.dispatch('wait/start', 'login-check', { root: true })
-            sleep(1000)
             renewToken().then(refreshResponse => { // wysłanie requestu o nowy token
               store.dispatch('wait/end', 'login-check', { root: true })
               if (refreshResponse.ok) {
