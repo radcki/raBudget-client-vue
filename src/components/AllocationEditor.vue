@@ -3,6 +3,7 @@
     :fullscreen="!$vuetify.breakpoint.smAndUp"
     v-model="dialog"
     v-if="allocationId"
+    persistent
     :max-width="800"
     @keydown.esc="cancel"
     :transition="!$vuetify.breakpoint.smAndUp ? 'dialog-bottom-transition' : 'dialog-transition'"

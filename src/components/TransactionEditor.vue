@@ -5,6 +5,7 @@
     v-if="transactionId"
     :max-width="800"
     @keydown.esc="cancel"
+    persistent
     :transition="!$vuetify.breakpoint.smAndUp ? 'dialog-bottom-transition' : 'dialog-transition'"
   >
     <v-spacer v-if="!$vuetify.breakpoint.smAndUp" class="py-3"></v-spacer>

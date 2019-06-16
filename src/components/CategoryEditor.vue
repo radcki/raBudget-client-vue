@@ -2,6 +2,7 @@
   <v-dialog
     width="600"
     v-model="dialog"
+    persistent
     :fullscreen="mobile"
     :transition="mobile ? 'dialog-bottom-transition' : 'dialog-transition'"
   >
