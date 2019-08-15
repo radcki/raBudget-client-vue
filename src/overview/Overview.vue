@@ -71,7 +71,7 @@
 
           <v-flex xs12 sm6 class="pt-0">
             <v-card class="text-sm-center" color="light-green darken-1" dark>
-              <v-card-title>{{$t('budgets.availablefunds')}}</v-card-title>
+              <v-card-title class="subtitle-2">{{$t('budgets.availablefunds')}}</v-card-title>
               <v-card-text class="display-1 pb-1">
                 <v-animated-number
                   v-if="budget.balance"
@@ -94,7 +94,7 @@
 
           <v-flex xs12 sm6 class="pt-0">
             <v-card class="text-sm-center" color="blue-grey darken-1" dark>
-              <v-card-title>{{$t('budgets.unassignedFunds')}}</v-card-title>
+              <v-card-title class="subtitle-2">{{$t('budgets.unassignedFunds')}}</v-card-title>
               <v-card-text class="display-1 pb-1">
                 <v-animated-number
                   v-if="budget.unassignedFunds"

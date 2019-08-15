@@ -18,7 +18,7 @@
                 <v-layout row wrap align-center justify-center >
                   <v-flex xs8 sm6>
                     <v-text-field
-                      prepend-icon="title"
+                      :prepend-icon="mdiFormatTitle"
                       v-model="budget.name"
                       :rules="requiredRule"
                       :label="$t('general.name')"
@@ -41,26 +41,26 @@
                       v-model="dateMenu"
                       :nudge-right="40"
                       :return-value.sync="budget.startingDate"
-                      lazy
                       transition="scale-transition"
                       offset-y
                       full-width
                       min-width="290px"
                     >
+                    <template v-slot:activator="{ on }">
                       <v-text-field
-                        slot="activator"
                         v-model="budget.startingDate"
                         :label="$t('budgets.startDate')"
                         :rules="requiredRule"
-                        prepend-icon="event"
+                        :prepend-icon="mdiCalendar"
                         readonly
                       ></v-text-field>
+                    </template>
                       <v-date-picker v-model="budget.startingDate" type="month" @input="$refs.dateMenu.save(budget.startingDate)"></v-date-picker>
                     </v-menu>
                   </v-flex>
                   <v-flex xs12>
                     <v-btn :disabled="budget.default" color="green" class="white--text" @click="setDefault" >
-                      <v-icon left>star_border</v-icon>
+                      <v-icon left>{{budget.default ? mdiStar : mdiStarOutline}}</v-icon>
                       {{$t('budgets.setDefault')}}
                     </v-btn>
                   </v-flex>
@@ -69,13 +69,13 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn flat color="red" dark @click="deleteBudget">
-                <v-icon left>delete_forever</v-icon>
+              <v-btn text color="red" dark @click="deleteBudget">
+                <v-icon left>{{mdiTrashCan}}</v-icon>
                 {{ $t("general.delete") }}
               </v-btn>
 
-              <v-btn flat color="primary" @click="saveBudget">
-                <v-icon left>save</v-icon>
+              <v-btn text color="primary" @click="saveBudget">
+                <v-icon left>{{mdiContentSave}}</v-icon>
                 {{ $t("general.save") }}
               </v-btn>
               
@@ -91,6 +91,9 @@
 import { budgetService } from "../_services/budget.service";
 import { mapState, mapActions } from "vuex";
 
+import { mdiFormatTitle, mdiTrashCan, mdiStarOutline, mdiStar, mdiCalendar, mdiContentSave } from "@mdi/js"
+
+
 export default {
   data() {
     return {
@@ -98,7 +101,8 @@ export default {
 
       dateMenu: false,
       valid: true,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      mdiFormatTitle, mdiTrashCan, mdiStarOutline, mdiStar, mdiCalendar, mdiContentSave
     };
   },
   computed: {

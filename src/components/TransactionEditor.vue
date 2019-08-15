@@ -1,57 +1,40 @@
 <template>
   <v-dialog
-    :fullscreen="!$vuetify.breakpoint.smAndUp"
+    :fullscreen="mobile"
     v-model="dialog"
-    v-if="transactionId"
-    :max-width="800"
+    max-width="800"
     @keydown.esc="cancel"
     persistent
-    :transition="!$vuetify.breakpoint.smAndUp ? 'dialog-bottom-transition' : 'dialog-transition'"
+    :transition="mobile ? 'dialog-bottom-transition' : 'dialog-transition'"
+    v-bind="$attrs"
+    v-on="$listeners"
   >
-    <v-spacer v-if="!$vuetify.breakpoint.smAndUp" class="py-3"></v-spacer>
+    <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
+    </template>
+
     <v-card>
-      <v-toolbar color="primary" dark dense flat :fixed="!$vuetify.breakpoint.smAndUp">
-        <v-btn v-if="!$vuetify.breakpoint.smAndUp" icon dark @click="cancel">
-          <v-icon>close</v-icon>
+      <v-toolbar color="primary" dark dense flat :fixed="mobile">
+        <v-btn v-if="mobile" icon dark @click="cancel">
+          <v-icon>{{mdiClose}}</v-icon>
         </v-btn>
         <v-toolbar-title class="white--text">{{ $t("transactions.editing") }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="$vuetify.breakpoint.smAndUp" flat icon @click="cancel">
-          <v-icon light>close</v-icon>
+        <v-btn v-if="!mobile" text icon @click="cancel">
+          <v-icon light>{{mdiClose}}</v-icon>
         </v-btn>
-        <v-btn
-          v-if="!$vuetify.breakpoint.smAndUp"
-          flat="flat"
-          @click.native="save"
-        >{{ $t('general.save') }}</v-btn>
+        <v-btn v-if="mobile" text @click.native="save">{{ $t('general.save') }}</v-btn>
       </v-toolbar>
       <v-card-text>
         <v-form ref="editorForm" v-model="valid" lazy-validation>
           <v-container grid-list-md>
             <v-layout row wrap align-center justify-center>
               <v-flex xs12>
-                <v-menu
-                  ref="dateMenu"
-                  :close-on-content-click="false"
-                  v-model="dateMenu"
-                  :nudge-right="40"
-                  :return-value.sync="editor.date"
-                  lazy
-                  transition="scale-transition"
-                  offset-y
-                  full-width
-                  min-width="290px"
-                >
-                  <v-text-field
-                    slot="activator"
-                    v-model="editor.date"
-                    :label="$t('transactions.date')"
-                    :rules="requiredRule"
-                    prepend-icon="event"
-                    readonly
-                  ></v-text-field>
-                  <v-date-picker v-model="editor.date" @input="$refs.dateMenu.save(editor.date)"></v-date-picker>
-                </v-menu>
+                <v-date-field
+                  :rules="requiredRule"
+                  v-model="editor.date"
+                  :label="$t('transactions.date')"
+                ></v-date-field> 
               </v-flex>
 
               <v-flex xs12 md5>
@@ -60,8 +43,7 @@
                   :label="$t('general.category')"
                   :rules="requiredRule"
                   v-model="editor.category"
-                >                  
-                </v-category-select>
+                ></v-category-select>
               </v-flex>
 
               <v-flex xs12 md7>
@@ -83,7 +65,7 @@
 
               <v-flex xs12>
                 <v-text-field
-                  v-model="editor.enteredAmount"
+                  v-model="editor.amount"
                   type="number"
                   step="0.01"
                   :label="$t('transactions.baseAmount')"
@@ -93,21 +75,21 @@
           </v-container>
         </v-form>
         <span class="subheading">{{ $t("transactions.finalAmount") }}:</span>
-        <span class="headline">{{amount | currency($currencies[budget.currency])}}</span>
+        <span class="headline">{{finalAmount | currency($currencies[budget.currency])}}</span>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
 
         <v-btn
-          v-if="$vuetify.breakpoint.smAndUp"
+          v-if="!mobile"
           color="red"
-          flat="flat"
+          text
           @click.native="cancel"
         >{{ $t('general.cancel') }}</v-btn>
         <v-btn
-          v-if="$vuetify.breakpoint.smAndUp"
+          v-if="!mobile"
           color="primary darken-1"
-          flat="flat"
+          text
           @click.native="save"
         >{{ $t('general.save') }}</v-btn>
       </v-card-actions>
@@ -116,39 +98,57 @@
 </template>
 
 <script>
-import { transactionsService } from "../_services/transactions.service.js";
-import { mapActions } from "vuex";
+import {mdiClose} from "@mdi/js"
 
 export default {
   components: {
-    "v-category-select": () => import("../components/CategorySelect")
+    "v-category-select": () => import("../components/CategorySelect"),
+    "v-date-field": () => import("../components/DateField.vue")
   },
-  data: () => ({
-    budget: { currency: "PLN" },
-    dateMenu: false,
-    requiredRule: [v => !!v],
-    categories: {
-      incomes: [],
-      spendings: [],
-      savings: []
-    },
-    dialog: false,
-    valid: true,
-    resolve: null,
-    reject: null,
-    transactionType: null,
-    transactionId: null,
-    editor: {
-      category: null,
-      date: null,
-      description: null,
-      enteredAmount: null,
-      modifyAmount: 0.0
+  props: {
+    value: Object,
+    dataBudget: {
+      type: Object,
+      default: () => {
+        return { currency: "PLN" };
+      }
     }
-  }),
+  },
+  data: function() {
+    return {
+      budget: this.dataBudget,
+      requiredRule: [v => !!v], 
+      dialog: false,
+      valid: true,
+
+      categoryTypes: [
+        { value: "spendingCategories", text: "general.spendings" },
+        { value: "incomeCategories", text: "general.incomes" },
+        { value: "savingCategories", text: "general.savings" }
+      ],
+      editor: {
+        ...{
+          category: null,
+          date: null,
+          description: null,
+          amount: null,
+          modifyAmount: 0.0
+        },
+        ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
+      },
+      mdiClose
+    };
+  },
   computed: {
-    amount: function() {
-      return 1 * this.editor.modifyAmount + 1 * this.editor.enteredAmount;
+    mobile() {
+      return !this.$vuetify.breakpoint.smAndUp;
+    },
+    transactionType() {return this.editor.category ? this.categoryTypes[this.editor.category.type].value : "spendingCategories"},
+    categories() {
+      return this.budget;
+    },
+    finalAmount: function() {
+      return 1 * this.editor.modifyAmount + 1 * this.editor.amount;
     }
   },
   watch: {
@@ -169,65 +169,16 @@ export default {
   beforeDestroy: function() {
     this.$wait.end("dialog");
   },
-  methods: {
-    ...mapActions({
-      updateTransactionInStore: "transactions/updateTransactionInStore"
-    }),
-    open(transactionId) {
-      this.transactionId = transactionId;
-      this.editor.modifyAmount = 0.0;
-      transactionsService.getTransaction(transactionId).then(response => {
-        if (response.ok) {
-          this.dialog = true;
-          response.json().then(transaction => {
-            this.editor.category = transaction.category;
-            this.transactionType =
-              transaction.category.type == 0
-                ? "spendings"
-                : transaction.category.type == 1
-                ? "incomes"
-                : "savings";
-            this.categories = {
-              spendings: transaction.budget.spendingCategories,
-              savings: transaction.budget.savingCategories,
-              incomes: transaction.budget.incomeCategories
-            };
-            this.editor.date = this.$moment(transaction.date).format(
-              "YYYY-MM-DD"
-            );
-            this.editor.description = transaction.description;
-            this.editor.enteredAmount = transaction.amount;
-            this.budget = transaction.budget;
-          });
-        }
-      });
-      return new Promise((resolve, reject) => {
-        this.resolve = resolve;
-        this.reject = reject;
-      });
-    },
+  methods: {    
     save() {
       if (this.$refs.editorForm.validate()) {
-        var transaction = {
-          transactionId: this.transactionId,
-          category: this.editor.category,
-          date: this.editor.date,
-          description: this.editor.description,
-          amount: this.amount
-        };
-        transactionsService.updateTransaction(transaction).then(response => {  
-          if (response.ok) {
-            response.json(data => {
-              this.updateTransactionInStore(data)
-            })
-          }        
-          this.resolve(response);
-        });
         this.dialog = false;
+        this.editor.amount = this.finalAmount;
+        this.editor.modifyAmount = 0;
+        this.$emit("save", this.editor);
       }
     },
     cancel() {
-      this.resolve(false);
       this.dialog = false;
     }
   }

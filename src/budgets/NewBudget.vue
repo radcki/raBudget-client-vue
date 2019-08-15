@@ -61,20 +61,20 @@
                           v-model="dateMenu"
                           :nudge-right="40"
                           :return-value.sync="budget.startingDate"
-                          lazy
                           transition="scale-transition"
                           offset-y
                           full-width
                           min-width="290px"
                         >
+                         <template v-slot:activator="{ on }">
                           <v-text-field
-                            slot="activator"
                             v-model="budget.startingDate"
                             :label="$t('budgets.startDate')"
                             :rules="requiredRule"
                             prepend-icon="event"
                             readonly
                           ></v-text-field>
+                         </template>
                           <v-date-picker v-model="budget.startingDate" @input="$refs.dateMenu.save(budget.startingDate)"></v-date-picker>
 
                         </v-menu>
@@ -104,10 +104,10 @@
                           :label="$t('general.icon')">
                         >
                           <template slot="selection" slot-scope="data">
-                            <v-icon>{{ data.item }}</v-icon>
+                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                           </template>
                           <template slot="item" slot-scope="data">
-                            <v-icon>{{ data.item }}</v-icon>
+                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                           </template>
                         </v-select>
                       </v-flex>
@@ -142,46 +142,45 @@
                   </v-container>
                 </v-form>
 
-                <v-list-tile
-                  avatar
+                <v-list-item
                   v-for="(category, i) in categories.income"
                   v-bind:data="category"
                   v-bind:key="i">
-                  <v-list-tile-avatar color="light-green darken-3">
-                    <v-icon dark>{{ category.icon }}</v-icon>
-                  </v-list-tile-avatar>
+                  <v-list-item-avatar color="light-green darken-3">
+                    <v-icon dark>{{ $categoryIcons[category.icon] }}</v-icon>
+                  </v-list-item-avatar>
 
-                  <v-list-tile-content>
-                    <v-list-tile-title>{{ category.name }}</v-list-tile-title>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ category.name }}</v-list-item-title>
 
-                    <v-list-tile-sub-title>
+                    <v-list-item-subtitle>
                       {{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencies[budget.currency]) }}
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
 
-                  <v-list-tile-action>
-                    <v-btn flat icon ripple dark color="primary" @click="editIncome(i)">
+                  <v-list-item-action>
+                    <v-btn text icon ripple dark color="primary" @click="editIncome(i)">
                       <v-icon >edit</v-icon>
                     </v-btn>
-                  </v-list-tile-action> 
-                  <v-list-tile-action>
-                    <v-btn flat icon ripple dark color="red" @click="removeIncome(i)">
+                  </v-list-item-action> 
+                  <v-list-item-action>
+                    <v-btn text icon ripple dark color="red" @click="removeIncome(i)">
                       <v-icon >close</v-icon>
                     </v-btn>
-                  </v-list-tile-action> 
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>
+                  </v-list-item-action> 
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-content>
                     {{ $t("categories.totalAmount") }}: {{ incomeCategoriesSum | currency($currencies[budget.currency]) }}
-                  </v-list-tile-content>
-                </v-list-tile>
+                  </v-list-item-content>
+                </v-list-item>
               </v-list>
 
               <v-btn :disabled="!(categories.income.length>0)" color="primary" @click="step = 3">
                 {{ $t("general.stepForward") }}
               </v-btn>
 
-              <v-btn flat @click="step = 1">
+              <v-btn text @click="step = 1">
                 {{ $t("general.stepBack") }}
               </v-btn>
             </v-stepper-content>
@@ -201,10 +200,10 @@
                           :label="$t('general.icon')">
                         >
                           <template slot="selection" slot-scope="data">
-                            <v-icon>{{ data.item }}</v-icon>
+                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                           </template>
                           <template slot="item" slot-scope="data">
-                            <v-icon>{{ data.item }}</v-icon>
+                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                           </template>
                         </v-select>
                       </v-flex>
@@ -239,46 +238,45 @@
                   </v-container>
                 </v-form>
 
-                <v-list-tile
-                  avatar
+                <v-list-item
                   v-for="(category, i) in categories.spending"
                   v-bind:data="category"
                   v-bind:key="i">
-                  <v-list-tile-avatar color="amber">
-                    <v-icon dark>{{ category.icon }}</v-icon>
-                  </v-list-tile-avatar>
+                  <v-list-item-avatar color="amber">
+                    <v-icon dark>{{ $categoryIcons[category.icon] }}</v-icon>
+                  </v-list-item-avatar>
 
-                  <v-list-tile-content>
-                    <v-list-tile-title>{{ category.name }}</v-list-tile-title>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ category.name }}</v-list-item-title>
 
-                    <v-list-tile-sub-title>
+                    <v-list-item-subtitle>
                       {{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencies[budget.currency]) }}
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
 
-                  <v-list-tile-action>
-                    <v-btn flat icon ripple dark color="primary" @click="editSpending(i)">
+                  <v-list-item-action>
+                    <v-btn text icon ripple dark color="primary" @click="editSpending(i)">
                       <v-icon >edit</v-icon>
                     </v-btn>
-                  </v-list-tile-action> 
-                  <v-list-tile-action>
-                    <v-btn flat icon ripple dark color="red" @click="removeSpending(i)">
+                  </v-list-item-action> 
+                  <v-list-item-action>
+                    <v-btn text icon ripple dark color="red" @click="removeSpending(i)">
                       <v-icon >close</v-icon>
                     </v-btn>
-                  </v-list-tile-action> 
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>
+                  </v-list-item-action> 
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-content>
                     {{ $t("categories.totalAmount") }}: {{ spendingCategoriesSum | currency($currencies[budget.currency]) }}
-                  </v-list-tile-content>
-                </v-list-tile>
+                  </v-list-item-content>
+                </v-list-item>
               </v-list>
 
               <v-btn :disabled="!(categories.spending.length>0)" color="primary" @click="step = 4">
                 {{ $t("general.stepForward") }}
               </v-btn>
 
-              <v-btn flat @click="step = 2">
+              <v-btn text @click="step = 2">
                 {{ $t("general.stepBack") }}
               </v-btn>
             </v-stepper-content>
@@ -336,46 +334,45 @@
                   </v-container>
                 </v-form>
 
-                <v-list-tile
-                  avatar
+                <v-list-item
                   v-for="(category, i) in categories.savings"
                   v-bind:data="category"
                   v-bind:key="i">
-                  <v-list-tile-avatar color="indigo">
-                    <v-icon dark>{{ category.icon }}</v-icon>
-                  </v-list-tile-avatar>
+                  <v-list-item-avatar color="indigo">
+                    <v-icon dark>{{ $categoryIcons[category.icon] }}</v-icon>
+                  </v-list-item-avatar>
 
-                  <v-list-tile-content>
-                    <v-list-tile-title>{{ category.name }}</v-list-tile-title>
+                  <v-list-item-content>
+                    <v-list-item-title>{{ category.name }}</v-list-item-title>
 
-                    <v-list-tile-sub-title>
+                    <v-list-item-subtitle>
                       {{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencies[budget.currency]) }}
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
 
-                  <v-list-tile-action>
-                    <v-btn flat icon ripple dark color="primary" @click="editSaving(i)">
+                  <v-list-item-action>
+                    <v-btn text icon ripple dark color="primary" @click="editSaving(i)">
                       <v-icon >edit</v-icon>
                     </v-btn>
-                  </v-list-tile-action> 
-                  <v-list-tile-action>
-                    <v-btn flat icon ripple dark color="red" @click="removeSaving(i)">
+                  </v-list-item-action> 
+                  <v-list-item-action>
+                    <v-btn text icon ripple dark color="red" @click="removeSaving(i)">
                       <v-icon >close</v-icon>
                     </v-btn>
-                  </v-list-tile-action> 
-                </v-list-tile>
-                <v-list-tile>
-                  <v-list-tile-content>
+                  </v-list-item-action> 
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-content>
                     {{ $t("categories.totalAmount") }}: {{ savingsCategoriesSum | currency($currencies[budget.currency]) }}
-                  </v-list-tile-content>
-                </v-list-tile>
+                  </v-list-item-content>
+                </v-list-item>
               </v-list>
 
               <v-btn :disabled="!(categories.savings.length>0)" color="primary" @click="step = 5">
                 {{ $t("general.stepForward") }}
               </v-btn>
 
-              <v-btn flat @click="step = 3">
+              <v-btn text @click="step = 3">
                 {{ $t("general.stepBack") }}
               </v-btn>
             </v-stepper-content>
@@ -386,18 +383,18 @@
                 <v-subheader class="headline">
                   {{ $t('general.summary') }}
                 </v-subheader>
-                <v-list-tile>
-                  <v-list-tile-content>
+                <v-list-item>
+                  <v-list-item-content>
                      
-                     <v-list-tile-title>
+                     <v-list-item-title>
                        {{ $t('budgets.budgetName') }}: {{ budget.name }}
-                     </v-list-tile-title>
+                     </v-list-item-title>
 
-                    <v-list-tile-sub-title>
+                    <v-list-item-subtitle>
                       {{ $t('budgets.startDate') }}: {{ budget.startingDate }}
-                    </v-list-tile-sub-title>
-                  </v-list-tile-content>
-                </v-list-tile>
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
                 <v-container grid-list-md>
                   <v-layout row wrap>
                     <v-flex xs12 md6 lg4>
@@ -445,7 +442,7 @@
                 {{ $t("general.save") }}
               </v-btn>
 
-              <v-btn flat @click="step = 4">{{ $t("general.stepBack") }}</v-btn>
+              <v-btn text @click="step = 4">{{ $t("general.stepBack") }}</v-btn>
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>

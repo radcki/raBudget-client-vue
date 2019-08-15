@@ -21,7 +21,7 @@
                 </v-card-text>
 
                 <v-card-actions>
-                    <v-btn flat color="red" @click="accountDelete">{{$t('account.deleteAccount')}}</v-btn>
+                    <v-btn textcolor="red" @click="accountDelete">{{$t('account.deleteAccount')}}</v-btn>
                     <v-spacer></v-spacer>
                     <v-btn 
                         color="primary"                         
@@ -44,7 +44,7 @@
                         <v-text-field
                             v-model="password.oldpassword"
                             autocomplete="current-password"
-                            :append-icon="show1 ? 'visibility_off' : 'visibility'"
+                            :append-icon="show1 ? mdiEyeOff : mdiEye"
                             :rules="requiredRule"
                             :type="show1 ? 'text' : 'password'"
                             :label="$t('account.oldpassword')"
@@ -54,7 +54,7 @@
                         <v-text-field
                             v-model="password.newpassword"
                             autocomplete="new-password"
-                            :append-icon="show2 ? 'visibility_off' : 'visibility'"
+                            :append-icon="show2 ? mdiEyeOff : mdiEye"
                             :rules="passwordRule"
                             :type="show2 ? 'text' : 'password'"
                             :label="$t('account.newpassword')"
@@ -65,7 +65,7 @@
                         <v-text-field
                             v-model="newpasswordConfirm"
                             autocomplete="new-password"
-                            :append-icon="show3 ? 'visibility_off' : 'visibility'"
+                            :append-icon="show3 ? mdiEyeOff : mdiEye"
                             :rules="passwordMatch"
                             :type="show3 ? 'text' : 'password'"
                             :label="$t('account.newpasswordConfirm')"
@@ -94,6 +94,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import { userService } from "../_services/user.service";
+import { mdiEye, mdiEyeOff } from "@mdi/js"
 
 export default {
   data() {
@@ -129,7 +130,8 @@ export default {
         v => !!v || this.$t("forms.requiredField"),
         v =>
           this.password.newpassword == v || this.$t("forms.passwordDontMatch")
-      ]
+      ],
+      mdiEye, mdiEyeOff
     };
   },
   computed: {

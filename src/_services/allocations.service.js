@@ -44,7 +44,7 @@ function updateAllocation (allocationData) {
       description: allocationData.description,
       amount: allocationData.amount,
       date: allocationData.date,
-      destinationCategory: allocationData.category
+      destinationCategory: allocationData.destinationCategory
     })
   }
   return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/${allocationData.allocationId}/update`, requestOptions)

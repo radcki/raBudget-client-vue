@@ -5,22 +5,25 @@
     persistent
     :fullscreen="mobile"
     :transition="mobile ? 'dialog-bottom-transition' : 'dialog-transition'"
+    v-bind="$attrs"
+    v-on="$listeners"
   >
-    <template slot="activator">
-      <slot></slot>
+    <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" :open="open" />
     </template>
+
     <v-spacer v-if="mobile" class="py-3"></v-spacer>
     <v-card>
-      <v-toolbar color="primary" dark dense flat :fixed="mobile">
+      <v-toolbar color="primary" dark dense text :fixed="mobile">
         <v-btn v-if="mobile" icon dark @click="dialog = false">
-          <v-icon>close</v-icon>
+          <v-icon>{{mdiClose}}</v-icon>
         </v-btn>
-        <v-toolbar-title class="white--text">{{ $t("allocations.editing") }}</v-toolbar-title>
+        <v-toolbar-title class="white--text">{{ $t("categories.categoryEdit") }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="!mobile" flat icon @click="dialog = false">
-          <v-icon light>close</v-icon>
+        <v-btn v-if="!mobile" text icon @click="dialog = false">
+          <v-icon light>{{mdiClose}}</v-icon>
         </v-btn>
-        <v-btn v-if="mobile" flat="flat" @click.native="save">{{ $t('general.save') }}</v-btn>
+        <v-btn v-if="mobile" text="flat" @click.native="save">{{ $t('general.save') }}</v-btn>
       </v-toolbar>
 
       <v-card-text>
@@ -30,10 +33,10 @@
               <v-flex :xs2="!mobile" :xs4="mobile">
                 <v-select v-model="category.icon" :items="icons" :label="$t('general.icon')">
                   <template slot="selection" slot-scope="data">
-                    <v-icon>{{ data.item }}</v-icon>
+                    <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                   </template>
                   <template slot="item" slot-scope="data">
-                    <v-icon>{{ data.item }}</v-icon>
+                    <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                   </template>
                 </v-select>
               </v-flex>
@@ -47,7 +50,7 @@
               <v-flex xs12 class="text-xs-right">
                 <v-subheader class="text-xs-right">
                   <v-spacer></v-spacer>
-                  <v-icon class="mr-3">payment</v-icon>
+                  <v-icon class="mr-3">{{mdiCreditCard}}</v-icon>
                   {{$t('categories.monthlyAmount')}}
                 </v-subheader>
                 <v-btn
@@ -61,34 +64,11 @@
                   <v-container :key="'row'+amountConfigIndex" grid-list-md class="pa-0 ma-0">
                     <v-layout row wrap class="pa-0 ma-0">
                       <v-flex :xs4="!mobile" :xs9="mobile">
-                        <v-menu
-                          :key="'date'+amountConfigIndex"
-                          ref="dateMenu"
-                          :close-on-content-click="false"
-                          v-model="amountConfig.dateMenu"
-                          :nudge-right="40"
-                          :return-value.sync="amountConfig.validFrom"
-                          lazy
-                          transition="scale-transition"
-                          offset-y
-                          full-width
-                          min-width="290px"
-                        >
-                          <v-text-field
-                            slot="activator"
-                            v-model="amountConfig.validFrom"
-                            :label="$t('budgets.startDate')"
-                            :rules="requiredRule"
-                            prepend-icon="event"
-                            readonly
-                          ></v-text-field>
-                          <v-date-picker
-                            v-model="amountConfig.validFrom"
-                            :min="dataBudget.startingDate"
-                            type="month"
-                            @input="$refs.dateMenu[amountConfigIndex].save(amountConfig.validFrom)"
-                          ></v-date-picker>
-                        </v-menu>
+                        <v-date-field
+                          :rules="requiredRule"
+                          v-model="amountConfig.validFrom"
+                          :label="$t('transactions.date')"
+                        ></v-date-field>                        
                       </v-flex>
 
                       <v-flex :xs4="!mobile" :xs9="mobile">
@@ -135,15 +115,16 @@
 
       <v-card-actions v-if="!mobile">
         <v-spacer></v-spacer>
-        <v-btn color="red" flat @click="dialog = false">{{$t('general.cancel')}}</v-btn>
+        <v-btn color="red" text @click="dialog = false">{{$t('general.cancel')}}</v-btn>
 
-        <v-btn color="primary" flat @click="save">{{$t('general.save')}}</v-btn>
+        <v-btn color="primary" text @click="save">{{$t('general.save')}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import {mdiClose, mdiCreditCard} from "@mdi/js"
 export default {
   name: "VCategoryEditor",
   props: {
@@ -155,12 +136,15 @@ export default {
       }
     }
   },
+  components: {
+    "v-date-field": () => import("../components/DateField.vue")
+  },
   data() {
     return {
       dialog: false,
       requiredRule: [v => !!v || this.$t("forms.requiredField")],
-      dateMenu: false,
-      icons: this.$categoryIcons,
+
+      icons: Object.keys(this.$categoryIcons),
       category: {
         ...{
           categoryId: null,
@@ -170,7 +154,8 @@ export default {
           amountConfigs: []
         },
         ...JSON.parse(JSON.stringify(this.value))
-      }
+      },
+      mdiCreditCard, mdiClose
     };
   },
   watch: {
@@ -219,6 +204,9 @@ export default {
     save() {
       this.$emit("save", this.category);
       this.dialog = false;
+    },
+    open() {
+      this.dialog = true;
     }
   }
 };

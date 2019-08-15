@@ -1,116 +1,152 @@
 <template>
-<v-container grid-list-md> 
-    <v-layout wrap >
-        <v-flex xs12 md6>
-            <v-subheader class="headline">
-                {{ $t('admin.logs') }}
-            </v-subheader>
-        </v-flex>
-        <v-flex xs12>
+  <v-container grid-list-md>
+    <v-layout wrap>
+      <v-flex xs12 md6>
+        <v-subheader class="headline">{{ $t('admin.logs') }}</v-subheader>
+      </v-flex>
+      <v-flex xs12>
         <v-card class="px-3">
           <v-card-text>
             <v-container fluid grid-list-sm class="pa-0">
-                <v-layout row wrap> 
+              <v-layout row wrap>
+                <v-flex xs12 md2>
+                  <v-container fluid grid-list-sm class="pa-0">
+                    <v-layout row wrap>
+                      <v-flex xs6>
+                        <v-checkbox
+                          hide-details
+                          v-model="levels"
+                          :label="$t('admin.debug')"
+                          value="Debug"
+                        ></v-checkbox>
+                        <v-checkbox
+                          hide-details
+                          v-model="levels"
+                          :label="$t('admin.information')"
+                          value="Information"
+                        ></v-checkbox>
+                        <v-checkbox
+                          hide-details
+                          v-model="levels"
+                          :label="$t('admin.warning')"
+                          value="Warning"
+                        ></v-checkbox>
+                        <v-checkbox
+                          hide-details
+                          v-model="levels"
+                          :label="$t('admin.error')"
+                          value="Error"
+                        ></v-checkbox>
+                        <v-checkbox
+                          hide-details
+                          v-model="levels"
+                          :label="$t('admin.critical')"
+                          value="Critical"
+                        ></v-checkbox>
+                        <v-checkbox
+                          hide-details
+                          v-model="levels"
+                          :label="$t('admin.none')"
+                          value="None"
+                        ></v-checkbox>
+                      </v-flex>
+                    </v-layout>
+                  </v-container>
+                </v-flex>
 
-                    <v-flex xs12 md2>
-                        <v-container fluid grid-list-sm class="pa-0">
-                        <v-layout row wrap> 
-                            <v-flex xs6>
-                            <v-checkbox hide-details v-model="levels" :label="$t('admin.debug')" value="Debug"></v-checkbox>
-                            <v-checkbox hide-details v-model="levels" :label="$t('admin.information')" value="Information"></v-checkbox>
-                            <v-checkbox hide-details v-model="levels" :label="$t('admin.warning')" value="Warning"></v-checkbox>
-                            <v-checkbox hide-details v-model="levels" :label="$t('admin.error')" value="Error"></v-checkbox>
-                            <v-checkbox hide-details v-model="levels" :label="$t('admin.critical')" value="Critical"></v-checkbox>
-                            <v-checkbox hide-details v-model="levels" :label="$t('admin.none')" value="None"></v-checkbox>
-                        </v-flex>
-                            
-                        </v-layout>
-                        </v-container>
-                    </v-flex>                 
+                <v-flex xs6 md5>
+                  <v-menu
+                    ref="minDateMenu"
+                    :close-on-content-click="false"
+                    v-model="minDateMenu"
+                    :nudge-right="40"
+                    :return-value.sync="minDate"
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field v-model="minDate" :label="$t('general.fromDate')" readonly></v-text-field>
+                    </template>
+                    <v-date-picker
+                      :max="today"
+                      v-model="minDate"
+                      @input="$refs.minDateMenu.save(minDate)"
+                    ></v-date-picker>
+                  </v-menu>
+                </v-flex>
 
-                    <v-flex xs6 md5>
-                        <v-menu
-                            ref="minDateMenu"
-                            :close-on-content-click="false"
-                            v-model="minDateMenu"                      
-                            :nudge-right="40"
-                            :return-value.sync="minDate"
-                            lazy
-                            transition="scale-transition"
-                            offset-y
-                            full-width
-                            min-width="290px">
-                            <v-text-field
-                                slot="activator"
-                                v-model="minDate"
-                                :label="$t('general.fromDate')"
-                                readonly></v-text-field>
-                            <v-date-picker 
-                                :max="today"
-                                v-model="minDate" 
-                                @input="$refs.minDateMenu.save(minDate)"></v-date-picker>
-                        </v-menu>
-                    </v-flex>
-
-                    <v-flex xs6 md5>
-                        <v-menu
-                        ref="maxDateMenu"
-                        :close-on-content-click="false"
-                        v-model="maxDateMenu"                      
-                        :nudge-right="40"
-                        :return-value.sync="maxDate"
-                        lazy
-                        transition="scale-transition"
-                        offset-y
-                        full-width
-                        min-width="290px">
-                        <v-text-field
-                            slot="activator"
-                            v-model="maxDate"
-                            :label="$t('general.fromDate')"
-                            readonly></v-text-field>
-                        <v-date-picker 
-                            :max="today"
-                            v-model="maxDate" 
-                            @input="$refs.maxDateMenu.save(maxDate)"></v-date-picker>
-                        </v-menu>
-                    </v-flex>
-                        
-
-                </v-layout>
+                <v-flex xs6 md5>
+                  <v-menu
+                    ref="maxDateMenu"
+                    :close-on-content-click="false"
+                    v-model="maxDateMenu"
+                    :nudge-right="40"
+                    :return-value.sync="maxDate"
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    min-width="290px"
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field v-model="maxDate" :label="$t('general.fromDate')" readonly></v-text-field>
+                    </template>
+                    <v-date-picker
+                      :max="today"
+                      v-model="maxDate"
+                      @input="$refs.maxDateMenu.save(maxDate)"
+                    ></v-date-picker>
+                  </v-menu>
+                </v-flex>
+              </v-layout>
             </v-container>
-          </v-card-text>  
-        </v-card> 
+          </v-card-text>
+        </v-card>
       </v-flex>
 
-        <v-flex xs12>
-            
-             <v-data-table
-                :headers="headers"
-                :items="logs"
-                :search="levels"
-                :custom-filter="customFilter"
-                :loading="loading"
-                class="elevation-1"
-                must-sort                
-                disable-initial-sort
-                :rows-per-page-items="[15,25,50,{text: $t('general.all'), value: -1}]"
-                >
-                <template slot="headerCell" slot-scope="props">
-                {{$t(props.header.text)}}
-                </template>
-                <template slot="items" slot-scope="props">
-                    <td><span>{{props.item.id}}</span></td>
-                    <td :class="conditionalColor(props.item.level)+' lighten-2 text-xs-center'"><span>{{props.item.level}}</span></td>
-                    <td><span>{{props.item.message}}</span></td>
-                    <td><span>{{props.item.name}}</span></td>
-                    <td><span>{{props.item.timeStamp | moment("DD MMMM YYYY HH:mm:ss")}}</span></td>
-                </template>
-                </v-data-table>
-        </v-flex>
-        
+      <v-flex xs12>
+        <v-data-table
+          :headers="headers"
+          :items="logs"
+          :search="JSON.stringify(levels)"
+          :custom-filter="customFilter"
+          :loading="loading"
+          class="elevation-1"
+          hide-default-header
+          must-sort
+          sort-by
+          footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
+        >
+          <template v-slot:header="{ props }">
+            <th v-for="header in props.headers" :key="header.text">{{$t(header.text)}}</th>
+          </template>
+
+          <template v-slot:body="{ items }">
+            <tbody>
+              <tr v-for="item in items" :key="item.id">
+                <td>
+                  <span>{{item.id}}</span>
+                </td>
+                <td :class="conditionalColor(item.level)+' lighten-2 text-xs-center'">
+                  <span>{{item.level}}</span>
+                </td>
+                <td>
+                  <span>{{item.message}}</span>
+                </td>
+                <td>
+                  <span>{{item.name}}</span>
+                </td>
+                <td>
+                  <span>{{item.timeStamp | moment("DD MMMM YYYY HH:mm:ss")}}</span>
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-data-table>
+      </v-flex>
     </v-layout>
-</v-container>
+  </v-container>
 </template>
 
 <script>
@@ -219,10 +255,8 @@ export default {
         return "white";
       }
     },
-    customFilter(items, search, filter) {
-      return items.filter(v => {
-        return this.levels.includes(v.level);
-      });
+    customFilter(value, search, item) {
+      return this.levels.includes(item.level);
     }
   }
 };

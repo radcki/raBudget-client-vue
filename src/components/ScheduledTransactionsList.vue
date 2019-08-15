@@ -1,69 +1,74 @@
 <template>
   <v-list class="py-0 elevation-1" dense subheader>
-    
-
     <template v-if="$vuetify.breakpoint.mdAndUp">
-      <v-list-tile class="grey darken-2 py-1">
-        <v-list-tile-title class="subheading white--text">{{ title }}</v-list-tile-title>
-      </v-list-tile>
+      <v-list-item class="grey darken-2 py-1">
+        <v-list-item-title class="subheading white--text">{{ title }}</v-list-item-title>
+      </v-list-item>
       <div class="white" :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
-        <v-list-tile
+        <v-list-item
           :key="'tr_' + transaction.transactionSchedule.transactionScheduleId  + transaction.date"
           v-for="(transaction, i) in items"
-          avatar
           class="pb-1"
         >
-          <v-list-tile-avatar>
-            <v-icon :color="typeColors[transaction.category.type]">{{ transaction.category.icon }}</v-icon>
-          </v-list-tile-avatar>
+          <v-list-item-avatar size="30">
+            <v-icon
+              :color="typeColors[transaction.category.type]"
+            >{{ $categoryIcons[transaction.category.icon] }}</v-icon>
+          </v-list-item-avatar>
 
-          <v-list-tile-content>
-            <v-list-tile-title class="font-weight-medium">{{ transaction.description}}</v-list-tile-title>
-            <v-list-tile-sub-title
+          <v-list-item-content>
+            <v-list-item-title class="font-weight-medium">{{ transaction.description}}</v-list-item-title>
+            <v-list-item-subtitle
               class="text--primary"
-            >{{transaction.date | moment}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-tile-sub-title>
-          </v-list-tile-content>
-          <v-list-tile-action>
+            >{{transaction.date | moment}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-item-subtitle>
+          </v-list-item-content>
+          <v-list-item-action>
             <v-tooltip top>
-              <v-icon slot="activator" color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
+              <template v-slot:activator="{ on }">
+                <v-icon color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
+              </template>
               <span>{{$t('transactions.saveTransaction')}}</span>
             </v-tooltip>
-          </v-list-tile-action>
-        </v-list-tile>
+          </v-list-item-action>
+        </v-list-item>
       </div>
     </template>
 
     <v-list-group class="grey darken-2 white--icon" :value="expanded" v-else>
-      <v-list-tile class="py-1" slot="activator">
-        <v-list-tile-title class="subheading white--text">{{ title }}</v-list-tile-title>
-      </v-list-tile>
+      <template v-slot:activator="{ on }">
+        <v-list-item class="py-1">
+          <v-list-item-title class="subheading white--text">{{ title }}</v-list-item-title>
+        </v-list-item>
+      </template>
       <div class="white" :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
-        <v-list-tile
+        <v-list-item
           :key="'tr_' + transaction.transactionSchedule.transactionScheduleId  + transaction.date"
-          v-for="(transaction, i) in items"
-          avatar
+          v-for="(transaction) in items"
           class="pb-1"
         >
-          <v-list-tile-avatar>
-            <v-icon :color="typeColors[transaction.category.type]">{{ transaction.category.icon }}</v-icon>
-          </v-list-tile-avatar>
+          <v-list-item-avatar size="24">
+            <v-icon
+              :color="typeColors[transaction.category.type]"
+            >{{ $categoryIcons[transaction.category.icon] }}</v-icon>
+          </v-list-item-avatar>
 
-          <v-list-tile-content>
-            <v-list-tile-title class="font-weight-medium">{{ transaction.description}}</v-list-tile-title>
-            <v-list-tile-sub-title
+          <v-list-item-content>
+            <v-list-item-title class="font-weight-medium">{{ transaction.description}}</v-list-item-title>
+            <v-list-item-subtitle
               class="text--primary"
-            >{{transaction.date | moment}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-tile-sub-title>
-          </v-list-tile-content>
-          <v-list-tile-action>
+            >{{transaction.date | moment}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-item-subtitle>
+          </v-list-item-content>
+          <v-list-item-action>
             <v-tooltip top>
-              <v-icon slot="activator" color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
+              <template v-slot:activator="{ on }">
+                <v-icon color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
+              </template>
               <span>{{$t('transactions.saveTransaction')}}</span>
             </v-tooltip>
-          </v-list-tile-action>
-        </v-list-tile>
+          </v-list-item-action>
+        </v-list-item>
       </div>
     </v-list-group>
-    
   </v-list>
 </template>
       
@@ -94,7 +99,7 @@ export default {
     };
   },
   mounted: function() {
-    this.expanded = this.$vuetify.breakpoint.lgAndUp
+    this.expanded = this.$vuetify.breakpoint.lgAndUp;
   },
   watch: {
     "$vuetify.breakpoint.lgAndUp": function(desktop) {

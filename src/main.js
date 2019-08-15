@@ -19,28 +19,13 @@ import 'moment/locale/en-gb'
 import pl from 'vuetify/es5/locale/pl.js'
 import en from 'vuetify/es5/locale/en.js'
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
-import { faUserCircle } from '@fortawesome/free-solid-svg-icons'
-import { faDotCircle } from '@fortawesome/free-solid-svg-icons'
-import { faCircle } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
-import 'vuetify/src/stylus/main.styl'
 const moment = require('moment')
-
-library.add(faSignOutAlt, faUserCircle, faDotCircle, faCircle)
 
 Vue.use(VueWait, { useVuex: true })
 Vue.use(VueI18n)
 Vue.use(signalrPlugin)
 
-Vue.use(Vuetify, {
-  lang: {
-    locales: { pl, en },
-    current: 'pl'
-  }
-})
+Vue.use(Vuetify)
 
 Vue.prototype.$moment = moment
 Vue.filter('moment', function (value, format) {
@@ -74,53 +59,54 @@ Vue.prototype.$currencies = {
   }
 }
 
-Vue.prototype.$categoryIcons = [
-  'directions_car',
-  'local_grocery_store',
-  'commute',
-  'card_travel',
-  'build',
-  'shopping_basket',
-  'games',
-  'phone',
-  'airplanemode_active',
-  'monetization_on',
-  'format_paint',
-  'videogame_asset',
-  'computer',
-  'camera_alt',
-  'location_city',
-  'whatshot',
-  'fitness_center',
-  'free_breakfast',
-  'casino',
-  'beach_access',
-  'airport_shuttle',
-  'smoking_rooms',
-  'kitchen',
-  'child_friendly',
-  'pets',
-  'healing',
-  'accessibility',
-  'weekend',
-  'memory',
-  'phone_android',
-  'speaker',
-  'sim_card',
-  'restaurant',
-  'fastfood',
-  'local_gas_station',
-  'local_hospital',
-  'local_mall',
-  'local_bar',
-  'local_movies',
-  'directions_bike',
-  'card_giftcard'
-]
+import { mdiCar, mdiBabyFace, mdiCamera, mdiCity, mdiHuman, mdiSofa, mdiMemory, mdiBike, mdiFire, mdiCart, mdiTrainCar, mdiWalletTravel, mdiWrench, mdiBasket, mdiGamepad, mdiPhone, mdiAirplane, mdiCoin, mdiFormatPaint, mdiGamepadSquare, mdiLaptop, mdiDumbbell, mdiCoffee, mdiDice5, mdiBeach, mdiBusArticulatedFront, mdiSmoking, mdiFridge, mdiPaw, mdiBandage, mdiCellphoneAndroid, mdiSpeaker, mdiSim, mdiSilverwareForkKnife, mdiFood, mdiGasStation, mdiHospitalBuilding, mdiShopping, mdiGlassCocktail, mdiFilmstrip, mdiMotorbike, mdiWalletGiftcard } from '@mdi/js'
+
+Vue.prototype.$categoryIcons = {
+  'directions_car': mdiCar,
+  'local_grocery_store': mdiCart,
+  'commute': mdiTrainCar,
+  'card_travel': mdiWalletTravel,
+  'build': mdiWrench,
+  'shopping_basket': mdiBasket,
+  'games': mdiGamepad,
+  'phone': mdiPhone,
+  'airplanemode_active': mdiAirplane,
+  'monetization_on': mdiCoin,
+  'format_paint': mdiFormatPaint,
+  'videogame_asset': mdiGamepadSquare,
+  'computer': mdiLaptop,
+  'camera_alt': mdiCamera,
+  'location_city': mdiCity,
+  'whatshot': mdiFire,
+  'fitness_center': mdiDumbbell,
+  'free_breakfast': mdiCoffee,
+  'casino': mdiDice5,
+  'beach_access': mdiBeach,
+  'airport_shuttle': mdiBusArticulatedFront,
+  'smoking_rooms': mdiSmoking,
+  'kitchen': mdiFridge,
+  'child_friendly': mdiBabyFace,
+  'pets': mdiPaw,
+  'healing': mdiBandage,
+  'accessibility': mdiHuman,
+  'weekend': mdiSofa,
+  'memory': mdiMemory,
+  'phone_android': mdiCellphoneAndroid,
+  'speaker': mdiSpeaker,
+  'sim_card': mdiSim,
+  'restaurant': mdiSilverwareForkKnife,
+  'fastfood': mdiFood,
+  'local_gas_station': mdiGasStation,
+  'local_hospital': mdiHospitalBuilding,
+  'local_mall': mdiShopping,
+  'local_bar': mdiGlassCocktail,
+  'local_movies': mdiFilmstrip,
+  'directions_bike': mdiBike,
+  'motorbike': mdiMotorbike,
+  'card_giftcard': mdiWalletGiftcard
+}
 
 Vue.use(VueCurrencyFilter)
-
-Vue.component('v-icon-fa', FontAwesomeIcon)
 
 Vue.filter('percentage', function (value, decimals) {
   if (!value) value = 0
@@ -145,6 +131,15 @@ const app = new Vue({
   wait: new VueWait({
     useVuex: true,
     vuexModuleName: 'wait'
+  }),
+  vuetify: new Vuetify({
+    lang: {
+      locales: { pl, en },
+      current: 'pl'
+    },
+    icons: {
+      iconfont: 'mdiSvg'
+    }
   }),
   router,
   store,

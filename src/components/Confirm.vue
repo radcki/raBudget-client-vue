@@ -21,10 +21,10 @@
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn v-if="options.buttons.cancel" color="red" flat="flat" @click.native="cancel">{{ $t('general.cancel') }}</v-btn>
-        <v-btn v-if="options.buttons.no" color="red" flat="flat" @click.native="cancel">{{ $t('general.no') }}</v-btn>
-        <v-btn v-if="options.buttons.yes" color="primary darken-1" flat="flat" @click.native="agree">{{ $t('general.yes') }}</v-btn>
-        <v-btn v-if="options.buttons.ok" color="primary darken-1" flat="flat" @click.native="agree">{{ $t('general.ok') }}</v-btn>
+        <v-btn v-if="options.buttons.cancel" color="red" text @click.native="cancel">{{ $t('general.cancel') }}</v-btn>
+        <v-btn v-if="options.buttons.no" color="red" text @click.native="cancel">{{ $t('general.no') }}</v-btn>
+        <v-btn v-if="options.buttons.yes" color="primary darken-1" text @click.native="agree">{{ $t('general.yes') }}</v-btn>
+        <v-btn v-if="options.buttons.ok" color="primary darken-1" text @click.native="agree">{{ $t('general.ok') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

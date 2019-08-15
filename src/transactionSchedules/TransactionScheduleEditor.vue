@@ -4,22 +4,24 @@
     v-model="dialog"
     :fullscreen="mobile"
     :transition="mobile ? 'dialog-bottom-transition' : 'dialog-transition'"
+    v-bind="$attrs"
+    v-on="$listeners"
   >
-    <template slot="activator">
-      <slot></slot>
+    <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
     </template>
-    <v-spacer v-if="mobile" class="py-3"></v-spacer>
+
     <v-card>
-      <v-toolbar color="primary" dark dense flat :fixed="mobile">
-        <v-btn v-if="mobile" icon dark @click="dialog = false">
-          <v-icon>close</v-icon>
+      <v-toolbar color="primary" dark dense :fixed="mobile">
+        <v-btn v-if="mobile" icon text dark @click="dialog = false">
+          <v-icon>{{mdiClose}}</v-icon>
         </v-btn>
         <v-toolbar-title class="white--text">{{ $t("transactionSchedules.editing") }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="!mobile" flat icon @click="dialog = false">
-          <v-icon light>close</v-icon>
+        <v-btn v-if="!mobile" text icon @click="dialog = false">
+          <v-icon light>{{mdiClose}}</v-icon>
         </v-btn>
-        <v-btn v-if="mobile" flat="flat" @click.native="save">{{ $t('general.save') }}</v-btn>
+        <v-btn v-if="mobile" text @click.native="save">{{ $t('general.save') }}</v-btn>
       </v-toolbar>
 
       <v-card-text>
@@ -125,14 +127,15 @@
 
       <v-card-actions v-if="!mobile">
         <v-spacer></v-spacer>
-        <v-btn color="red" flat @click="dialog = false">{{$t('general.cancel')}}</v-btn>
-        <v-btn color="primary" flat @click="save">{{$t('general.save')}}</v-btn>
+        <v-btn color="red" text @click="dialog = false">{{$t('general.cancel')}}</v-btn>
+        <v-btn color="primary" text @click="save">{{$t('general.save')}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import {mdiClose} from "@mdi/js"
 export default {
   name: "TransactionScheduleEditor",
   components: {
@@ -181,7 +184,9 @@ export default {
         },
         ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
       },
-      budget: this.dataBudget
+      budget: this.dataBudget,
+
+      mdiClose
     };
   },
   computed: {

@@ -7,10 +7,10 @@
     </v-layout>
     <v-layout row wrap v-else>
       <v-flex xs4 align-center></v-flex>
-      <v-flex xs4 align-center>{{ $t('categories.totalAmount') }}</v-flex>
-      <v-flex xs4 align-center>{{ $t('categories.monthPlanLeft') }}</v-flex>
+      <v-flex xs4 align-center class="subtitle-2">{{ $t('categories.totalAmount') }}</v-flex>
+      <v-flex xs4 align-center class="subtitle-2">{{ $t('categories.monthPlanLeft') }}</v-flex>
         <template v-for="(category, index) in dataBalance" >
-          <v-flex :key="index + '_name'" xs4 align-center>
+          <v-flex :key="index + '_name'" xs4 align-center class="subtitle-2">
             {{category.budgetCategory.name}}
           </v-flex>
           <v-flex :key="index + '_savingsum'" xs4>

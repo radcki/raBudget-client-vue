@@ -2,26 +2,30 @@
   <v-dialog
     :fullscreen="!$vuetify.breakpoint.smAndUp"
     v-model="dialog"
-    v-if="allocationId"
     persistent
     :max-width="800"
     @keydown.esc="cancel"
     :transition="!$vuetify.breakpoint.smAndUp ? 'dialog-bottom-transition' : 'dialog-transition'"
+    v-bind="$attrs"
+    v-on="$listeners"
   >
-    <v-spacer v-if="!$vuetify.breakpoint.smAndUp" class="py-3"></v-spacer>
+    <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+      <slot :name="slot" v-bind="scope" />
+    </template>
+
     <v-card>
       <v-toolbar color="primary" dark dense flat :fixed="!$vuetify.breakpoint.smAndUp">
         <v-btn v-if="!$vuetify.breakpoint.smAndUp" icon dark @click="cancel">
-          <v-icon>close</v-icon>
+          <v-icon>{{mdiClose}}</v-icon>
         </v-btn>
         <v-toolbar-title class="white--text">{{ $t("allocations.editing") }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="$vuetify.breakpoint.smAndUp" flat icon @click="cancel">
-          <v-icon light>close</v-icon>
+        <v-btn v-if="$vuetify.breakpoint.smAndUp" text icon @click="cancel">
+          <v-icon light>{{mdiClose}}</v-icon>
         </v-btn>
         <v-btn
           v-if="!$vuetify.breakpoint.smAndUp"
-          flat="flat"
+          text
           @click.native="save"
         >{{ $t('general.save') }}</v-btn>
       </v-toolbar>
@@ -30,28 +34,11 @@
           <v-container grid-list-md>
             <v-layout row wrap align-center justify-center>
               <v-flex xs12>
-                <v-menu
-                  ref="dateMenu"
-                  :close-on-content-click="false"
-                  v-model="dateMenu"
-                  :nudge-right="40"
-                  :return-value.sync="editor.date"
-                  lazy
-                  transition="scale-transition"
-                  offset-y
-                  full-width
-                  min-width="290px"
-                >
-                  <v-text-field
-                    slot="activator"
-                    v-model="editor.date"
-                    :label="$t('allocations.date')"
-                    :rules="requiredRule"
-                    prepend-icon="event"
-                    readonly
-                  ></v-text-field>
-                  <v-date-picker v-model="editor.date" @input="$refs.dateMenu.save(editor.date)"></v-date-picker>
-                </v-menu>
+                <v-date-field
+                  :rules="requiredRule"
+                  v-model="editor.date"
+                  :label="$t('transactions.date')"
+                ></v-date-field> 
               </v-flex>
 
               <v-flex xs12 md5>
@@ -59,7 +46,7 @@
                     :items="categories[allocationType]"
                     :label="$t('general.category')"
                     :rules="requiredRule"
-                    v-model="editor.category"
+                    v-model="editor.destinationCategory"
                   ></v-category-select>
 
               </v-flex>
@@ -83,7 +70,7 @@
 
               <v-flex xs12>
                 <v-text-field
-                  v-model="editor.enteredAmount"
+                  v-model="editor.amount"
                   type="number"
                   step="0.01"
                   :label="$t('transactions.baseAmount')"
@@ -93,7 +80,7 @@
           </v-container>
         </v-form>
         <span class="subheading">{{ $t("transactions.finalAmount") }}:</span>
-        <span class="headline">{{amount | currency($currencies[budget.currency])}}</span>
+        <span class="headline">{{finalAmount | currency($currencies[budget.currency])}}</span>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
@@ -101,13 +88,13 @@
         <v-btn
           v-if="$vuetify.breakpoint.smAndUp"
           color="red"
-          flat="flat"
+          text
           @click.native="cancel"
         >{{ $t('general.cancel') }}</v-btn>
         <v-btn
           v-if="$vuetify.breakpoint.smAndUp"
           color="primary darken-1"
-          flat="flat"
+          text
           @click.native="save"
         >{{ $t('general.save') }}</v-btn>
       </v-card-actions>
@@ -116,37 +103,58 @@
 </template>
 
 <script>
-import { allocationsService } from "../_services/allocations.service.js";
+import { mdiClose } from "@mdi/js"
+
 export default {
   components: {
-    "v-category-select": () => import("../components/CategorySelect")
+    "v-category-select": () => import("../components/CategorySelect"),
+    "v-date-field": () => import("../components/DateField.vue")
   },
-  data: () => ({
-    budget: { currency: "PLN" },
-    dateMenu: false,
-    requiredRule: [v => !!v],
-    categories: {
-      incomes: [],
-      spendings: [],
-      savings: []
-    },
-    dialog: false,
-    valid: true,
-    resolve: null,
-    reject: null,
-    allocationType: null,
-    allocationId: null,
-    editor: {
-      category: null,
-      date: null,
-      description: null,
-      enteredAmount: null,
-      modifyAmount: 0.0
+  props: {
+    value: Object,
+    dataBudget: {
+      type: Object,
+      default: () => {
+        return { currency: "PLN" };
+      }
     }
-  }),
+  },  
+  data: function(){
+    return {
+      budget: this.dataBudget,
+      dateMenu: false,
+      requiredRule: [v => !!v],
+      categoryTypes: [
+          { value: "spendingCategories", text: "general.spendings" },
+          { value: "incomeCategories", text: "general.incomes" },
+          { value: "savingCategories", text: "general.savings" }
+        ],
+      dialog: false,
+      valid: true,    
+      editor: {
+          ...{
+            destinationCategory: null,
+            date: null,
+            description: null,
+            amount: null,
+            modifyAmount: 0.0
+          },
+          ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
+        },
+
+      mdiClose
+    }
+  },
   computed: {
-    amount: function() {
-      return 1 * this.editor.modifyAmount + 1 * this.editor.enteredAmount;
+    mobile() {
+      return !this.$vuetify.breakpoint.smAndUp;
+    },
+    allocationType() {return this.editor.destinationCategory ? this.categoryTypes[this.editor.destinationCategory.type].value : "spendingCategories"},
+    categories() {
+      return this.budget;
+    },
+    finalAmount: function() {
+      return 1 * this.editor.modifyAmount + 1 * this.editor.amount;
     }
   },
   mounted: function() {
@@ -167,52 +175,16 @@ export default {
       }
     }
   },
-  methods: {
-    open(allocationId) {
-      this.allocationId = allocationId;
-      this.editor.modifyAmount = 0.0;
-      allocationsService.getAllocation(allocationId).then(response => {
-        if (response.ok) {
-          this.dialog = true;
-          response.json().then(allocation => {
-            this.editor.category = allocation.destinationCategory;
-            this.allocationType = "spendings";
-            this.categories = {
-              spendings: allocation.budget.spendingCategories,
-              savings: allocation.budget.savingCategories,
-              incomes: allocation.budget.incomeCategories
-            };
-            this.editor.date = this.$moment(allocation.date).format(
-              "YYYY-MM-DD"
-            );
-            this.editor.description = allocation.description;
-            this.editor.enteredAmount = allocation.amount;
-            this.budget = allocation.budget;
-          });
-        }
-      });
-      return new Promise((resolve, reject) => {
-        this.resolve = resolve;
-        this.reject = reject;
-      });
-    },
+  methods: {    
     save() {
       if (this.$refs.editorForm.validate()) {
-        var allocation = {
-          allocationId: this.allocationId,
-          category: this.editor.category,
-          date: this.editor.date,
-          description: this.editor.description,
-          amount: this.amount
-        };
-        allocationsService.updateAllocation(allocation).then(response => {
-          this.resolve(response);
-        });
         this.dialog = false;
+        this.editor.amount = this.finalAmount;
+        this.editor.modifyAmount = 0;
+        this.$emit("save", this.editor);
       }
     },
     cancel() {
-      this.resolve(false);
       this.dialog = false;
     }
   }

@@ -44,7 +44,7 @@
             @click="handleSubmit"
           >{{ $t('account.register') }}</v-btn>
 
-          <v-btn flat to="/login">{{ $t('account.logging') }}</v-btn>
+          <v-btn textto="/login">{{ $t('account.logging') }}</v-btn>
           <v-progress-linear :indeterminate="true" v-if="$wait.is('register')"></v-progress-linear>
         </v-card-actions>
       </v-card>

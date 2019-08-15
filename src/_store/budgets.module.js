@@ -10,12 +10,13 @@ const state = {
 const actions = {
   reloadInitialized ({ state, dispatch }, budgetId) {
     var budget = state.budgets.find(v => v.id == state.activeBudgetId)
-    if (budgetId && budgetId != budget.id) {
-      dispatch('fetchBudget', budgetId)
-    } else {
-      state.budgets.forEach(b => {
+    if (budgetId && budgetId != budget.id) {     
+      state.budgets.filter(v=>v.id != budgetId).forEach(b => {
         dispatch('fetchBudget', b.id)
       })
+    } else {
+      dispatch('fetchBudget', budget.id)
+
       if (budget.unassignedFunds) {
         dispatch('fetchUnassignedFunds', budget.id)
       }

@@ -10,54 +10,56 @@
         single-line
         :clearable="clearable"
         :disabled="disabled"
-        append-icon="keyboard_arrow_down"
         :class="!multiple ? '' : 'caption'"
         :rules="rules && rules.length > 0 ? rules : []"
         :persistent-hint="persistentHint"
         :hint="hint">
 
-        <v-list-tile 
-            :color="categoriesSelected != 'none' ? 'blue darken-2' : ''" 
-            slot="prepend-item" 
-            v-if="multiple"
+        <template v-slot:prepend-item v-if="multiple">
+        <v-list-item 
+            :color="categoriesSelected != 'none' ? 'blue darken-2' : ''"             
             ripple 
             @click="toggleSelectedCategories">
-            <v-list-tile-action>
+            <v-list-item-action>
                 <v-icon color="blue darken-2" v-if="categoriesSelected == 'all'">
-                    check_box
+                    {{mdiCheckboxMarked}}
                 </v-icon>
                 <v-icon color="blue darken-2"  v-if="categoriesSelected == 'some'">                                      
-                    indeterminate_check_box
+                    {{mdiCheckboxIntermediate}}
                 </v-icon>
                 <v-icon v-if="categoriesSelected == 'none'">
-                    check_box_outline_blank
+                    {{mdiCheckboxBlank}}
                 </v-icon>
-            </v-list-tile-action>
-            <v-list-tile-title >
+            </v-list-item-action>
+            <v-list-item-title >
                 {{$t("general.selectAll")}}
-            </v-list-tile-title>
-        </v-list-tile>
-        <v-divider v-if="multiple" slot="prepend-item" class="mt-2"></v-divider>
-
-        <template slot="item" slot-scope="data">
-            <v-list-tile-action v-if="data.item">
-                <v-icon>{{ data.item.icon }}</v-icon>
-            </v-list-tile-action>
-                <span>{{ data.item.name }}</span>
-         
+            </v-list-item-title>
+        </v-list-item>
+        <v-divider class="mt-2"></v-divider>
         </template>
 
-        <template slot="selection" slot-scope="{ item, index }">
+        <template v-slot:item="{item}">
+            <v-list-item-action v-if="item">
+                <v-icon>{{ $categoryIcons[item.icon] }}</v-icon>
+            </v-list-item-action>
+                <span>{{ item.name }}</span>  
+        </template>
+
+        <template v-slot:selection="{ item, index }">
             <span v-if="multiple && index > 0">,&nbsp;</span>
-            <v-list-tile-action v-if="!multiple" >
-                <v-icon>{{ item.icon}}</v-icon>
-            </v-list-tile-action>  
+            <v-list-item-action v-if="!multiple" >
+                <v-icon>{{ $categoryIcons[item.icon]}}</v-icon>
+            </v-list-item-action>  
             <span>{{ item.name }}</span>
         </template>
         
     </v-select>
 </template>
 <script>
+
+import { mdiCheckboxBlank, mdiCheckboxMarked, mdiCheckboxIntermediate } from '@mdi/js'
+
+
 export default {
     name: "VCategorySelect",
     props: {
@@ -84,7 +86,11 @@ export default {
     data() {
         return {
             model: this.value,
-            requiredRule: [v => !!v || this.$t("forms.requiredField")]
+            requiredRule: [v => !!v || this.$t("forms.requiredField")],
+
+            mdiCheckboxBlank, 
+            mdiCheckboxMarked, 
+            mdiCheckboxIntermediate
         }        
     },
     watch: {

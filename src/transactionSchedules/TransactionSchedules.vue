@@ -11,59 +11,11 @@
             <v-container fluid grid-list-sm class="pa-0">
               <v-layout row wrap>
                 <v-flex xs12 md6>
-                  <v-menu
-                    ref="startDateMenu"
-                    :close-on-content-click="false"
-                    v-model="startDateMenu"
-                    :nudge-right="40"
-                    :return-value.sync="filters.startDate"
-                    lazy
-                    transition="scale-transition"
-                    offset-y
-                    full-width
-                    min-width="290px"
-                  >
-                    <v-text-field
-                      slot="activator"
-                      v-model="filters.startDate"
-                      :label="$t('general.fromDate')"
-                      clearable
-                      prepend-icon="event"
-                      readonly
-                    ></v-text-field>
-                    <v-date-picker
-                      v-model="filters.startDate"
-                      @input="$refs.startDateMenu.save(filters.startDate)"
-                    ></v-date-picker>
-                  </v-menu>
+                  <v-date-field v-model="filters.startDate" :label="$t('general.fromDate')"></v-date-field>
                 </v-flex>
 
                 <v-flex xs12 md6>
-                  <v-menu
-                    ref="endDateMenu"
-                    :close-on-content-click="false"
-                    v-model="endDateMenu"
-                    :nudge-right="40"
-                    :return-value.sync="filters.startDate"
-                    lazy
-                    transition="scale-transition"
-                    offset-y
-                    full-width
-                    min-width="290px"
-                  >
-                    <v-text-field
-                      slot="activator"
-                      v-model="filters.endDate"
-                      :label="$t('general.toDate')"
-                      clearable
-                      prepend-icon="event"
-                      readonly
-                    ></v-text-field>
-                    <v-date-picker
-                      v-model="filters.endDate"
-                      @input="$refs.endDateMenu.save(filters.endDate)"
-                    ></v-date-picker>
-                  </v-menu>
+                  <v-date-field v-model="filters.endDate" :label="$t('general.toDate')"></v-date-field>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -79,23 +31,24 @@
         <v-subheader class="headline">{{$t('general.foundData')}}</v-subheader>
       </v-flex>
 
-      <v-flex xs12 class="text-xs-right">
+      <v-flex xs12 class="text-xs-right mb-1">
         <v-spacer></v-spacer>
         <v-transaction-schedule-editor v-on:save="createSchedule" :data-budget="budget">
-          <v-btn color="green darken-1" dark>
-            <v-icon left>add_circle_outline</v-icon>
-            {{$t("general.create")}}
-          </v-btn>
+          <template v-slot:activator="{on}">
+            <v-btn color="green darken-1" v-on="on" dark>
+              <v-icon left>{{mdiPlusCircleOutline}}</v-icon>
+              {{$t("general.create")}}
+            </v-btn>
+          </template>
         </v-transaction-schedule-editor>
       </v-flex>
 
-      <v-flex xs12 v-if="$wait.is('loading.*') && !$vuetify.breakpoint.smAndUp" class="text-xs-center">
-        <v-progress-circular
-          :size="70"
-          :width="7"
-          color="amber darken-3"
-          indeterminate
-        ></v-progress-circular>
+      <v-flex
+        xs12
+        v-if="$wait.is('loading.*') && !$vuetify.breakpoint.smAndUp"
+        class="text-xs-center"
+      >
+        <v-progress-circular :size="70" :width="7" color="amber darken-3" indeterminate></v-progress-circular>
       </v-flex>
 
       <v-flex xs12 class="elevation-1 white" v-if="transactionSchedules">
@@ -104,7 +57,7 @@
             <v-text-field
               v-if="$vuetify.breakpoint.smAndUp"
               v-model="search"
-              append-icon="search"
+              :append-icon="mdiMagnify"
               :label="$t('general.search')"
               single-line
               hide-details
@@ -119,70 +72,74 @@
           :loading="$wait.is('loading.*')"
           :search="search"
           must-sort
-          disable-initial-sort
-          :rows-per-page-items="[15,25,50,{text: $t('general.all'), value: -1}]"
+          footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
         >
-          <template slot="items" slot-scope="props">
-            <td>
-              <v-icon
-                class="px-2"
-                :color="typeColors[props.item.budgetCategory.type]"
-              >{{ props.item.budgetCategory.icon }}</v-icon>
-              {{ props.item.budgetCategory.name }}
-            </td>
-            <td>{{ props.item.startDate | moment("dddd, D.MM.YYYY") }}</td>
-            <td>{{ props.item.endDate | moment("dddd, D.MM.YYYY") }}</td>
-            <td>
-              <span
-                v-if="props.item.frequency > 0"
-              >{{$t('general.every')}} {{ props.item.periodStep }}:</span>
-              {{ $t(occurrenceFrequencies.find(v=>v.value==props.item.frequency).text) }}
-            </td>
-            <td>{{ props.item.description }}</td>
+          <template v-slot:body="{ items }">
+            <tbody>
+              <tr v-for="item in items" :key="item.transactionScheduleId">
+                <td>
+                  <v-icon
+                    class="px-2"
+                    :size="40"
+                    :color="typeColors[item.budgetCategory.type]"
+                  >{{ $categoryIcons[item.budgetCategory.icon] }}</v-icon>
+                  {{ item.budgetCategory.name }}
+                </td>
+                <td>{{ item.startDate | moment("dddd, D.MM.YYYY") }}</td>
+                <td>{{ item.endDate | moment("dddd, D.MM.YYYY") }}</td>
+                <td>
+                  <span v-if="item.frequency > 0">{{$t('general.every')}} {{ item.periodStep }}:</span>
+                  {{ $t(occurrenceFrequencies.find(v=>v.value==item.frequency).text) }}
+                </td>
+                <td>{{ item.description }}</td>
 
-            <td>{{ props.item.amount | currency($currencies[budget.currency]) }}</td>
-            <td>
-              <v-transaction-schedule-editor
-                v-on:save="updateSchedule"
-                :value="props.item"
-                :data-budget="budget"
-              >
-                <v-btn color="primary" dark icon flat>
-                  <v-icon>edit</v-icon>
-                </v-btn>
-              </v-transaction-schedule-editor>
+                <td>{{ item.amount | currency($currencies[budget.currency]) }}</td>
+                <td>
+                  <v-transaction-schedule-editor
+                    v-on:save="updateSchedule"
+                    :value="item"
+                    :data-budget="budget"
+                  >
+                    <template v-slot:activator="{on}">
+                      <v-btn color="primary" v-on="on" dark icon text>
+                        <v-icon>{{mdiPencil}}</v-icon>
+                      </v-btn>
+                    </template>
+                  </v-transaction-schedule-editor>
 
-              <v-btn
-                color="red darken-1"
-                dark
-                icon
-                flat
-                @click="deleteSchedule(props.item.transactionScheduleId)"
-              >
-                <v-icon>delete</v-icon>
-              </v-btn>
-            </td>
+                  <v-btn
+                    color="red darken-1"
+                    dark
+                    icon
+                    text
+                    @click="deleteSchedule(item.transactionScheduleId)"
+                  >
+                    <v-icon>{{mdiTrashCan}}</v-icon>
+                  </v-btn>
+                </td>
+              </tr>
+            </tbody>
           </template>
         </v-data-table>
 
         <v-list v-if="!$vuetify.breakpoint.smAndUp" dense subheader>
           <template v-for="(transaction, index) in transactionSchedules">
-            <v-list-tile :key="transaction.transactionScheduleId + '.' + index" avatar class="pb-1">
-              <v-list-tile-avatar>
+            <v-list-item :key="transaction.transactionScheduleId + '.' + index" class="pb-1">
+              <v-list-item-avatar>
                 <v-icon
                   :color="typeColors[transaction.budgetCategory.type]"
-                >{{ transaction.budgetCategory.icon }}</v-icon>
-              </v-list-tile-avatar>
+                >{{ $categoryIcons[transaction.budgetCategory.icon] }}</v-icon>
+              </v-list-item-avatar>
 
-              <v-list-tile-content>
-                <v-list-tile-title class="font-weight-medium">
+              <v-list-item-content>
+                <v-list-item-title class="font-weight-medium">
                   {{ transaction.description}} -
                   <span
                     class="grey--text text--darken-1 caption"
                   >{{$t('transactionSchedules.start')}}: {{transaction.startDate | moment("D.MM.YYYY")}}</span>
-                </v-list-tile-title>
+                </v-list-item-title>
 
-                <v-list-tile-sub-title class="text--primary">
+                <v-list-item-subtitle class="text--primary">
                   {{transaction.amount | currency($currencies[budget.currency])}}
                   <span
                     class="grey--text text--lighten-1 caption"
@@ -193,45 +150,27 @@
                     >{{$t('general.every')}} {{ transaction.periodStep }}:</span>
                     {{ $t(occurrenceFrequencies.find(v=>v.value==transaction.frequency).text) }}
                   </span>
-                </v-list-tile-sub-title>
-              </v-list-tile-content>
+                </v-list-item-subtitle>
+              </v-list-item-content>
 
-              <v-list-tile-action>
-                <v-menu>
-                  <v-btn slot="activator" icon>
-                    <v-icon>more_vert</v-icon>
-                  </v-btn>
-                  <v-list single-line dense light>
-                    <v-list-tile>
-                      <v-list-tile-avatar>
-                        <v-transaction-schedule-editor
-                          v-on:save="updateSchedule"
-                          :value="transaction"
-                          :data-budget="budget"
-                        >
-                          <v-btn color="primary" dark icon flat>
-                            <v-icon small>edit</v-icon>
-                          </v-btn>
-                        </v-transaction-schedule-editor>
-                      </v-list-tile-avatar>
-                    </v-list-tile>
-                    <v-list-tile>
-                      <v-list-tile-avatar>
-                        <v-btn
-                          color="red darken-1"
-                          dark
-                          icon
-                          flat
-                          @click="deleteSchedule(props.item.transactionScheduleId)"
-                        >
-                          <v-icon>delete</v-icon>
-                        </v-btn>
-                      </v-list-tile-avatar>
-                    </v-list-tile>
-                  </v-list>
-                </v-menu>
-              </v-list-tile-action>
-            </v-list-tile>
+              <v-list-item-action>
+                <v-transaction-schedule-editor
+                  v-on:save="updateSchedule"
+                  :value="transaction"
+                  :data-budget="budget"
+                >
+                  <template v-slot:activator="{on}">
+                    <v-icon color="primary" v-on="on">{{mdiPencil}}</v-icon>
+                  </template>
+                </v-transaction-schedule-editor>
+              </v-list-item-action>
+              <v-list-item-action>
+                <v-icon
+                  color="red darken-1"
+                  @click="deleteSchedule(transaction.transactionScheduleId)"
+                >{{mdiTrashCan}}</v-icon>
+              </v-list-item-action>
+            </v-list-item>
           </template>
         </v-list>
       </v-flex>
@@ -242,12 +181,19 @@
 <script>
 import { transactionSchedulesService } from "../_services/transactionSchedules.service";
 import { mapState, mapActions } from "vuex";
+import {
+  mdiPlusCircleOutline,
+  mdiPencil,
+  mdiTrashCan,
+  mdiMagnify
+} from "@mdi/js";
 
 export default {
   name: "TransactionSchedules",
   components: {
     "v-transaction-schedule-editor": () =>
-      import("./TransactionScheduleEditor.vue")
+      import("./TransactionScheduleEditor.vue"),
+    "v-date-field": () => import("../components/DateField.vue")
   },
   data() {
     return {
@@ -307,7 +253,11 @@ export default {
           text: this.$t("general.actions"),
           sortable: false
         }
-      ]
+      ],
+      mdiPlusCircleOutline,
+      mdiPencil,
+      mdiTrashCan,
+      mdiMagnify
     };
   },
   computed: {

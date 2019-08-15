@@ -34,7 +34,7 @@
         <v-card-actions>
           <v-btn color="primary" :disabled="!valid" @click="handleSubmit">{{ $t("account.signIn") }}</v-btn>
 
-          <v-btn flat to="/register">{{ $t("account.register") }}</v-btn>
+          <v-btn textto="/register">{{ $t("account.register") }}</v-btn>
           <v-progress-linear :indeterminate="true" v-if="$wait.is('login')"></v-progress-linear>
         </v-card-actions>
       </v-card>

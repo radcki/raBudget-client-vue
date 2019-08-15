@@ -54,7 +54,7 @@
             </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn flat to="/login">{{ $t('account.logging') }}</v-btn>
+          <v-btn textto="/login">{{ $t('account.logging') }}</v-btn>
           <v-btn v-if="haveCode" color="primary" @click="resetPassword">{{ $t("account.changePassword") }}</v-btn>
           <v-btn v-else color="primary" @click="passwordChangeRequest">{{ $t("account.requestPasswordReset") }}</v-btn>
           <v-progress-linear :indeterminate="true" v-if="$wait.is('processing')"></v-progress-linear>

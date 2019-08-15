@@ -1,113 +1,145 @@
 <template>
-<v-container grid-list-md> 
-    <v-layout wrap >
-        <v-flex xs12 md6>
-            <v-subheader class="headline">
-                {{ $t('admin.users') }}
-            </v-subheader>
-        </v-flex>
-        <v-flex xs12>
-            <v-list class="elevation-1" v-if="$vuetify.breakpoint.xs">
-                <template v-for="(user, index) in users">
-                    <v-list-tile :key="'user'+index">
-                        <v-list-tile-action>
-                            <span>{{user.id}}</span>
-                        </v-list-tile-action>
-                        <v-list-tile-content>
-                            <v-list-tile-title>{{user.username}}</v-list-tile-title>
-                            <v-list-tile-sub-title>{{user.email}}</v-list-tile-sub-title>
-                        </v-list-tile-content>
-                        <v-list-tile-action>
-                            <v-tooltip bottom>
-                                <v-btn slot="activator" flat color="primary" @click="openEditDialog(user)" icon>
-                                    <v-icon>edit</v-icon>
-                                </v-btn>
-                                <span>{{$t("general.edit")}}</span>
-                            </v-tooltip>
-                        </v-list-tile-action>
-                        <v-list-tile-action-text>
-                            <v-tooltip bottom>
-                                <v-btn slot="activator" flat color="red" @click="accountDelete(user)" icon>
-                                    <v-icon>delete_forever</v-icon>
-                                </v-btn>
-                                <span>{{$t("general.delete")}}</span>
-                            </v-tooltip>
-                        </v-list-tile-action-text>
-                    </v-list-tile>
-                    <v-divider :key="'divider' + index" v-if="index != users.length-1"></v-divider>
-                </template>
-            </v-list>
-            <v-layout row justify-end v-if="$vuetify.breakpoint.smAndUp">
-                <v-flex xs4>
-                <v-text-field                    
-                    v-model="search"
-                    append-icon="search"               
-                    :label="$t('general.search')"
-                    single-line 
-                    hide-details></v-text-field>
-                </v-flex>
-            </v-layout>
-             <v-data-table
-                v-if="$vuetify.breakpoint.smAndUp"
-                :headers="headers"
-                :items="users"
-                :search="search"
-                class="elevation-1"
-                must-sort                
-                disable-initial-sort
-                :rows-per-page-items="[15,25,50,{text: $t('general.all'), value: -1}]"
-                >
-                <template slot="headerCell" slot-scope="props">
-                {{$t(props.header.text)}}
-                </template>
-                <template slot="items" slot-scope="props">
-                    <td>
-                        <span>{{props.item.id}}</span>
-                    </td>
-                    <td>
-                        <v-chip v-if="props.item.roles.filter((v)=>{return v==1}).length > 0" small color="red" disabled class="small white--text">
-                            {{$t("account.adminshort")}}
-                        </v-chip>
-                        {{props.item.username}}                        
-                    </td>
-                    <td>{{props.item.email}}</td>
-                    <td>{{props.item.creationDate | moment("YYYY-MM-DD HH:mm:ss") }}</td>
-                    <td>            
-                        <v-btn flat small color="primary" @click="openEditDialog(props.item)">{{$t("account.editProfile")}}</v-btn>         
-                        <v-btn flat small color="red" @click="accountDelete(props.item)">{{$t("general.delete")}}</v-btn>         
-                    </td>
-                </template>
-                </v-data-table>
-        </v-flex>
-
-        <v-dialog v-model="userEditDialog" max-width="700">
-            <v-card>
-                <v-toolbar dark color="primary" dense flat>
-                    <v-toolbar-title class="white--text">{{$t('account.editProfile')}}</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                    <v-btn flat icon @click="userEditDialog = false">
-                        <v-icon light>close</v-icon>
+  <v-container grid-list-md>
+    <v-layout wrap>
+      <v-flex xs12 md6>
+        <v-subheader class="headline">{{ $t('admin.users') }}</v-subheader>
+      </v-flex>
+      <v-flex xs12>
+        <v-list class="elevation-1" v-if="$vuetify.breakpoint.xs">
+          <template v-for="(user, index) in users">
+            <v-list-item :key="'user'+index">
+              <v-list-item-action>
+                <span>{{user.id}}</span>
+              </v-list-item-action>
+              <v-list-item-content>
+                <v-list-item-title>{{user.username}}</v-list-item-title>
+                <v-list-item-subtitle>{{user.email}}</v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" text color="primary" @click="openEditDialog(user)" icon>
+                      <v-icon>edit</v-icon>
                     </v-btn>
-                </v-toolbar>
-                <v-card-text>
-                    <v-text-field v-model="userEdit.username" :label="$t('account.username')"></v-text-field>
-                    <v-text-field v-model="userEdit.email" :label="$t('account.email')"></v-text-field>
-                    <v-select :items="roles" v-model="userEdit.roles" :label="$t('account.roles')" multiple></v-select>
-                </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="red" flat="flat" @click="userEditDialog = false">{{ $t('general.cancel') }}</v-btn>
-                    <v-btn color="primary darken-1" flat="flat" @click.native="updateProfile()">{{ $t('general.save') }}</v-btn>        
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+                  </template>
+                  <span>{{$t("general.edit")}}</span>
+                </v-tooltip>
+              </v-list-item-action>
+              <v-list-item-action-text>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on }">
+                    <v-btn v-on="on" text color="primary" @click="accountDelete(user)" icon>
+                      <v-icon>delete_forever</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>{{$t("general.delete")}}</span>
+                </v-tooltip>
+              </v-list-item-action-text>
+            </v-list-item>
+            <v-divider :key="'divider' + index" v-if="index != users.length-1"></v-divider>
+          </template>
+        </v-list>
+        <v-layout row justify-end v-if="$vuetify.breakpoint.smAndUp">
+          <v-flex xs4>
+            <v-text-field
+              v-model="search"
+              :append-icon="mdiMagnify"
+              :label="$t('general.search')"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-flex>
+        </v-layout>
+        <v-data-table
+          v-if="$vuetify.breakpoint.smAndUp"
+          :headers="headers"
+          :items="users"
+          :search="search"
+          class="elevation-1"
+          hide-default-header
+          must-sort
+          sort-by
+          footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
+        >
+          <template v-slot:header="{ props }">
+            <th v-for="header in props.headers" :key="header.text">{{$t(header.text)}}</th>
+          </template>
+
+          <template v-slot:body="{ items }">
+            <tbody>
+              <tr v-for="item in items" :key="item.id">
+                <td>
+                  <span>{{item.id}}</span>
+                </td>
+                <td>
+                  <v-chip
+                    v-if="item.roles.filter((v)=>{return v==1}).length > 0"
+                    small
+                    color="red"
+                    disabled
+                    class="small white--text"
+                  >{{$t("account.adminshort")}}</v-chip>
+                  {{item.username}}
+                </td>
+                <td>{{item.email}}</td>
+                <td>{{item.creationDate | moment("YYYY-MM-DD HH:mm:ss") }}</td>
+                <td>
+                  <v-btn
+                    text
+                    small
+                    color="primary"
+                    @click="openEditDialog(item)"
+                  >{{$t("account.editProfile")}}</v-btn>
+                  <v-btn
+                    text
+                    small
+                    color="red"
+                    @click="accountDelete(item)"
+                  >{{$t("general.delete")}}</v-btn>
+                </td>
+              </tr>
+            </tbody>
+          </template>
+        </v-data-table>
+      </v-flex>
+
+      <v-dialog v-model="userEditDialog" max-width="700">
+        <v-card>
+          <v-toolbar dark color="primary" dense text>
+            <v-toolbar-title class="white--text">{{$t('account.editProfile')}}</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <v-btn text icon @click="userEditDialog = false">
+              <v-icon light>{{mdiClose}}</v-icon>
+            </v-btn>
+          </v-toolbar>
+          <v-card-text>
+            <v-text-field v-model="userEdit.username" :label="$t('account.username')"></v-text-field>
+            <v-text-field v-model="userEdit.email" :label="$t('account.email')"></v-text-field>
+            <v-select :items="roles" v-model="userEdit.roles" :label="$t('account.roles')" multiple></v-select>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="red"
+              text="text"
+              @click="userEditDialog = false"
+            >{{ $t('general.cancel') }}</v-btn>
+            <v-btn
+              color="primary darken-1"
+              text="text"
+              @click.native="updateProfile()"
+            >{{ $t('general.save') }}</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-layout>
-</v-container>
+  </v-container>
 </template>
 
 <script>
 import { mapState, mapActions } from "vuex";
 import { userService } from "../_services/user.service";
+import { mdiMagnify, mdiClose } from "@mdi/js"
 
 export default {
   data() {
@@ -149,7 +181,8 @@ export default {
           text: "general.actions",
           sortable: false
         }
-      ]
+      ],
+      mdiMagnify, mdiClose
     };
   },
   computed: {

@@ -9,7 +9,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
@@ -21,6 +21,21 @@ const env = require('../config/prod.env')
 const webpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: [
+      {
+        test: /\.s(c|a)ss$/,
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              implementation: require('sass'),
+              fiber: require('fibers'),
+              indentedSyntax: true // optional
+            }
+          }
+        ]
+      },
       {
         test: /\.css$/,
         use: [
@@ -50,13 +65,13 @@ const webpackConfig = merge(baseWebpackConfig, {
   },
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
+      /*new UglifyJsPlugin({
         uglifyOptions: {
           warnings: false
         },
         sourceMap: config.build.productionSourceMap,
         parallel: true
-      }),
+      }),*/
       new TerserPlugin({
         cache: true,
         parallel: true,
@@ -104,7 +119,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         apiUrl: '' // leave blank if hosting together
       })
     }),
-    new CleanWebpackPlugin(['wwwroot'], {
+    new CleanWebpackPlugin({
       root: path.join(config.build.assetsRoot, '..')
     }),
     new SWPrecacheWebpackPlugin({
