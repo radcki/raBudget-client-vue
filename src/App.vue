@@ -146,7 +146,7 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
 
-      <v-menu left>
+      <v-menu >
         <template v-slot:activator="{ on }">
           <v-btn v-on="on" text>
             <v-icon class="mr-2">{{mdiWeb}}</v-icon>

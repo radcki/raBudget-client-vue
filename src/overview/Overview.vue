@@ -183,7 +183,7 @@
       :input-data="newEntryInputData"
     >
       <v-btn v-if="$vuetify.breakpoint.xs" fixed dark fab bottom right color="pink">
-        <v-icon>add</v-icon>
+        <v-icon>{{mdiPlus}}</v-icon>
       </v-btn>
     </v-new-entry>
 
@@ -196,7 +196,7 @@ import { budgetService } from "../_services/budget.service";
 import { transactionsService } from "../_services/transactions.service";
 import { allocationsService } from "../_services/allocations.service";
 import { mapState, mapActions, mapGetters } from "vuex";
-
+import { mdiPlus } from "@mdi/js"
 
 export default {
   name: "Overview",
@@ -222,7 +222,8 @@ export default {
         savings: []
       },
       newEntryVisible: 'manual',
-      newEntryInputData: null
+      newEntryInputData: null,
+      mdiPlus
     };
   },
   computed: {

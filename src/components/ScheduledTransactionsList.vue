@@ -35,10 +35,8 @@
     </template>
 
     <v-list-group class="grey darken-2 white--icon" :value="expanded" v-else>
-      <template v-slot:activator="{ on }">
-        <v-list-item class="py-1">
-          <v-list-item-title class="subheading white--text">{{ title }}</v-list-item-title>
-        </v-list-item>
+      <template v-slot:activator>
+          <v-list-item-title class="py-1 subheading white--text">{{ title }}</v-list-item-title>
       </template>
       <div class="white" :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
         <v-list-item
@@ -61,7 +59,7 @@
           <v-list-item-action>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-icon color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
+                <v-icon color="primary" @click="$emit('create', transaction)">{{mdiLocationEnter}}</v-icon>
               </template>
               <span>{{$t('transactions.saveTransaction')}}</span>
             </v-tooltip>
@@ -73,6 +71,7 @@
 </template>
       
 <script>
+import {mdiLocationEnter} from "@mdi/js"
 export default {
   name: "VScheduledTransactionsList",
   props: {
@@ -95,7 +94,8 @@ export default {
         1: "green darken-1",
         2: "blue darken-1"
       },
-      expanded: true
+      expanded: true,
+      mdiLocationEnter
     };
   },
   mounted: function() {
