@@ -182,9 +182,12 @@
       v-on:saved="reloadInitialized();fetchTransactions();"
       :input-data="newEntryInputData"
     >
-      <v-btn v-if="$vuetify.breakpoint.xs" fixed dark fab bottom right color="pink">
+      <template v-slot:activator="{on}">
+<v-btn v-if="$vuetify.breakpoint.xs" v-on="on" fixed dark fab bottom right color="pink">
         <v-icon>{{mdiPlus}}</v-icon>
       </v-btn>
+      </template>
+      
     </v-new-entry>
 
     <transaction-editor ref="transactionEditor"></transaction-editor>

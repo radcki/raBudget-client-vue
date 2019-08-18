@@ -134,22 +134,24 @@
       v-model="editorDialog"
       hide-overlay
       transition="dialog-bottom-transition"
+      v-bind="$attrs"
+      v-on="$listeners"
     >
-      <template v-slot:activator="{ on }">
-        <slot></slot>
+      <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
+        <slot :name="slot" v-bind="scope" />
       </template>
 
       <v-card>
         <v-toolbar :color="color[tab]" fixed dark tabs>
           <v-btn icon dark @click="editorDialog = false">
-            <v-icon>close</v-icon>
+            <v-icon>{{mdiClose}}</v-icon>
           </v-btn>
           <v-toolbar-title>{{$t('transactions.newtransaction')}}</v-toolbar-title>
           <v-spacer></v-spacer>
 
           <v-btn dark text v-if="tab!=3" @click="createTransaction">{{ $t('general.add') }}</v-btn>
           <v-btn dark text v-if="tab==3" @click="createAllocation">{{ $t('general.add') }}</v-btn>
-          <v-tabs slot="extension" v-model="tab" :color="color[tab]" grow>
+          <v-tabs slot="extension" v-model="tab" :background-color="color[tab]" grow>
             <v-tabs-slider></v-tabs-slider>
             <v-tab class="white--text" ripple>Wydatki</v-tab>
             <v-tab class="white--text" ripple>Wpływy</v-tab>
@@ -157,7 +159,7 @@
             <v-tab class="white--text" ripple>Alokacje</v-tab>
           </v-tabs>
         </v-toolbar>
-        <v-form ref="editorForm" v-model="valid" lazy-validation>
+        <v-form ref="editorForm" class="px-2" v-model="valid" lazy-validation>
           <v-container>
             <v-layout row wrap align-center justify-center>
               <v-flex xs12 class="mt-5"></v-flex>
