@@ -19,7 +19,7 @@
             <v-text-field
               v-model="password"
               autocomplete="current-password"
-              :append-icon="show ? 'visibility_off' : 'visibility'"
+              :append-icon="show ? mdiEyeOff : mdiEye"
               :rules="requiredRule"
               :type="show ? 'text' : 'password'"
               name="input-10-1"
@@ -44,6 +44,7 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
+import { mdiEye, mdiEyeOff } from "@mdi/js"
 
 export default {
   data() {

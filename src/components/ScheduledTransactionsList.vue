@@ -25,7 +25,7 @@
           <v-list-item-action>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
-                <v-icon color="primary" @click="$emit('create', transaction)">save_alt</v-icon>
+                <v-icon color="primary" @click="$emit('create', transaction)">{{mdiLocationEnter}}</v-icon>
               </template>
               <span>{{$t('transactions.saveTransaction')}}</span>
             </v-tooltip>

@@ -62,14 +62,12 @@
                       v-if="periodReport && $vuetify.breakpoint.smAndUp"
                       class
                       :headers="headers"
-                      hide-default-header
+                      
                       hide-default-footer
+                      disable-pagination
+                      item-key="category.categoryId"
                       :items="periodReport"
                     >
-                      <template v-slot:header="{ props }">
-                        <th v-for="header in props.headers" :key="header.text">{{$t(header.text)}}</th>
-                      </template>
-
                       <template v-slot:body="{ items }">
                         <tbody>
                           <tr v-for="item in items" :key="item.category.categoryId">
@@ -466,39 +464,46 @@ export default {
       return this.monthlyData[type];
     },
     headers: function() {
+      var locale = this.$i18n.locale; /* reload binding */
+       var categoryName = this.$t("categories.name");
+       var budgetSum = this.$t("reports.budgetSum");
+       var transactionsSum = this.$t("reports.transactionsSum");
+       var allocationsSum = this.$t("reports.allocationsSum");
+       var averagePerDay = this.$t("reports.averagePerDay");
+       var averagePerMonth = this.$t("reports.averagePerMonth");
       var headers = [
         {
-          text: "categories.name",
+          text: categoryName,
           align: "left",
           sortable: true,
-          value: "category.name"
+          value: "category.name"  
         },
         {
-          text: "reports.budgetSum",
+          text: budgetSum,
           align: "left",
           sortable: true,
           value: "budgetAmount"
         },
         {
-          text: "reports.transactionsSum",
+          text: transactionsSum,
           align: "left",
           sortable: true,
           value: "transactionsSum"
         },
         {
-          text: "reports.allocationsSum",
+          text: allocationsSum,
           align: "left",
           sortable: true,
           value: "allocationsSum"
         },
         {
-          text: "reports.averagePerDay",
+          text: averagePerDay,
           align: "left",
           sortable: true,
           value: "averagePerDay"
         },
         {
-          text: "reports.averagePerMonth",
+          text: averagePerMonth,
           align: "left",
           sortable: true,
           value: "averagePerMonth"

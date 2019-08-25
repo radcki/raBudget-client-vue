@@ -31,7 +31,7 @@
               <v-text-field
                   v-model="newpassword"
                   autocomplete="new-password"
-                  :append-icon="show ? 'visibility_off' : 'visibility'"
+                  :append-icon="show ? mdiEyeOff : mdiEye"
                   :rules="passwordRule"
                   :type="show ? 'text' : 'password'"
                   :label="$t('account.newpassword')"
@@ -42,7 +42,7 @@
                 <v-text-field
                     v-model="newpasswordConfirm"
                     autocomplete="new-password"
-                    :append-icon="show2 ? 'visibility_off' : 'visibility'"
+                    :append-icon="show2 ? mdiEyeOff : mdiEye"
                     :rules="passwordMatch"
                     :type="show2 ? 'text' : 'password'"
                     :label="$t('account.newpasswordConfirm')"
@@ -67,6 +67,7 @@
 <script>
 import { mapState, mapActions } from "vuex";
 import { userService } from '../_services/user.service'
+import { mdiEye, mdiEyeOff } from "@mdi/js"
 
 export default {
   data() {
