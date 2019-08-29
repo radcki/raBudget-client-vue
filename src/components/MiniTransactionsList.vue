@@ -11,7 +11,7 @@
       <v-divider :key="date + '_divider'" inset></v-divider>
       <v-list-item
         :key="'tr_' + transaction.transactionId"
-        v-for="(transaction, i) in transactions"
+        v-for="transaction in transactions"
         class="pb-1"
       >
         <v-list-item-avatar :size="24">

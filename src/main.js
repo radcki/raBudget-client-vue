@@ -59,7 +59,7 @@ Vue.prototype.$currencies = {
   }
 }
 
-import { mdiCar, mdiBabyFace, mdiCamera, mdiCity, mdiHuman, mdiSofa, mdiMemory, mdiBike, mdiFire, mdiCart, mdiTrainCar, mdiWalletTravel, mdiWrench, mdiBasket, mdiGamepad, mdiPhone, mdiAirplane, mdiCoin, mdiFormatPaint, mdiGamepadSquare, mdiLaptop, mdiDumbbell, mdiCoffee, mdiDice5, mdiBeach, mdiBusArticulatedFront, mdiSmoking, mdiFridge, mdiPaw, mdiBandage, mdiCellphoneAndroid, mdiSpeaker, mdiSim, mdiSilverwareForkKnife, mdiFood, mdiGasStation, mdiHospitalBuilding, mdiShopping, mdiGlassCocktail, mdiFilmstrip, mdiMotorbike, mdiWalletGiftcard } from '@mdi/js'
+import { mdiCar, mdiBabyFace, mdiCamera, mdiCity, mdiHuman, mdiSofa, mdiMemory, mdiBike, mdiFire, mdiCart, mdiTrainCar, mdiWalletTravel, mdiWrench, mdiBasket, mdiGamepad, mdiPhone, mdiAirplane, mdiCoinOutline, mdiFormatPaint, mdiGamepadSquare, mdiLaptop, mdiDumbbell, mdiCoffee, mdiDice5, mdiBeach, mdiBusArticulatedFront, mdiSmoking, mdiFridge, mdiPaw, mdiBandage, mdiCellphoneAndroid, mdiSpeaker, mdiSim, mdiSilverwareForkKnife, mdiFood, mdiGasStation, mdiHospitalBuilding, mdiShopping, mdiGlassCocktail, mdiFilmstrip, mdiMotorbike, mdiWalletGiftcard } from '@mdi/js'
 
 Vue.prototype.$categoryIcons = {
   'directions_car': mdiCar,
@@ -71,7 +71,7 @@ Vue.prototype.$categoryIcons = {
   'games': mdiGamepad,
   'phone': mdiPhone,
   'airplanemode_active': mdiAirplane,
-  'monetization_on': mdiCoin,
+  'monetization_on': mdiCoinOutline,
   'format_paint': mdiFormatPaint,
   'videogame_asset': mdiGamepadSquare,
   'computer': mdiLaptop,
