@@ -225,8 +225,8 @@
     <confirm ref="confirm"></confirm>
     <v-dialog fullscreen v-model="loadingOverlay">
       <div class="centered-overlay">
-        <div>
-          <v-progress-circular :size="400" :width="15" class color="purple" indeterminate></v-progress-circular>
+        <div >
+          <v-progress-circular :size="400" style="max-width: 90vw" :width="15" class color="purple" indeterminate></v-progress-circular>
         </div>
       </div>
     </v-dialog>
