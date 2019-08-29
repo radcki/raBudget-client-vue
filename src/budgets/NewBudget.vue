@@ -38,7 +38,7 @@
                     <v-layout row wrap>
                       <v-flex xs8 sm6>
                         <v-text-field
-                          prepend-icon="title"
+                          :prepend-icon="mdiFormatTitle"
                           v-model="budget.name"
                           :rules="requiredRule"
                           :label="$t('general.name')"
@@ -54,31 +54,12 @@
                           ></v-select>
                       </v-flex>
 
-                      <v-flex xs8 sm4>
-                        <v-menu
-                          ref="dateMenu"
-                          :close-on-content-click="false"
-                          v-model="dateMenu"
-                          :nudge-right="40"
-                          :return-value.sync="budget.startingDate"
-                          transition="scale-transition"
-                          offset-y
-                          full-width
-                          min-width="290px"
-                        >
-                         <template v-slot:activator="{ on }">
-                          <v-text-field
-                            v-model="budget.startingDate"
-                            :label="$t('budgets.startDate')"
-                            :rules="requiredRule"
-                            prepend-icon="event"
-                            readonly
-                          ></v-text-field>
-                         </template>
-                          <v-date-picker v-model="budget.startingDate" @input="$refs.dateMenu.save(budget.startingDate)"></v-date-picker>
+                      <v-date-field
+                        :rules="requiredRule"
+                        v-model="budget.startingDate"
+                        :label="$t('budgets.startDate')"
+                      ></v-date-field> 
 
-                        </v-menu>
-                      </v-flex>
                     </v-layout>
                 </v-container>
               </v-form>
@@ -120,7 +101,7 @@
                       </v-flex>
                       <v-flex xs12 md4>
                         <v-text-field 
-                          prepend-icon="payment"
+                          :prepend-icon="mdiCash"
                           type="number" 
                           step="0.01"
                           :rules="requiredRule"
@@ -135,7 +116,7 @@
                           class="white--text"
                           @click="addIncome">
                           {{$t('general.add')}}
-                          <v-icon right dark>add_circle_outline</v-icon>
+                          <v-icon right dark>{{mdiPlus}}</v-icon>
                         </v-btn>
                       </v-flex>                    
                     </v-layout>                  
@@ -160,12 +141,12 @@
 
                   <v-list-item-action>
                     <v-btn text icon ripple dark color="primary" @click="editIncome(i)">
-                      <v-icon >edit</v-icon>
+                      <v-icon >{{mdiPencil}}</v-icon>
                     </v-btn>
                   </v-list-item-action> 
                   <v-list-item-action>
                     <v-btn text icon ripple dark color="red" @click="removeIncome(i)">
-                      <v-icon >close</v-icon>
+                      <v-icon >{{mdiCancel}}</v-icon>
                     </v-btn>
                   </v-list-item-action> 
                 </v-list-item>
@@ -216,7 +197,7 @@
                       </v-flex>
                       <v-flex xs12 md4>
                         <v-text-field 
-                          prepend-icon="payment"
+                          :prepend-icon="mdiCash"
                           type="number" 
                           step="0.01"
                           :rules="requiredRule"
@@ -231,7 +212,7 @@
                           class="white--text"
                           @click="addSpending">
                           {{$t('general.add')}}
-                          <v-icon right dark>add_circle_outline</v-icon>
+                          <v-icon right dark>{{mdiPlus}}</v-icon>
                         </v-btn>
                       </v-flex>                    
                     </v-layout>                  
@@ -256,12 +237,12 @@
 
                   <v-list-item-action>
                     <v-btn text icon ripple dark color="primary" @click="editSpending(i)">
-                      <v-icon >edit</v-icon>
+                      <v-icon >{{mdiPencil}}</v-icon>
                     </v-btn>
                   </v-list-item-action> 
                   <v-list-item-action>
                     <v-btn text icon ripple dark color="red" @click="removeSpending(i)">
-                      <v-icon >close</v-icon>
+                      <v-icon >{{mdiCancel}}</v-icon>
                     </v-btn>
                   </v-list-item-action> 
                 </v-list-item>
@@ -290,16 +271,12 @@
                   <v-container grid-list-md>
                     <v-layout row wrap>
                       <v-flex xs3 md1 d-flex>
-                        <v-select
-                          v-model="newSavingCategory.icon"
-                          :items="icons"
-                          :label="$t('general.icon')">
-                        >
+                        <v-select v-model="newSavingCategory.icon" :items="icons" :label="$t('general.icon')">
                           <template slot="selection" slot-scope="data">
-                            <v-icon>{{ data.item }}</v-icon>
+                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                           </template>
                           <template slot="item" slot-scope="data">
-                            <v-icon>{{ data.item }}</v-icon>
+                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
                           </template>
                         </v-select>
                       </v-flex>
@@ -312,7 +289,7 @@
                       </v-flex>
                       <v-flex xs12 md4>
                         <v-text-field 
-                          prepend-icon="payment"
+                          :prepend-icon="mdiCash"
                           type="number" 
                           step="0.01"
                           :rules="requiredRule"
@@ -327,7 +304,7 @@
                           class="white--text"
                           @click="addSaving">
                           {{$t('general.add')}}
-                          <v-icon right dark>add_circle_outline</v-icon>
+                          <v-icon right dark>{{mdiPlus}}</v-icon>
                         </v-btn>
                       </v-flex>                    
                     </v-layout>                  
@@ -352,12 +329,12 @@
 
                   <v-list-item-action>
                     <v-btn text icon ripple dark color="primary" @click="editSaving(i)">
-                      <v-icon >edit</v-icon>
+                      <v-icon >{{mdiPencil}}</v-icon>
                     </v-btn>
                   </v-list-item-action> 
                   <v-list-item-action>
                     <v-btn text icon ripple dark color="red" @click="removeSaving(i)">
-                      <v-icon >close</v-icon>
+                      <v-icon >{{mdiCancel}}</v-icon>
                     </v-btn>
                   </v-list-item-action> 
                 </v-list-item>
@@ -454,10 +431,13 @@
 <script>
 import { budgetService } from "../_services/budget.service";
 import { mapActions } from "vuex";
+import { mdiFormatTitle, mdiCash, mdiPlus, mdiPencil, mdiCancel } from "@mdi/js"
+
 
 export default {
   components: {
     "categories-list": () => import("../components/CategoriesList"),
+    "v-date-field": () => import("../components/DateField.vue")
   },
   data() {
     return {
@@ -487,13 +467,14 @@ export default {
         amount: null,
         icon: null
       },
-      icons: this.$categoryIcons,
+      icons: Object.keys(this.$categoryIcons),
       dateMenu: false,
       validStep1: true,
       validStep2: true,
       validStep3: true,
       validStep4: true,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")]
+      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      mdiFormatTitle, mdiCash, mdiPlus, mdiPencil, mdiCancel
     };
   },
   computed: {

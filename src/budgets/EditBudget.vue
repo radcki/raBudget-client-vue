@@ -32,6 +32,7 @@
                         :items="currencies"
                         :label="$t('budgets.currency')"
                       ></v-select>
+                      
                   </v-flex>
 
                   <v-flex xs8 sm4>

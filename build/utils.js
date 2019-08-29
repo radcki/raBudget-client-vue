@@ -65,8 +65,10 @@ exports.cssLoaders = function (options) {
     less: generateLoaders('less'),
     sass: generateLoaders('sass', {
       implementation: require('sass'),
-      fiber: require('fibers'),
-      indentedSyntax: true
+      sassOptions: {
+        fiber: require('fibers'),
+        indentWidth: 4
+      },
     }),
     scss: generateLoaders('sass'),
     stylus: generateLoaders('stylus'),
