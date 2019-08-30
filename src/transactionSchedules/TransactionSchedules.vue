@@ -179,25 +179,25 @@
 </template>
 
 <script>
-import { transactionSchedulesService } from "../_services/transactionSchedules.service";
-import { mapState, mapActions } from "vuex";
+import { transactionSchedulesService } from '../_services/transactionSchedules.service'
+import { mapState, mapActions } from 'vuex'
 import {
   mdiPlusCircleOutline,
   mdiPencil,
   mdiTrashCan,
   mdiMagnify
-} from "@mdi/js";
+} from '@mdi/js'
 
 export default {
-  name: "TransactionSchedules",
+  name: 'TransactionSchedules',
   components: {
-    "v-transaction-schedule-editor": () =>
-      import("./TransactionScheduleEditor.vue"),
-    "v-date-field": () => import("../components/DateField.vue")
+    'v-transaction-schedule-editor': () =>
+      import('./TransactionScheduleEditor.vue'),
+    'v-date-field': () => import('../components/DateField.vue')
   },
-  data() {
+  data () {
     return {
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
       filters: {
         startDate: null,
         endDate: null
@@ -208,49 +208,49 @@ export default {
       startDateMenu: false,
       endDateMenu: false,
       typeColors: {
-        0: "amber darken-1",
-        1: "green darken-1",
-        2: "blue darken-1"
+        0: 'amber darken-1',
+        1: 'green darken-1',
+        2: 'blue darken-1'
       },
       occurrenceFrequencies: [
-        { value: 0, text: "transactionSchedules.once" },
-        { value: 1, text: "transactionSchedules.day" },
-        { value: 2, text: "transactionSchedules.week" },
-        { value: 3, text: "transactionSchedules.month" }
+        { value: 0, text: 'transactionSchedules.once' },
+        { value: 1, text: 'transactionSchedules.day' },
+        { value: 2, text: 'transactionSchedules.week' },
+        { value: 3, text: 'transactionSchedules.month' }
       ],
       headers: [
         {
-          text: this.$t("general.category"),
+          text: this.$t('general.category'),
           sortable: true,
-          value: "category"
+          value: 'category'
         },
         {
-          text: this.$t("general.fromDate"),
+          text: this.$t('general.fromDate'),
           sortable: true,
-          value: "startDate"
+          value: 'startDate'
         },
         {
-          text: this.$t("general.toDate"),
+          text: this.$t('general.toDate'),
           sortable: true,
-          value: "endDate"
+          value: 'endDate'
         },
         {
-          text: this.$t("transactionSchedules.frequency"),
+          text: this.$t('transactionSchedules.frequency'),
           sortable: true,
-          value: "frequency"
+          value: 'frequency'
         },
         {
-          text: this.$t("general.description"),
+          text: this.$t('general.description'),
           sortable: true,
-          value: "description"
+          value: 'description'
         },
         {
-          text: this.$t("general.amount"),
+          text: this.$t('general.amount'),
           sortable: true,
-          value: "amount"
+          value: 'amount'
         },
         {
-          text: this.$t("general.actions"),
+          text: this.$t('general.actions'),
           sortable: false
         }
       ],
@@ -258,51 +258,51 @@ export default {
       mdiPencil,
       mdiTrashCan,
       mdiMagnify
-    };
+    }
   },
   computed: {
     ...mapState({
       budgets: state => state.budgets.budgets
     }),
-    budget() {
-      return this.budgets.find(v => v.id == this.$route.params.id);
+    budget () {
+      return this.budgets.find(v => v.id == this.$route.params.id)
     }
   },
-  mounted: function() {
-    this.activeBudgetChange(this.$route.params.id);
+  mounted: function () {
+    this.activeBudgetChange(this.$route.params.id)
     setTimeout(() => {
-      this.initializeBudgets();
-    }, 300);
-    this.initializeBudgets();
+      this.initializeBudgets()
+    }, 300)
+    this.initializeBudgets()
     if (this.budget) {
-      this.fetchTransactionSchedules();
+      this.fetchTransactionSchedules()
     }
   },
   watch: {
-    $route(to, from) {
+    $route (to, from) {
       if (from.params.id != to.params.id) {
-        this.activeBudgetChange(to.params.id);
-        this.reloadInitialized();
+        this.activeBudgetChange(to.params.id)
+        this.reloadInitialized()
       }
     },
-    budget: function(budget) {
-      this.fetchTransactionSchedules();
+    budget: function (budget) {
+      this.fetchTransactionSchedules()
     }
   },
   methods: {
     ...mapActions({
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success",
-      reloadInitialized: "budgets/reloadInitialized",
-      initializeBudgets: "budgets/initializeBudgets",
-      activeBudgetChange: "budgets/activeBudgetChange"
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success',
+      reloadInitialized: 'budgets/reloadInitialized',
+      initializeBudgets: 'budgets/initializeBudgets',
+      activeBudgetChange: 'budgets/activeBudgetChange'
     }),
 
-    fetchTransactionSchedules() {
+    fetchTransactionSchedules () {
       var startDate =
-        this.filters.startDate || this.budget.startingDate + "-01";
+        this.filters.startDate || this.budget.startingDate + '-01'
 
-      this.$wait.start("loading.transactionSchedules");
+      this.$wait.start('loading.transactionSchedules')
       transactionSchedulesService
         .listTransactionSchedules(
           this.budget.id,
@@ -312,67 +312,67 @@ export default {
         .then(response => {
           if (response.ok) {
             response.json().then(data => {
-              this.$wait.end("loading.transactionSchedules");
-              this.transactionSchedules = data;
-            });
+              this.$wait.end('loading.transactionSchedules')
+              this.transactionSchedules = data
+            })
           } else {
             response.json().then(data => {
-              this.$wait.end("loading.transactionSchedules");
-              this.dispatchError(data.message);
-            });
+              this.$wait.end('loading.transactionSchedules')
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     },
-    createSchedule: function(scheduleData) {
-      this.$wait.start("saving.transactionSchedules");
+    createSchedule: function (scheduleData) {
+      this.$wait.start('saving.transactionSchedules')
       transactionSchedulesService
         .createTransactionSchedule(scheduleData)
         .then(response => {
           if (response.ok) {
-            this.$wait.end("saving.transactionSchedules");
-            this.fetchTransactionSchedules();
-            this.reloadInitialized();
+            this.$wait.end('saving.transactionSchedules')
+            this.fetchTransactionSchedules()
+            this.reloadInitialized()
           } else {
             response.json().then(data => {
-              this.$wait.end("saving.transactionSchedules");
-              this.dispatchError(data.message);
-            });
+              this.$wait.end('saving.transactionSchedules')
+              this.dispatchError(data.message)
+            })
           }
         })
         .catch(error => {
-          this.$wait.end("saving.transactionSchedules");
+          this.$wait.end('saving.transactionSchedules')
           error.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        });
+            this.dispatchError(data.message)
+          })
+        })
     },
-    updateSchedule: function(scheduleData) {
-      this.$wait.start("saving.transactionSchedules");
+    updateSchedule: function (scheduleData) {
+      this.$wait.start('saving.transactionSchedules')
       transactionSchedulesService
         .updateTransactionSchedule(scheduleData)
         .then(response => {
           if (response.ok) {
-            this.$wait.end("saving.transactionSchedules");
-            this.fetchTransactionSchedules();
-            this.reloadInitialized();
+            this.$wait.end('saving.transactionSchedules')
+            this.fetchTransactionSchedules()
+            this.reloadInitialized()
           } else {
             response.json().then(data => {
-              this.$wait.end("saving.transactionSchedules");
-              this.dispatchError(data.message);
-            });
+              this.$wait.end('saving.transactionSchedules')
+              this.dispatchError(data.message)
+            })
           }
         })
         .catch(error => {
-          this.$wait.end("saving.transactionSchedules");
+          this.$wait.end('saving.transactionSchedules')
           error.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        });
+            this.dispatchError(data.message)
+          })
+        })
     },
-    deleteSchedule: function(scheduleId) {
+    deleteSchedule: function (scheduleId) {
       this.$root
-        .$confirm("general.remove", "transactionSchedules.deleteConfirm", {
-          color: "red",
+        .$confirm('general.remove', 'transactionSchedules.deleteConfirm', {
+          color: 'red',
           buttons: { yes: true, no: true, cancel: false, ok: false }
         })
         .then(confirm => {
@@ -381,23 +381,23 @@ export default {
               .deleteTransactionSchedule(scheduleId, false)
               .then(response => {
                 if (response.ok) {
-                  this.fetchTransactionSchedules();
-                  this.reloadInitialized();
+                  this.fetchTransactionSchedules()
+                  this.reloadInitialized()
                 } else {
                   response.json().then(data => {
-                    this.dispatchError(data.message);
-                  });
+                    this.dispatchError(data.message)
+                  })
                 }
               })
               .catch(error => {
-                this.$wait.end("saving.transactionSchedules");
+                this.$wait.end('saving.transactionSchedules')
                 error.json().then(data => {
-                  this.dispatchError(data.message);
-                });
-              });
+                  this.dispatchError(data.message)
+                })
+              })
           }
-        });
+        })
     }
   }
-};
+}
 </script>

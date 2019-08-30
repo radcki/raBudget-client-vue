@@ -28,8 +28,8 @@ function createTransactionSchedule (data) {
       step: data.step
     })
   }
-  
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactionSchedules/create`, requestOptions)
+
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/create`, requestOptions)
 }
 
 function updateTransactionSchedule (data) {
@@ -50,14 +50,14 @@ function updateTransactionSchedule (data) {
       step: data.step
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactionSchedules/${data.transactionScheduleId}/update`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/${data.transactionScheduleId}/update`, requestOptions)
 }
 
 function deleteTransactionSchedule (id, deleteTransactions) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactionSchedules/${id}/delete/${(!!deleteTransactions)}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/${id}/delete/${(!!deleteTransactions)}`, requestOptions)
 }
 
 function listTransactionSchedules (budgetId, startDate, endDate) {
@@ -72,14 +72,14 @@ function listTransactionSchedules (budgetId, startDate, endDate) {
       endDate: endDate
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactionSchedules/list`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/list`, requestOptions)
 }
 
 function getTransactionSchedule (transactionScheduleId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactionSchedules/` + transactionScheduleId, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/` + transactionScheduleId, requestOptions)
 }
 
 function listClosestOccurrences (budgetId, endDate) {
@@ -87,7 +87,7 @@ function listClosestOccurrences (budgetId, endDate) {
     method: 'GET',
     params: { endDate: endDate, budgetId: budgetId }
   }
-  var url = new URL(`${config.apiUrl}/transactionSchedules/closest-transactions`, document.location)
+  var url = new URL(`${process.env.apiUrl}/transactionSchedules/closest-transactions`, document.location)
   var params = { endDate: endDate, budgetId: budgetId }
 
   url.search = new URLSearchParams(params)

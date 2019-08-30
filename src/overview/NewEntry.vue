@@ -26,7 +26,7 @@
                     v-model="editor.date"
                     :label="$t('transactions.date')"
                   ></v-date-field>
-                  
+
                 </v-flex>
                 <v-flex xs7 v-if="dataBudget">
                   <v-category-select
@@ -253,29 +253,29 @@
 </template>
 
 <script>
-import { transactionsService } from "../_services/transactions.service";
-import { allocationsService } from "../_services/allocations.service";
-import { transactionSchedulesService } from "../_services/transactionSchedules.service";
-import { mapActions } from "vuex";
+import { transactionsService } from '../_services/transactions.service'
+import { allocationsService } from '../_services/allocations.service'
+import { transactionSchedulesService } from '../_services/transactionSchedules.service'
+import { mapActions } from 'vuex'
 
 export default {
   components: {
-    "v-category-select": () => import("../components/CategorySelect"),
-    "v-date-field": () => import("../components/DateField")
+    'v-category-select': () => import('../components/CategorySelect'),
+    'v-date-field': () => import('../components/DateField')
   },
   props: {
     dialog: Boolean,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     },
     inputData: {
       type: Object
     }
   },
-  data() {
+  data () {
     return {
       editorDialog: false,
       valid: true,
@@ -295,130 +295,132 @@ export default {
       addScheduleDisabled: false,
       tab: 0,
       color: [
-        "amber darken-1",
-        "green darken-1",
-        "blue darken-1",
-        "purple darken-1"
+        'amber darken-1',
+        'green darken-1',
+        'blue darken-1',
+        'purple darken-1'
       ],
       occurrenceFrequencies: [
-        { value: 1, text: "transactionSchedules.day" },
-        { value: 2, text: "transactionSchedules.week" },
-        { value: 3, text: "transactionSchedules.month" }
+        { value: 1, text: 'transactionSchedules.day' },
+        { value: 2, text: 'transactionSchedules.week' },
+        { value: 3, text: 'transactionSchedules.month' }
       ],
-      requiredRule: [v => !!v || this.$t("forms.requiredField")]
-    };
+      requiredRule: [v => !!v || this.$t('forms.requiredField')]
+    }
   },
   computed: {
-    selectedType: function() {
+    selectedType: function () {
+      return this.tab == 0 || this.tab == 3
+        ? 'spending'
+        : this.tab == 1
+          ? 'income'
+          : this.tab == 2
+            ? 'saving'
+            : 'allocation'
+    }
+  },
+  watch: {
+    tab: function (value) {
+      this.$refs.editorForm.resetValidation()
+    },
+    selectedType: function () {
       if (
         this.editor.category &&
         this.editor.category.type != this.tab &&
         (this.tab == 3 && this.editor.category.type != 0)
       ) {
-        this.editor.category = null;
+        this.editor.category = null
       }
-      return this.tab == 0 || this.tab == 3
-        ? "spending"
-        : this.tab == 1
-        ? "income"
-        : this.tab == 2
-        ? "saving"
-        : "allocation";
-    }
-  },
-  watch: {
-    tab: function(value) {
-      this.$refs.editorForm.resetValidation();
     },
-    editorDialog(open) {
+    editorDialog (open) {
       if (open) {
-        this.$wait.start("dialog");
-        this.resetForm();
+        this.$wait.start('dialog')
+        this.resetForm()
       } else {
-        this.$wait.end("dialog");
+        this.$wait.end('dialog')
       }
     },
-    inputData: function(data) {
+    inputData: function (data) {
       if (!data) {
-        return;
+        return
       }
-      this.tab = data.category.type;
-      this.editor = JSON.parse(JSON.stringify(data));
-      this.editor.date = this.$moment(this.editor.date).format("YYYY-MM-DD");
-      this.editor.category = data.category;
-      this.createSchedule = false;
-      this.addScheduleDisabled = true;
+      this.tab = data.category.type
+      this.editor = JSON.parse(JSON.stringify(data))
+      this.editor.date = this.$moment(this.editor.date).format('YYYY-MM-DD')
+      this.editor.category = data.category
+      this.createSchedule = false
+      this.addScheduleDisabled = true
     }
   },
-  beforeDestroy: function() {
-    this.$wait.end("dialog");
+  beforeDestroy: function () {
+    this.$wait.end('dialog')
   },
-  mounted: function() {
-    this.$root.$on("closeDialogs", () => {
-      this.editorDialog = false;
-    });
+  mounted: function () {
+    this.$root.$on('closeDialogs', () => {
+      this.editorDialog = false
+    })
   },
   methods: {
     ...mapActions({
-      loadTransactionToStore: "transactions/loadTransactionToStore"
+      loadTransactionToStore: 'transactions/loadTransactionToStore'
     }),
-    getDate() {
-      return this.$moment().format("YYYY-MM-DD");
+    getDate () {
+      return this.$moment().format('YYYY-MM-DD')
     },
-    createTransaction() {
+    createTransaction () {
       if (this.$refs.editorForm.validate()) {
         if (this.createSchedule && !this.editor.transactionSchedule) {
-          this.createTransactionSchedule(this.editor);
+          this.createTransactionSchedule(this.editor)
         }
         transactionsService.createTransaction(this.editor).then(response => {
           if (response.ok) {
-            this.$emit("saved");
-            this.editorDialog = false;
-            this.editor.budget = { ...this.dataBudget };
-            this.loadTransactionToStore(this.editor);
-            this.resetForm();
+            this.$emit('saved')
+            this.editorDialog = false
+            this.editor.budget = { ...this.dataBudget }
+            this.loadTransactionToStore(this.editor)
+            this.resetForm()
           } else {
             response.json().then(data => {
-              this.dispatchError(data.message);
-            });
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
       }
     },
-    createTransactionSchedule: function(scheduleData) {
-      this.$wait.start("saving.transactionSchedules");
+    createTransactionSchedule: function (scheduleData) {
+      this.$wait.start('saving.transactionSchedules')
 
-      scheduleData.budgetCategory = scheduleData.category;
-      scheduleData.startDate = scheduleData.date;
+      scheduleData.budgetCategory = scheduleData.category
+      scheduleData.startDate = scheduleData.date
       transactionSchedulesService
         .createTransactionSchedule(scheduleData)
         .then(response => {
           if (response.ok) {
-            this.$wait.end("saving.transactionSchedules");
+            this.$wait.end('saving.transactionSchedules')
           } else {
             response.json().then(data => {
-              this.$wait.end("saving.transactionSchedules");
-              this.dispatchError(data.message);
-            });
+              this.$wait.end('saving.transactionSchedules')
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     },
-    createAllocation() {
+    createAllocation () {
       if (this.$refs.editorForm.validate()) {
         allocationsService.createAllocation(this.editor).then(response => {
           if (response.ok) {
-            this.$emit("saved");
-            this.editorDialog = false;
-            this.resetForm();
+            this.$emit('saved')
+            this.editorDialog = false
+            this.resetForm()
           } else {
             response.json().then(data => {
-              this.dispatchError(data.message);
-            });
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
       }
     },
-    resetForm() {
+    resetForm () {
       this.editor = {
         category: null,
         sourceCategory: null,
@@ -428,13 +430,13 @@ export default {
         endDate: null,
         frequency: 3,
         periodStep: 1
-      };
-      this.createSchedule = false;
-      this.addScheduleDisabled = false;
+      }
+      this.createSchedule = false
+      this.addScheduleDisabled = false
       if (this.$refs.editorForm) {
-        this.$refs.editorForm.resetValidation();
+        this.$refs.editorForm.resetValidation()
       }
     }
   }
-};
+}
 </script>

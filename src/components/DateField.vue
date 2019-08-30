@@ -25,13 +25,13 @@
   </v-menu>
 
 </template>
- 
+
 <script>
-import { mdiCalendar } from "@mdi/js";
+import { mdiCalendar } from '@mdi/js'
 
 export default {
-  name: "VDateField",
-  props: ["value", "label", "rules", "clearable", "readonly", "hideDetails"],
+  name: 'VDateField',
+  props: ['value', 'label', 'rules', 'clearable', 'readonly', 'hideDetails'],
 
   data: () => ({
     date: null,
@@ -39,17 +39,17 @@ export default {
     mdiCalendar
   }),
   watch: {
-    date: function(value) {
-      this.$emit("input", value);
+    date: function (value) {
+      this.$emit('input', value)
     },
-    value: function(value) {
-      this.date != value ? null : this.$moment(value).format("YYYY-MM-DD");
+    value: function (value) {
+      this.date != value ? null : this.$moment(value).format('YYYY-MM-DD')
     }
   },
-  mounted: function() {
+  mounted: function () {
     this.date = !this.value
       ? null
-      : this.$moment(this.value).format("YYYY-MM-DD");
+      : this.$moment(this.value).format('YYYY-MM-DD')
   }
-};
+}
 </script>

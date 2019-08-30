@@ -2,21 +2,21 @@ import { apiHandler } from '../_services/apiHandler'
 import * as signalR from '@aspnet/signalr'
 import { store } from '../_store/index'
 
-let connection = new signalR.HubConnectionBuilder()
-  .withUrl(`${config.apiUrl}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
+new signalR.HubConnectionBuilder()
+  .withUrl(`${process.env.apiUrl}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
   .build()
 
 const signalrPlugin = {
   install (Vue) {
     const transactionsHubConnection = new signalR.HubConnectionBuilder()
       .configureLogging(signalR.LogLevel.Warning)
-      .withUrl(`${config.apiUrl}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
+      .withUrl(`${process.env.apiUrl}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
       .build()
     transactionsHubConnection.start()
 
     const budgetsHubConnection = new signalR.HubConnectionBuilder()
       .configureLogging(signalR.LogLevel.Warning)
-      .withUrl(`${config.apiUrl}/hubs/budgets`, { accessTokenFactory: () => apiHandler.getAccessToken() })
+      .withUrl(`${process.env.apiUrl}/hubs/budgets`, { accessTokenFactory: () => apiHandler.getAccessToken() })
       .build()
     budgetsHubConnection.start()
 

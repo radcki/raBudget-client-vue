@@ -1,5 +1,5 @@
 <template>
-  <v-container :class="'elevation-1 '+ color + ' ' + backgroundColor">     
+  <v-container :class="'elevation-1 '+ color + ' ' + backgroundColor">
     <v-layout row wrap v-if="loading">
       <v-flex xs12>
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
@@ -35,24 +35,24 @@
 </template>
 <script>
 export default {
-  name: "VMiniCategoriesSummary",
+  name: 'VMiniCategoriesSummary',
   props: {
     loading: Boolean,
     dataBalance: Array,
     dataBudget: {
-        type: Object,
-        default: ()=>{return {currency: "PLN"}}
+      type: Object,
+      default: () => { return { currency: 'PLN' } }
     },
     backgroundColor: String,
-    color: String,
-  },  
+    color: String
+  },
   components: {
-    "v-animated-number": () => import("../components/AnimatedNumber")
+    'v-animated-number': () => import('../components/AnimatedNumber')
   },
   methods: {
-    formatAmount(value) {
+    formatAmount (value) {
       return this.$options.filters.currency(value, this.$currencies[this.dataBudget.currency])
-    },  
+    }
   }
-};
+}
 </script>

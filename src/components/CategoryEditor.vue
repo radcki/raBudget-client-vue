@@ -68,7 +68,7 @@
                           :rules="requiredRule"
                           v-model="amountConfig.validFrom"
                           :label="$t('transactions.date')"
-                        ></v-date-field>                        
+                        ></v-date-field>
                       </v-flex>
 
                       <v-flex :xs4="!mobile" :xs9="mobile">
@@ -124,25 +124,25 @@
 </template>
 
 <script>
-import {mdiClose, mdiCreditCard} from "@mdi/js"
+import { mdiClose, mdiCreditCard } from '@mdi/js'
 export default {
-  name: "VCategoryEditor",
+  name: 'VCategoryEditor',
   props: {
     value: Object,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     }
   },
   components: {
-    "v-date-field": () => import("../components/DateField.vue")
+    'v-date-field': () => import('../components/DateField.vue')
   },
-  data() {
+  data () {
     return {
       dialog: false,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
 
       icons: Object.keys(this.$categoryIcons),
       category: {
@@ -155,59 +155,60 @@ export default {
         },
         ...JSON.parse(JSON.stringify(this.value))
       },
-      mdiCreditCard, mdiClose
-    };
+      mdiCreditCard,
+      mdiClose
+    }
   },
   watch: {
-    dialog(open) {
+    dialog (open) {
       if (open) {
-        this.$wait.start("dialog");
+        this.$wait.start('dialog')
       } else {
-        this.$wait.end("dialog");
+        this.$wait.end('dialog')
       }
       setTimeout(() => {
         this.category = {
           ...this.category,
           ...JSON.parse(JSON.stringify(this.value))
-        };
-      }, 500);
+        }
+      }, 500)
     }
   },
-  beforeDestroy: function() {
-    this.$wait.end("dialog");
+  beforeDestroy: function () {
+    this.$wait.end('dialog')
   },
-  mounted: function() {
-    this.$root.$on("closeDialogs", () => {
-      this.dialog = false;
-    });
+  mounted: function () {
+    this.$root.$on('closeDialogs', () => {
+      this.dialog = false
+    })
     for (var config of this.category.amountConfigs) {
-      config.dateMenu = false;
-      config.validFrom = this.$moment(config.validFrom).format("YYYY-MM");
+      config.dateMenu = false
+      config.validFrom = this.$moment(config.validFrom).format('YYYY-MM')
       config.validTo = config.validTo
-        ? this.$moment(config.validTo).format("YYYY-MM")
-        : null;
+        ? this.$moment(config.validTo).format('YYYY-MM')
+        : null
     }
   },
   computed: {
-    mobile() {
-      return !this.$vuetify.breakpoint.smAndUp;
+    mobile () {
+      return !this.$vuetify.breakpoint.smAndUp
     }
   },
   methods: {
-    addPeriod() {
+    addPeriod () {
       this.category.amountConfigs.push({
         dateMenu: false,
-        validFrom: this.$moment().format("YYYY-MM"),
+        validFrom: this.$moment().format('YYYY-MM'),
         amount: null
-      });
+      })
     },
-    save() {
-      this.$emit("save", this.category);
-      this.dialog = false;
+    save () {
+      this.$emit('save', this.category)
+      this.dialog = false
     },
-    open() {
-      this.dialog = true;
+    open () {
+      this.dialog = true
     }
   }
-};
+}
 </script>

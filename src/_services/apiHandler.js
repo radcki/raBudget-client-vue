@@ -65,7 +65,7 @@ function renewToken () {
     refreshToken: getRefreshToken(),
     clientId: getClientId()
   })
-  return fetch(`${config.apiUrl}/users/renewtoken`, {
+  return fetch(`${process.env.apiUrl}/users/renewtoken`, {
     method: 'POST',
     body: body,
     headers: {

@@ -2,8 +2,6 @@ import {
   apiHandler
 } from './apiHandler'
 
-
-
 export const transactionsService = {
   transferTransactions,
   createTransaction,
@@ -25,7 +23,7 @@ function transferTransactions (budgetId, sourceCategory, targetCategory) {
       targetCategory: targetCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/transfer`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/transfer`, requestOptions)
 }
 
 function createTransaction (transactionData) {
@@ -42,14 +40,14 @@ function createTransaction (transactionData) {
       transactionSchedule: transactionData.transactionSchedule
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/create`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/create`, requestOptions)
 }
 
 function deleteTransaction (id) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/${id}/delete`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${id}/delete`, requestOptions)
 }
 
 function updateTransaction (transactionData) {
@@ -65,7 +63,7 @@ function updateTransaction (transactionData) {
       category: transactionData.category
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/${transactionData.transactionId}/update`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${transactionData.transactionId}/update`, requestOptions)
 }
 
 function listTransactions (budgetId, limitCount, startDate, endDate, categories) {
@@ -82,12 +80,12 @@ function listTransactions (budgetId, limitCount, startDate, endDate, categories)
       categories: categories
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/list`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/list`, requestOptions)
 }
 
 function getTransaction (transactionId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/transactions/` + transactionId, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/` + transactionId, requestOptions)
 }

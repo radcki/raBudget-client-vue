@@ -140,7 +140,7 @@
               <v-list-item-action>
                 <v-icon @click="deleteAllocation(transaction.allocationId)">{{mdiTrashCan}}</v-icon>
               </v-list-item-action>
-              
+
             </v-list-item>
           </template>
         </v-list>
@@ -151,53 +151,50 @@
 </template>
 
 <script>
-import { allocationsService } from "../_services/allocations.service";
-import { budgetService } from "../_services/budget.service";
-import { mapState, mapActions, mapGetters } from "vuex";
+import { allocationsService } from '../_services/allocations.service'
+import { mapActions, mapGetters } from 'vuex'
 
 import { mdiMagnify, mdiPencil, mdiTrashCan, mdiAlertCircleOutline } from '@mdi/js'
 
-
 export default {
   components: {
-    "v-allocation-editor": () => import("../components/AllocationEditor"),
-    "v-category-select": () => import("../components/CategorySelect"),
-    "v-date-range-slider": () => import("../components/DateRangeSlider")
+    'v-allocation-editor': () => import('../components/AllocationEditor'),
+    'v-category-select': () => import('../components/CategorySelect'),
+    'v-date-range-slider': () => import('../components/DateRangeSlider')
   },
-  data() {
+  data () {
     return {
       loading: false,
       error: false,
       search: null,
 
-      categoryType: "spendingCategories",
+      categoryType: 'spendingCategories',
       selectedRange: [null, null],
       selectedCategories: null,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
 
       headers: [
         {
-          text: this.$t("general.category"),
+          text: this.$t('general.category'),
           sortable: true,
-          value: "category"
+          value: 'category'
         },
         {
-          text: this.$t("general.date"),
+          text: this.$t('general.date'),
           sortable: true,
-          value: "date"
+          value: 'date'
         },
         {
-          text: this.$t("general.description"),
+          text: this.$t('general.description'),
           sortable: true,
-          value: "description"
+          value: 'description'
         },
         {
-          text: this.$t("general.amount"),
+          text: this.$t('general.amount'),
           sortable: true,
-          value: "amount"
+          value: 'amount'
         },
         {
-          text: this.$t("general.actions"),
+          text: this.$t('general.actions'),
           sortable: false
         }
       ],
@@ -205,69 +202,72 @@ export default {
       allocations: null,
       tab: 0,
       color: [
-        "amber darken-1",
-        "green darken-1",
-        "blue darken-1",
-        "purple darken-1"
+        'amber darken-1',
+        'green darken-1',
+        'blue darken-1',
+        'purple darken-1'
       ],
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
 
-      mdiMagnify, mdiPencil, mdiTrashCan, mdiAlertCircleOutline
-    };
+      mdiMagnify,
+      mdiPencil,
+      mdiTrashCan,
+      mdiAlertCircleOutline
+    }
   },
   computed: {
     ...mapGetters({
-      budget: "budgets/budget",
-    }), 
+      budget: 'budgets/budget'
+    }),
 
-    currencies: function() {
-      return Object.keys(this.$currencies);
+    currencies: function () {
+      return Object.keys(this.$currencies)
     },
-    today: function() {
-      return this.$moment().format("YYYY-MM-DD");
+    today: function () {
+      return this.$moment().format('YYYY-MM-DD')
     },
-    monthAgoOrStart() {
-      return this.$moment().subtract(1, "month") <
+    monthAgoOrStart () {
+      return this.$moment().subtract(1, 'month') <
         this.$moment(this.budget.startingDate)
-        ? this.$moment(this.budget.startingDate).format("YYYY-MM-DD")
-        : this.$moment().subtract(1, "month");
+        ? this.$moment(this.budget.startingDate).format('YYYY-MM-DD')
+        : this.$moment().subtract(1, 'month')
     }
   },
-  created: function() {
-    this.activeBudgetChange(this.$route.params.id);
+  created: function () {
+    this.activeBudgetChange(this.$route.params.id)
     if (this.budget) {
-      this.selectedCategories = this.budget[this.categoryType];
-      this.selectedRange = [this.monthAgoOrStart, this.today];
-      this.fetchAllocations();
+      this.selectedCategories = this.budget[this.categoryType]
+      this.selectedRange = [this.monthAgoOrStart, this.today]
+      this.fetchAllocations()
     }
   },
   watch: {
-    budget: function(budget) {
-      this.selectedRange = [this.monthAgoOrStart, this.today];
+    budget: function (budget) {
+      this.selectedRange = [this.monthAgoOrStart, this.today]
 
       if (this.budget && this.budget[this.categoryType]) {
-        this.selectedCategories = this.budget[this.categoryType];
+        this.selectedCategories = this.budget[this.categoryType]
       }
-      this.fetchAllocations();
+      this.fetchAllocations()
     },
-    categoryType: function(value) {
-      this.allocations = null;
+    categoryType: function (value) {
+      this.allocations = null
       if (this.budget && this.budget[value]) {
-        this.selectedCategories = this.budget[value];
+        this.selectedCategories = this.budget[value]
       }
-      this.fetchAllocations();
+      this.fetchAllocations()
     }
   },
 
   methods: {
     ...mapActions({
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success",
-      activeBudgetChange: "budgets/activeBudgetChange",
-      reloadInitialized: "budgets/reloadInitialized",
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success',
+      activeBudgetChange: 'budgets/activeBudgetChange',
+      reloadInitialized: 'budgets/reloadInitialized'
     }),
-    fetchAllocations() {
-      this.loading = true;
+    fetchAllocations () {
+      this.loading = true
       allocationsService
         .listAllocations(
           this.$route.params.id,
@@ -279,62 +279,61 @@ export default {
         .then(response => {
           if (response.ok) {
             response.json().then(data => {
-              this.loading = false;
-              this.allocations = data;
-            });
+              this.loading = false
+              this.allocations = data
+            })
           } else {
-            this.loading = false;
-            this.error = true;
-            this.allocations = null;
+            this.loading = false
+            this.error = true
+            this.allocations = null
             response.json().then(data => {
-              this.dispatchError(data.message);
-            });
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     },
-    updateAllocation(allocation) {     
-      this.$wait.start("saving.allocation");
+    updateAllocation (allocation) {
+      this.$wait.start('saving.allocation')
       allocationsService.updateAllocation(allocation)
         .then(response => {
           if (response.ok) {
-            this.$wait.end("saving.allocation");
-            this.reloadInitialized();
-            this.fetchAllocations();
+            this.$wait.end('saving.allocation')
+            this.reloadInitialized()
+            this.fetchAllocations()
           } else {
             response.json().then(data => {
-              this.$wait.end("saving.allocation");
-              this.dispatchError(data.message);
-            });
+              this.$wait.end('saving.allocation')
+              this.dispatchError(data.message)
+            })
           }
         })
         .catch(error => {
-          this.$wait.end("saving.allocation");
+          this.$wait.end('saving.allocation')
           error.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        });
-
+            this.dispatchError(data.message)
+          })
+        })
     },
-    deleteAllocation(id) {
+    deleteAllocation (id) {
       this.$root
-        .$confirm("general.remove", "allocations.deleteConfirm", {
-          color: "red",
+        .$confirm('general.remove', 'allocations.deleteConfirm', {
+          color: 'red',
           buttons: { yes: true, no: true, cancel: false, ok: false }
         })
         .then(confirm => {
           if (confirm) {
             allocationsService.deleteAllocation(id).then(response => {
               if (response.ok) {
-                this.fetchAllocations();
+                this.fetchAllocations()
               } else {
                 response.json().then(data => {
-                  this.dispatchError(data.message);
-                });
+                  this.dispatchError(data.message)
+                })
               }
-            });
+            })
           }
-        });
+        })
     }
   }
-};
+}
 </script>

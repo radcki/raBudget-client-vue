@@ -1,5 +1,5 @@
 <template>
-<v-container grid-list-md> 
+<v-container grid-list-md>
     <v-layout wrap >
         <v-flex xs12 md6>
             <v-card>
@@ -15,16 +15,16 @@
                             :rules="emailRule"
                             :label="$t('account.email')"
                             required>
-                        </v-text-field>                    
-                    </v-form>                   
-                    
+                        </v-text-field>
+                    </v-form>
+
                 </v-card-text>
 
                 <v-card-actions>
                     <v-btn textcolor="red" @click="accountDelete">{{$t('account.deleteAccount')}}</v-btn>
                     <v-spacer></v-spacer>
-                    <v-btn 
-                        color="primary"                         
+                    <v-btn
+                        color="primary"
                         :disabled="!valid"
                         @click="handleProfileUpdate">
                         {{ $t('general.save') }}
@@ -61,7 +61,7 @@
                             counter
                             @click:append="show2 = !show2"
                         ></v-text-field>
-                        
+
                         <v-text-field
                             v-model="newpasswordConfirm"
                             autocomplete="new-password"
@@ -72,13 +72,13 @@
                             counter
                             @click:append="show3 = !show3"
                         ></v-text-field>
-                    </v-form>                
+                    </v-form>
                 </v-card-text>
 
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn 
-                        color="primary"                         
+                    <v-btn
+                        color="primary"
                         :disabled="!validPasswordForm"
                         @click="handlePaswordChange">
                         {{ $t('general.save') }}
@@ -86,18 +86,18 @@
                 </v-card-actions>
             </v-card>
         </v-flex>
-        
+
     </v-layout>
 </v-container>
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
-import { userService } from "../_services/user.service";
-import { mdiEye, mdiEyeOff } from "@mdi/js"
+import { mapState, mapActions } from 'vuex'
+import { userService } from '../_services/user.service'
+import { mdiEye, mdiEyeOff } from '@mdi/js'
 
 export default {
-  data() {
+  data () {
     return {
       valid: true,
       validPasswordForm: true,
@@ -115,64 +115,65 @@ export default {
       },
       newpasswordConfirm: null,
       emailRule: [
-        v => !!v || this.$t("forms.requiredField"),
+        v => !!v || this.$t('forms.requiredField'),
         v => {
-          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(v) || this.$t("forms.incorrectEmail");
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          return pattern.test(v) || this.$t('forms.incorrectEmail')
         }
       ],
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
       passwordRule: [
-        v => (v && v.length > 5) || this.$t("forms.tooShortPassword"),
-        v => !!v || this.$t("forms.requiredField")
+        v => (v && v.length > 5) || this.$t('forms.tooShortPassword'),
+        v => !!v || this.$t('forms.requiredField')
       ],
       passwordMatch: [
-        v => !!v || this.$t("forms.requiredField"),
+        v => !!v || this.$t('forms.requiredField'),
         v =>
-          this.password.newpassword == v || this.$t("forms.passwordDontMatch")
+          this.password.newpassword == v || this.$t('forms.passwordDontMatch')
       ],
-      mdiEye, mdiEyeOff
-    };
+      mdiEye,
+      mdiEyeOff
+    }
   },
   computed: {
     ...mapState({
       account: state => state.account
     })
   },
-  created() {
-    this.fetchProfile();
+  created () {
+    this.fetchProfile()
   },
   methods: {
-    ...mapActions("users", {
-      deleteUser: "delete"
+    ...mapActions('users', {
+      deleteUser: 'delete'
     }),
-    ...mapActions("account", ["updateProfile", "changePassword", "logout"]),
-    fetchProfile() {
+    ...mapActions('account', ['updateProfile', 'changePassword', 'logout']),
+    fetchProfile () {
       userService.getProfile().then(data => {
-        this.user.id = data.id;
-        this.user.email = data.email;
-        this.user.username = data.username;
-      });
+        this.user.id = data.id
+        this.user.email = data.email
+        this.user.username = data.username
+      })
     },
-    handleProfileUpdate() {
+    handleProfileUpdate () {
       if (this.$refs.formProfileUpdate.validate()) {
-        this.updateProfile(this.user);
+        this.updateProfile(this.user)
       }
     },
-    handlePaswordChange() {
+    handlePaswordChange () {
       if (this.$refs.formPassChange.validate()) {
         this.changePassword(this.password).then(result => {
           if (result == true) {
-            this.$refs.formPassChange.reset();
+            this.$refs.formPassChange.reset()
           }
-        });
+        })
       }
     },
-    accountDelete() {
+    accountDelete () {
       this.$root
-        .$confirm("account.deleteAccount", "account.confirmRemove", {
-          color: "red",
-          input: "password",
+        .$confirm('account.deleteAccount', 'account.confirmRemove', {
+          color: 'red',
+          input: 'password',
           width: 400,
           buttons: { yes: false, no: false, cancel: true, ok: true }
         })
@@ -180,13 +181,13 @@ export default {
           if (input) {
             userService.delete(this.user.id, input).then(response => {
               if (response.ok) {
-                this.logout();
-                this.$router.push({ name: "login" });
+                this.logout()
+                this.$router.push({ name: 'login' })
               }
-            });
+            })
           }
-        });
+        })
     }
   }
-};
+}
 </script>

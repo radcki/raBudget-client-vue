@@ -69,17 +69,17 @@
     </v-list-group>
   </v-list>
 </template>
-      
+
 <script>
-import {mdiLocationEnter} from "@mdi/js"
+import { mdiLocationEnter } from '@mdi/js'
 export default {
-  name: "VScheduledTransactionsList",
+  name: 'VScheduledTransactionsList',
   props: {
     items: Array,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     },
     title: {
@@ -87,24 +87,24 @@ export default {
     },
     maxHeight: { type: String }
   },
-  data: function() {
+  data: function () {
     return {
       typeColors: {
-        0: "amber darken-1",
-        1: "green darken-1",
-        2: "blue darken-1"
+        0: 'amber darken-1',
+        1: 'green darken-1',
+        2: 'blue darken-1'
       },
       expanded: true,
       mdiLocationEnter
-    };
+    }
   },
-  mounted: function() {
-    this.expanded = this.$vuetify.breakpoint.lgAndUp;
+  mounted: function () {
+    this.expanded = this.$vuetify.breakpoint.lgAndUp
   },
   watch: {
-    "$vuetify.breakpoint.lgAndUp": function(desktop) {
-      this.expanded = desktop;
+    '$vuetify.breakpoint.lgAndUp': function (desktop) {
+      this.expanded = desktop
     }
   }
-};
+}
 </script>

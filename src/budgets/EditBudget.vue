@@ -1,9 +1,9 @@
 <template>
 
-<v-container  grid-list-md v-if="budget">     
+<v-container  grid-list-md v-if="budget">
     <v-layout row wrap align-center justify-center >
       <v-flex xs12>
-        
+
       </v-flex>
 
       <v-flex xs12>
@@ -14,7 +14,7 @@
             </v-subheader>
           </v-card-title>
             <v-card-text>
-              <v-container  grid-list-md>     
+              <v-container  grid-list-md>
                 <v-layout row wrap align-center justify-center >
                   <v-flex xs8 sm6>
                     <v-text-field
@@ -26,13 +26,13 @@
                       ></v-text-field>
                   </v-flex>
 
-                  <v-flex xs4 sm2>                        
+                  <v-flex xs4 sm2>
                       <v-select
                         v-model="budget.currency"
                         :items="currencies"
                         :label="$t('budgets.currency')"
                       ></v-select>
-                      
+
                   </v-flex>
 
                   <v-flex xs8 sm4>
@@ -79,7 +79,7 @@
                 <v-icon left>{{mdiContentSave}}</v-icon>
                 {{ $t("general.save") }}
               </v-btn>
-              
+
             </v-card-actions>
         </v-card>
       </v-flex>
@@ -89,92 +89,94 @@
 </template>
 
 <script>
-import { budgetService } from "../_services/budget.service";
-import { mapState, mapActions } from "vuex";
+import { budgetService } from '../_services/budget.service'
+import { mapState, mapActions } from 'vuex'
 
-import { mdiFormatTitle, mdiTrashCan, mdiStarOutline, mdiStar, mdiCalendar, mdiContentSave } from "@mdi/js"
-
+import { mdiFormatTitle, mdiTrashCan, mdiStarOutline, mdiStar, mdiCalendar, mdiContentSave } from '@mdi/js'
 
 export default {
-  data() {
+  data () {
     return {
       step: 1,
 
       dateMenu: false,
       valid: true,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
-      mdiFormatTitle, mdiTrashCan, mdiStarOutline, mdiStar, mdiCalendar, mdiContentSave
-    };
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
+      mdiFormatTitle,
+      mdiTrashCan,
+      mdiStarOutline,
+      mdiStar,
+      mdiCalendar,
+      mdiContentSave
+    }
   },
   computed: {
     ...mapState({
       budgets: state => state.budgets.budgets
     }),
 
-    currencies: function() {
-      return Object.keys(this.$currencies);
+    currencies: function () {
+      return Object.keys(this.$currencies)
     },
-    budget() {return this.budgets.filter(v=>v.id==this.$route.params.id)[0]}
-  },  
+    budget () { return this.budgets.filter(v => v.id == this.$route.params.id)[0] }
+  },
   methods: {
     ...mapActions({
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success",
-      budgetsFetch: "budgets/fetchBudgets"
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success',
+      budgetsFetch: 'budgets/fetchBudgets'
     }),
-    saveBudget() {
-      var category = {};
-      
+    saveBudget () {
       budgetService
         .saveBudget(this.$route.params.id, this.budget)
         .then(response => {
           if (response.ok) {
-            this.budgetsFetch();
-            this.dispatchSuccess("general.changesSaved");
+            this.budgetsFetch()
+            this.dispatchSuccess('general.changesSaved')
           } else {
             response.json().then(data => {
-              this.dispatchError(data.message);
-            });
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     },
-    setDefault() {
+    setDefault () {
       budgetService
         .setDefault(this.$route.params.id, this.budget)
         .then(response => {
           if (response.ok) {
-            this.dispatchSuccess("general.changesSaved");
-            this.budgetsFetch();
+            this.dispatchSuccess('general.changesSaved')
+            this.budgetsFetch()
           } else {
             response.json().then(data => {
-              this.dispatchError(data.message);
-            });
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     },
-    deleteBudget() {
+    deleteBudget () {
       this.$root
-        .$confirm("general.remove", "budgets.deleteConfirm", {
-          color: "red",
+        .$confirm('general.remove', 'budgets.deleteConfirm', {
+          color: 'red',
           buttons: { yes: true, no: true, cancel: false, ok: false }
         })
         .then(confirm => {
           if (confirm) {
             budgetService.deleteBudget(this.$route.params.id).then(response => {
               if (response.ok) {
-                this.$router.push("/");
-                this.budgetsFetch();
+                this.$router.push('/')
+                this.budgetsFetch()
               } else {
                 response.json().then(data => {
-                  this.dispatchError(data.message);
-                });
+                  this.dispatchError(data.message)
+                })
               }
-            });
+            })
           }
         }
-      );      
-    },
-    
+        )
+    }
+
   }
-};
+}
 </script>

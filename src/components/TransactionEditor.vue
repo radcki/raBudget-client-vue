@@ -34,7 +34,7 @@
                   :rules="requiredRule"
                   v-model="editor.date"
                   :label="$t('transactions.date')"
-                ></v-date-field> 
+                ></v-date-field>
               </v-flex>
 
               <v-flex xs12 md5>
@@ -98,33 +98,33 @@
 </template>
 
 <script>
-import {mdiClose} from "@mdi/js"
+import { mdiClose } from '@mdi/js'
 
 export default {
   components: {
-    "v-category-select": () => import("../components/CategorySelect"),
-    "v-date-field": () => import("../components/DateField.vue")
+    'v-category-select': () => import('../components/CategorySelect'),
+    'v-date-field': () => import('../components/DateField.vue')
   },
   props: {
     value: Object,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     }
   },
-  data: function() {
+  data: function () {
     return {
       budget: this.dataBudget,
-      requiredRule: [v => !!v], 
+      requiredRule: [v => !!v],
       dialog: false,
       valid: true,
 
       categoryTypes: [
-        { value: "spendingCategories", text: "general.spendings" },
-        { value: "incomeCategories", text: "general.incomes" },
-        { value: "savingCategories", text: "general.savings" }
+        { value: 'spendingCategories', text: 'general.spendings' },
+        { value: 'incomeCategories', text: 'general.incomes' },
+        { value: 'savingCategories', text: 'general.savings' }
       ],
       editor: {
         ...{
@@ -137,50 +137,50 @@ export default {
         ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
       },
       mdiClose
-    };
+    }
   },
   computed: {
-    mobile() {
-      return !this.$vuetify.breakpoint.smAndUp;
+    mobile () {
+      return !this.$vuetify.breakpoint.smAndUp
     },
-    transactionType() {return this.editor.category ? this.categoryTypes[this.editor.category.type].value : "spendingCategories"},
-    categories() {
-      return this.budget;
+    transactionType () { return this.editor.category ? this.categoryTypes[this.editor.category.type].value : 'spendingCategories' },
+    categories () {
+      return this.budget
     },
-    finalAmount: function() {
-      return 1 * this.editor.modifyAmount + 1 * this.editor.amount;
+    finalAmount: function () {
+      return 1 * this.editor.modifyAmount + 1 * this.editor.amount
     }
   },
   watch: {
-    dialog(open) {
+    dialog (open) {
       if (open) {
-        this.$wait.start("dialog");
+        this.$wait.start('dialog')
       } else {
-        this.$wait.end("dialog");
+        this.$wait.end('dialog')
       }
     }
   },
-  mounted: function() {
-    this.$root.$on("closeDialogs", () => {
-      this.dialog = false;
-    });
-    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
+  mounted: function () {
+    this.$root.$on('closeDialogs', () => {
+      this.dialog = false
+    })
+    this.requiredRule = [v => !!v || this.$t('forms.requiredField')]
   },
-  beforeDestroy: function() {
-    this.$wait.end("dialog");
+  beforeDestroy: function () {
+    this.$wait.end('dialog')
   },
-  methods: {    
-    save() {
+  methods: {
+    save () {
       if (this.$refs.editorForm.validate()) {
-        this.dialog = false;
-        this.editor.amount = this.finalAmount;
-        this.editor.modifyAmount = 0;
-        this.$emit("save", this.editor);
+        this.dialog = false
+        this.editor.amount = this.finalAmount
+        this.editor.modifyAmount = 0
+        this.$emit('save', this.editor)
       }
     },
-    cancel() {
-      this.dialog = false;
+    cancel () {
+      this.dialog = false
     }
   }
-};
+}
 </script>

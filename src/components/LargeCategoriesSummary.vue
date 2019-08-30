@@ -182,40 +182,40 @@
 </template>
 <script>
 export default {
-  name: "VLargeCategoriesSummary",
+  name: 'VLargeCategoriesSummary',
   props: {
     loading: Boolean,
     dataBalance: Array,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     }
   },
   components: {
-    "v-animated-number": () => import("../components/AnimatedNumber")
+    'v-animated-number': () => import('../components/AnimatedNumber')
   },
   methods: {
-    conditionalColor(percentValue) {
+    conditionalColor (percentValue) {
       if (percentValue > 90) {
-        return "green darken-3";
+        return 'green darken-3'
       } else if (percentValue > 60) {
-        return "light-green darken-1";
+        return 'light-green darken-1'
       } else if (percentValue > 30) {
-        return "yellow darken-1";
+        return 'yellow darken-1'
       } else if (percentValue >= -1) {
-        return "orange lighten-1";
+        return 'orange lighten-1'
       } else if (percentValue < -1) {
-        return "deep-orange darken-4";
+        return 'deep-orange darken-4'
       }
     },
-    formatAmount(value) {
+    formatAmount (value) {
       return this.$options.filters.currency(
         value,
         this.$currencies[this.dataBudget.currency]
-      );
+      )
     }
   }
-};
+}
 </script>

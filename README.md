@@ -9,10 +9,9 @@
 npm install
 
 # serve with hot reload at localhost:8080
-npm run dev
+npm run serve
 
 # build for production with minification
-# bundle is saved in ../Api/wwwroot folder
 npm run build
 
 # build for production and view the bundle analyzer report

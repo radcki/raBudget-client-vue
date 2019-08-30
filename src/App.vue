@@ -19,8 +19,8 @@
             </v-btn>
           </v-list-item-action>
         </v-list-item>
-        
-<v-divider></v-divider>
+
+        <v-divider></v-divider>
         <v-list-group
           v-for="(budget, i) in this.budgets"
           v-bind:data="budget"
@@ -51,7 +51,7 @@
           </v-list-item>
 
           <v-list-item
-            class="grey--text text--darken-1 "
+            class="grey--text text--darken-1"
             :to="{ name: 'overview', params: { id: budget.id }}"
           >
             <v-list-item-content>
@@ -146,7 +146,7 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
 
-      <v-menu >
+      <v-menu>
         <template v-slot:activator="{ on }">
           <v-btn v-on="on" text>
             <v-icon class="mr-2">{{mdiWeb}}</v-icon>
@@ -225,8 +225,15 @@
     <confirm ref="confirm"></confirm>
     <v-dialog fullscreen v-model="loadingOverlay">
       <div class="centered-overlay">
-        <div >
-          <v-progress-circular :size="400" style="max-width: 90vw" :width="15" class color="purple" indeterminate></v-progress-circular>
+        <div>
+          <v-progress-circular
+            :size="400"
+            style="max-width: 90vw"
+            :width="15"
+            class
+            color="purple"
+            indeterminate
+          ></v-progress-circular>
         </div>
       </div>
     </v-dialog>
@@ -256,54 +263,56 @@
 </style>
 
 <script>
-import { mapState, mapActions } from "vuex";
-import { budgetService } from "./_services/budget.service";
+import { mapState, mapActions } from 'vuex'
 
-import Confirm from "./components/Confirm.vue";
-import { 
-  mdiDotsVertical, 
-  mdiAccountBoxOutline, 
-  mdiLogout, 
-  mdiMenu, 
-  mdiPlusCircleOutline, 
-  mdiPencil, 
-  mdiHome, 
-  mdiCheckCircle, 
-  mdiCircleOutline, 
-  mdiWeb, 
-  mdiFormatListBulleted, 
+import Confirm from './components/Confirm.vue'
+import {
+  mdiDotsVertical,
+  mdiAccountBoxOutline,
+  mdiLogout,
+  mdiMenu,
+  mdiPlusCircleOutline,
+  mdiPencil,
+  mdiHome,
+  mdiCheckCircle,
+  mdiCircleOutline,
+  mdiWeb,
+  mdiFormatListBulleted,
   mdiCalendarClock,
   mdiPollBox,
   mdiTune,
   mdiDirections,
-  mdiAccountMultiple } from "@mdi/js";
+  mdiAccountMultiple,
+  mdiClose
+} from '@mdi/js'
 
 export default {
-  name: "app",
+  name: 'app',
   components: {
     confirm: Confirm
   },
   data: () => ({
-    locale: "pl",
+    locale: 'pl',
     drawer: null,
     loadingOverlay: false,
 
     mdiDotsVertical,
-    mdiAccountBoxOutline, 
-    mdiLogout, 
-    mdiMenu, 
-    mdiPlusCircleOutline, 
-    mdiPencil, 
-    mdiHome, 
-    mdiCheckCircle, 
-    mdiCircleOutline, 
-    mdiWeb, 
-    mdiFormatListBulleted, 
+    mdiAccountBoxOutline,
+    mdiLogout,
+    mdiMenu,
+    mdiPlusCircleOutline,
+    mdiPencil,
+    mdiHome,
+    mdiCheckCircle,
+    mdiCircleOutline,
+    mdiWeb,
+    mdiFormatListBulleted,
     mdiCalendarClock,
     mdiPollBox,
     mdiTune,
     mdiDirections,
     mdiAccountMultiple,
+    mdiClose
   }),
   computed: {
     ...mapState({
@@ -311,112 +320,111 @@ export default {
       account: state => state.account,
       budgets: state => state.budgets.budgets
     }),
-    isAdmin: function() {
+    isAdmin: function () {
       return (
         this.account.user &&
         this.account.user.roles &&
-        this.account.user.roles.filter(function(v) {
-          return v == 1;
+        this.account.user.roles.filter(function (v) {
+          return v === 1
         }).length > 0
-      );
+      )
     },
-    loginRefreshInProgress: function() {
-      return this.$wait.is("login-check");
+    loginRefreshInProgress: function () {
+      return this.$wait.is('login-check')
     }
   },
-  mounted() {
-    var savedLocale = localStorage.getItem("locale");
+  mounted () {
+    var savedLocale = localStorage.getItem('locale')
     if (savedLocale) {
-      this.switchLocale(savedLocale);
+      this.switchLocale(savedLocale)
     } else {
-      this.switchLocale(navigator.language);
+      this.switchLocale(navigator.language)
     }
 
-    this.drawer = this.$vuetify.breakpoint.lgAndUp;
-    this.$root.$confirm = this.$refs.confirm.open;
-    this.loginCheckTimout = null;
+    this.drawer = this.$vuetify.breakpoint.lgAndUp
+    this.$root.$confirm = this.$refs.confirm.open
+    this.loginCheckTimout = null
 
     if (this.account.status.loggedIn) {
-      this.initializeBudgets();
-      this.noBudgetsGuard();
+      this.initializeBudgets()
+      this.noBudgetsGuard()
     }
   },
-  created() {
-    this.$root.$on("reloadBudgets", this.fetchBudgets);
+  created () {
+    this.$root.$on('reloadBudgets', this.fetchBudgets)
   },
   methods: {
     ...mapActions({
-      clearAlert: "alert/clear",
-      logout: "account/logout",
-      initializeBudgets: "budgets/initializeBudgets",
-      fetchBudgets: "budgets/fetchBudgets"
+      clearAlert: 'alert/clear',
+      logout: 'account/logout',
+      initializeBudgets: 'budgets/initializeBudgets',
+      fetchBudgets: 'budgets/fetchBudgets'
     }),
-    signOut() {
+    signOut () {
       this.logout().then(() => {
-        this.$router.push("/");
-      });
+        this.$router.push('/')
+      })
     },
-    switchLocale(locale) {
-      locale = locale.substring(0, 2);
-      this.locale = locale;
-      localStorage.setItem("locale", locale);
-      document.getElementsByTagName("html")[0].setAttribute("lang", locale);
-      this.$i18n.locale = locale;
-      this.$moment.locale(locale);
+    switchLocale (locale) {
+      locale = locale.substring(0, 2)
+      this.locale = locale
+      localStorage.setItem('locale', locale)
+      document.getElementsByTagName('html')[0].setAttribute('lang', locale)
+      this.$i18n.locale = locale
+      this.$moment.locale(locale)
     },
-    noBudgetsGuard() {
-      if (this.budgets.length === 0 && !this.$wait.is("loading.budgets")) {
-        this.$router.push({ name: "newBudget" });
-        return;
-      } else if (this.$route.name == "home") {
-        var defaultBudget = this.budgets.find(v => v.default);
-        var activeBudget = null;
+    noBudgetsGuard () {
+      if (this.budgets.length === 0 && !this.$wait.is('loading.budgets')) {
+        this.$router.push({ name: 'newBudget' })
+      } else if (this.$route.name === 'home') {
+        var defaultBudget = this.budgets.find(v => v.default)
+        var activeBudget = null
 
         if (!defaultBudget) {
-          activeBudget = defaultBudget;
+          activeBudget = defaultBudget
         } else {
-          activeBudget = this.budgets[0];
+          activeBudget = this.budgets[0]
         }
         this.$router.push({
-          name: "overview",
+          name: 'overview',
           params: { id: activeBudget.id }
-        });
+        })
       }
     }
   },
   watch: {
-    "account.status.loggedIn": {
-      handler: function(isLogged) {
-        var metaThemeColor = document.querySelector("meta[name=theme-color]");
+    'account.status.loggedIn': {
+      handler: function (isLogged) {
+        var metaThemeColor = document.querySelector('meta[name=theme-color]')
         if (!isLogged) {
-          metaThemeColor.setAttribute("content", "#90a4ae");
-          return;
+          metaThemeColor.setAttribute('content', '#90a4ae')
+          return
         }
-        metaThemeColor.setAttribute("content", "#455a64");
-        this.fetchBudgets();
+        metaThemeColor.setAttribute('content', '#455a64')
+        this.fetchBudgets()
       },
       immediate: true
     },
-    budgets: function() {
-      this.noBudgetsGuard();
+    budgets: function () {
+      this.noBudgetsGuard()
     },
-    loginRefreshInProgress: function(isInProgress) {
+    loginRefreshInProgress: function (isInProgress) {
       /*
       Debounced display of token refresh overlay
       */
       if (isInProgress) {
-        var t = this;
-        this.loginCheckTimout = setTimeout(function() {
-          t.loadingOverlay = true;
-        }, 300);
+        var t = this
+        this.loginCheckTimout = setTimeout(function () {
+          t.loadingOverlay = true
+        }, 300)
       } else {
         if (this.loginCheckTimout != null) {
-          clearTimeout(this.loginCheckTimout);
+          clearTimeout(this.loginCheckTimout)
         }
-        this.loginCheckTimout = null;
-        this.loadingOverlay = false;
+        this.loginCheckTimout = null
+        this.loadingOverlay = false
       }
     }
   }
-};
+}
 </script>

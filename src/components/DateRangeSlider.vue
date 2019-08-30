@@ -14,7 +14,7 @@
         <v-chip
           small
           class="my-1"
-          
+
           :color="period == '6m'? 'primary' : 'grey'"
           @click="period = '6m'"
           text-color="white"
@@ -107,7 +107,7 @@
 </template>
 <script>
 export default {
-  name: "VDateRangeSlider",
+  name: 'VDateRangeSlider',
   props: {
     min: String,
     max: String,
@@ -115,7 +115,7 @@ export default {
     step: String,
     chips: Boolean
   },
-  data() {
+  data () {
     return {
       period: null,
       sliderValue: [null, null],
@@ -123,157 +123,157 @@ export default {
       selectedMax: this.value[1],
       minMenu: false,
       maxMenu: false,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")]
-    };
-  },
-  computed: {
-    format() {
-      if (this.step == "days") {
-        return "YYYY-MM-DD";
-      } else if (this.step == "months") {
-        return "YYYY-MM";
-      }
-    },
-    pickerType() {
-      return this.step == "months" ? "month" : "date";
-    },
-    addSign() {
-      return this.step == "months" ? "M" : "d";
-    },
-    minMoment() {
-      return this.$moment(this.min, this.format);
-    },
-    maxMoment() {
-      return this.$moment(this.max, this.format);
-    },
-    rangeDiff() {
-      return this.maxMoment.diff(this.minMoment, this.step);
-    },
-    selectedMinMoment() {
-      return this.$moment(this.selectedMin, this.format);
-    },
-    selectedMaxMoment() {
-      return this.$moment(this.selectedMax, this.format);
-    },
-    selectedMinInt() {
-      return this.selectedMinMoment.diff(this.minMoment, this.step);
-    },
-    selectedMaxInt() {
-      return this.selectedMaxMoment.diff(this.minMoment, this.step);
-    },
-
-    result() {
-      return [this.selectedMin, this.selectedMax];
-    },
-    locale: function() {
-      return this.$i18n.locale;
+      requiredRule: [v => !!v || this.$t('forms.requiredField')]
     }
   },
-  mounted() {
-    this.sliderValue = [this.selectedMinInt, this.selectedMaxInt];
+  computed: {
+    format () {
+      if (this.step == 'days') {
+        return 'YYYY-MM-DD'
+      } else if (this.step == 'months') {
+        return 'YYYY-MM'
+      }
+    },
+    pickerType () {
+      return this.step == 'months' ? 'month' : 'date'
+    },
+    addSign () {
+      return this.step == 'months' ? 'M' : 'd'
+    },
+    minMoment () {
+      return this.$moment(this.min, this.format)
+    },
+    maxMoment () {
+      return this.$moment(this.max, this.format)
+    },
+    rangeDiff () {
+      return this.maxMoment.diff(this.minMoment, this.step)
+    },
+    selectedMinMoment () {
+      return this.$moment(this.selectedMin, this.format)
+    },
+    selectedMaxMoment () {
+      return this.$moment(this.selectedMax, this.format)
+    },
+    selectedMinInt () {
+      return this.selectedMinMoment.diff(this.minMoment, this.step)
+    },
+    selectedMaxInt () {
+      return this.selectedMaxMoment.diff(this.minMoment, this.step)
+    },
+
+    result () {
+      return [this.selectedMin, this.selectedMax]
+    },
+    locale: function () {
+      return this.$i18n.locale
+    }
+  },
+  mounted () {
+    this.sliderValue = [this.selectedMinInt, this.selectedMaxInt]
     if (this.chips) {
-      this.checkChips(this.result);
+      this.checkChips(this.result)
     }
   },
   watch: {
-    "value.0": function(value) {
+    'value.0': function (value) {
       if (this.$moment(value, this.format) < this.minMoment) {
-        this.selectedMin = this.minMoment.format(this.format);
+        this.selectedMin = this.minMoment.format(this.format)
       } else {
-        this.selectedMin = value;
+        this.selectedMin = value
       }
     },
-    "value.1": function(value) {
+    'value.1': function (value) {
       if (this.$moment(value, this.format) > this.maxMoment) {
-        this.selectedMax = this.maxMoment.format(this.format);
+        this.selectedMax = this.maxMoment.format(this.format)
       } else {
-        this.selectedMax = value;
+        this.selectedMax = value
       }
     },
-    "sliderValue.0": function(min) {
+    'sliderValue.0': function (min) {
       if (this.intToDate(min) != this.selectedMin) {
-        this.selectedMin = this.intToDate(min);
+        this.selectedMin = this.intToDate(min)
       }
     },
-    "sliderValue.1": function(max) {
+    'sliderValue.1': function (max) {
       if (this.intToDate(max) != this.selectedMax) {
-        this.selectedMax = this.intToDate(max);
+        this.selectedMax = this.intToDate(max)
       }
     },
-    selectedMin: function(value) {
+    selectedMin: function (value) {
       if (this.dateToInt(value) != this.sliderValue[0]) {
-        this.sliderValue = [this.selectedMinInt, this.sliderValue[1]];
+        this.sliderValue = [this.selectedMinInt, this.sliderValue[1]]
       }
     },
-    selectedMax: function(value) {
+    selectedMax: function (value) {
       if (this.dateToInt(value) != this.sliderValue[1]) {
-        this.sliderValue = [this.sliderValue[0], this.selectedMaxInt];
+        this.sliderValue = [this.sliderValue[0], this.selectedMaxInt]
       }
     },
-    result: function(range) {
-      this.$emit("input", range);
+    result: function (range) {
+      this.$emit('input', range)
       if (this.chips) {
-        this.checkChips(range);
+        this.checkChips(range)
       }
     },
-    period: function(value) {
-      if (value == "full") {
-        this.selectedMin = this.min;
-        this.selectedMax = this.max;
+    period: function (value) {
+      if (value == 'full') {
+        this.selectedMin = this.min
+        this.selectedMax = this.max
       }
-      if (value == "6m") {
+      if (value == '6m') {
         this.selectedMin = this.$moment()
-          .subtract(6, "month")
-          .format("YYYY-MM");
-        this.selectedMax = this.max;
+          .subtract(6, 'month')
+          .format('YYYY-MM')
+        this.selectedMax = this.max
       }
-      if (value == "1m") {
+      if (value == '1m') {
         this.selectedMin = this.$moment()
-          .subtract(1, "month")
-          .format("YYYY-MM");
-        this.selectedMax = this.max;
+          .subtract(1, 'month')
+          .format('YYYY-MM')
+        this.selectedMax = this.max
       }
     }
   },
   methods: {
-    intToDate(value) {
+    intToDate (value) {
       return this.minMoment
         .clone()
         .add(value, this.addSign)
-        .format(this.format);
+        .format(this.format)
     },
-    dateToInt(value) {
-      return this.$moment(value, this.format).diff(this.minMoment, this.step);
+    dateToInt (value) {
+      return this.$moment(value, this.format).diff(this.minMoment, this.step)
     },
-    checkChips(range) {
+    checkChips (range) {
       if (range[1] != this.max) {
-        this.period = null;
-        return;
+        this.period = null
+        return
       }
       if (range[0] == this.min) {
-        this.period = "full";
-        return;
+        this.period = 'full'
+        return
       }
       if (
         range[0] ==
         this.$moment()
-          .subtract(6, "month")
-          .format("YYYY-MM")
+          .subtract(6, 'month')
+          .format('YYYY-MM')
       ) {
-        this.period = "6m";
-        return;
+        this.period = '6m'
+        return
       }
       if (
         range[0] ==
         this.$moment()
-          .subtract(1, "month")
-          .format("YYYY-MM")
+          .subtract(1, 'month')
+          .format('YYYY-MM')
       ) {
-        this.period = "1m";
-        return;
+        this.period = '1m'
+        return
       }
-      this.period = null;
+      this.period = null
     }
   }
-};
+}
 </script>

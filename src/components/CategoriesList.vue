@@ -76,19 +76,19 @@ import {
   mdiPencil,
   mdiTrashCan,
   mdiReplyAll
-} from "@mdi/js";
+} from '@mdi/js'
 
 export default {
-  name: "VCategoriesList",
+  name: 'VCategoriesList',
   components: {
-    "v-category-editor": () => import("../components/CategoryEditor")
+    'v-category-editor': () => import('../components/CategoryEditor')
   },
   props: {
     items: Array,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     },
     title: {
@@ -99,7 +99,7 @@ export default {
     colorSecondary: String,
     hideActions: Boolean
   },
-  data: function() {
+  data: function () {
     return {
       menu: false,
 
@@ -108,40 +108,40 @@ export default {
       mdiPencil,
       mdiTrashCan,
       mdiReplyAll
-    };
+    }
   },
   computed: {
-    itemsSum: function() {
+    itemsSum: function () {
       if (this.items && this.items.length > 0) {
         return this.items
           .map(v => this.readCurrentAmount(v))
-          .reduce(function(a, b) {
-            return 1 * a + 1 * b;
-          });
+          .reduce(function (a, b) {
+            return 1 * a + 1 * b
+          })
       }
-      return 0;
+      return 0
     }
   },
 
   methods: {
-    emitSave: function(payload) {
-      this.$emit("edit", payload);
+    emitSave: function (payload) {
+      this.$emit('edit', payload)
     },
-    readCurrentAmount(category) {
+    readCurrentAmount (category) {
       var matching = category.amountConfigs.filter(v => {
         return (
-          this.$moment().startOf("month") >=
-            this.$moment(v.validFrom, "YYYY-MM") &&
+          this.$moment().startOf('month') >=
+            this.$moment(v.validFrom, 'YYYY-MM') &&
           (!v.validTo ||
-            this.$moment(v.validTo, "YYYY-MM") >=
-              this.$moment().startOf("month"))
-        );
-      });
-      return matching && matching.length > 0 ? matching[0].amount : null;
+            this.$moment(v.validTo, 'YYYY-MM') >=
+              this.$moment().startOf('month'))
+        )
+      })
+      return matching && matching.length > 0 ? matching[0].amount : null
     },
-    start: function(method) {
-      setTimeout(() => method());
+    start: function (method) {
+      setTimeout(() => method())
     }
   }
-};
+}
 </script>

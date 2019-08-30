@@ -10,8 +10,8 @@ const state = {
 const actions = {
   reloadInitialized ({ state, dispatch }, budgetId) {
     var budget = state.budgets.find(v => v.id == state.activeBudgetId)
-    if (budgetId && budgetId != budget.id) {     
-      state.budgets.filter(v=>v.id != budgetId).forEach(b => {
+    if (budgetId && budgetId != budget.id) {
+      state.budgets.filter(v => v.id != budgetId).forEach(b => {
         dispatch('fetchBudget', b.id)
       })
     } else {
@@ -200,21 +200,21 @@ const mutations = {
         }
       }
     })
-    for (var budget of budgets) {
-      for (var category of budget.spendingCategories) {
-        for (var config of category.amountConfigs) {
+    for (let budget of budgets) {
+      for (let category of budget.spendingCategories) {
+        for (let config of category.amountConfigs) {
           config.validFrom = moment(config.validFrom).format('YYYY-MM')
           config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
         }
       }
-      for (var category of budget.incomeCategories) {
-        for (var config of category.amountConfigs) {
+      for (let category of budget.incomeCategories) {
+        for (let config of category.amountConfigs) {
           config.validFrom = moment(config.validFrom).format('YYYY-MM')
           config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
         }
       }
-      for (var category of budget.savingCategories) {
-        for (var config of category.amountConfigs) {
+      for (let category of budget.savingCategories) {
+        for (let config of category.amountConfigs) {
           config.validFrom = moment(config.validFrom).format('YYYY-MM')
           config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
         }
@@ -225,20 +225,20 @@ const mutations = {
   setBudget (state, budget) {
     budget.startingDate = moment(budget.startingDate).format('YYYY-MM')
 
-    for (var category of budget.spendingCategories) {
-      for (var config of category.amountConfigs) {
+    for (let category of budget.spendingCategories) {
+      for (let config of category.amountConfigs) {
         config.validFrom = moment(config.validFrom).format('YYYY-MM')
         config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
       }
     }
-    for (var category of budget.incomeCategories) {
-      for (var config of category.amountConfigs) {
+    for (let category of budget.incomeCategories) {
+      for (let config of category.amountConfigs) {
         config.validFrom = moment(config.validFrom).format('YYYY-MM')
         config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
       }
     }
-    for (var category of budget.savingCategories) {
-      for (var config of category.amountConfigs) {
+    for (let category of budget.savingCategories) {
+      for (let config of category.amountConfigs) {
         config.validFrom = moment(config.validFrom).format('YYYY-MM')
         config.validTo = config.validTo ? moment(config.validTo).format('YYYY-MM') : null
       }

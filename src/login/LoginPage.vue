@@ -43,58 +43,60 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
-import { mdiEye, mdiEyeOff } from "@mdi/js"
+import { mapState, mapActions } from 'vuex'
+import { mdiEye, mdiEyeOff } from '@mdi/js'
 
 export default {
-  data() {
+  data () {
     return {
       valid: true,
       show: false,
       username: null,
       password: null,
       submitted: false,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")]
-    };
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
+      mdiEye,
+      mdiEyeOff
+    }
   },
   computed: {
-    ...mapState("account", ["status"])
+    ...mapState('account', ['status'])
   },
   watch: {
-    "status.loggedIn": function(isLogged) {
+    'status.loggedIn': function (isLogged) {
       if (isLogged) {
-        this.$router.push("home");
+        this.$router.push('home')
       }
     }
   },
-  created() {
+  created () {
     if (status.loggedIn) {
-      this.$router.push("home");
+      this.$router.push('home')
     }
   },
   methods: {
     ...mapActions({
-      login: "account/login",
-      logout: "account/logout",
-      fetchBudgets: "budgets/fetchBudgets"
+      login: 'account/login',
+      logout: 'account/logout',
+      fetchBudgets: 'budgets/fetchBudgets'
     }),
-    handleSubmit(e) {
-      this.submitted = true;
-      const { username, password } = this;
+    handleSubmit (e) {
+      this.submitted = true
+      const { username, password } = this
       if (username && password) {
-        this.$wait.start("login");
+        this.$wait.start('login')
         this.login({ username, password })
           .then(ok => {
-            this.$wait.end("login");
+            this.$wait.end('login')
             if (ok) {
-              this.fetchBudgets();
+              this.fetchBudgets()
             }
           })
           .catch(() => {
-            this.$wait.end("login");
-          });
+            this.$wait.end('login')
+          })
       }
     }
   }
-};
+}
 </script>

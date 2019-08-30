@@ -62,7 +62,7 @@
                       v-if="periodReport && $vuetify.breakpoint.smAndUp"
                       class
                       :headers="headers"
-                      
+
                       hide-default-footer
                       disable-pagination
                       item-key="category.categoryId"
@@ -387,21 +387,19 @@ table.v-table tbody th {
 }
 </style>
 <script>
-import { transactionsService } from "../_services/transactions.service";
-import { budgetService } from "../_services/budget.service";
-import { mapState, mapActions } from "vuex";
-import { debounce } from "debounce";
-import { GChart } from "vue-google-charts";
-import { mdiChevronRight } from "@mdi/js";
+import { budgetService } from '../_services/budget.service'
+import { mapState, mapActions } from 'vuex'
+import { debounce } from 'debounce'
+import { GChart } from 'vue-google-charts'
+import { mdiChevronRight } from '@mdi/js'
 
 export default {
   components: {
     GChart,
-    "transaction-editor": () => import("../components/TransactionEditor"),
-    "v-date-range-slider": () => import("../components/DateRangeSlider"),
-    "v-category-select": () => import("../components/CategorySelect")
+    'v-date-range-slider': () => import('../components/DateRangeSlider'),
+    'v-category-select': () => import('../components/CategorySelect')
   },
-  data() {
+  data () {
     return {
       budgetLoading: false,
       periodLoading: false,
@@ -422,254 +420,255 @@ export default {
       selectedCategories: [],
       selectedRange: [null, null],
 
-      mode: "period",
-      chartDataType: "averagePerDay",
+      mode: 'period',
+      chartDataType: 'averagePerDay',
       chartOptions: {
-        legend: { position: "none" }
+        legend: { position: 'none' }
       },
 
       categoryTypes: [
-        { text: "general.spendings", value: "spendingCategories" },
-        { text: "general.incomes", value: "incomeCategories" },
-        { text: "general.savings", value: "savingCategories" }
+        { text: 'general.spendings', value: 'spendingCategories' },
+        { text: 'general.incomes', value: 'incomeCategories' },
+        { text: 'general.savings', value: 'savingCategories' }
       ],
-      categoryType: "spendingCategories",
+      categoryType: 'spendingCategories',
       mdiChevronRight
-    };
+    }
   },
   computed: {
     ...mapState({
       budgets: state => state.budgets.budgets
     }),
-    budget() {
-      return this.budgets.filter(v => v.id == this.$route.params.id)[0];
+    budget () {
+      return this.budgets.filter(v => v.id == this.$route.params.id)[0]
     },
-    loading: function() {
-      return this.budgetLoading || this.periodLoading || this.monthlyLoading;
+    loading: function () {
+      return this.budgetLoading || this.periodLoading || this.monthlyLoading
     },
-    currencies: function() {
-      return Object.keys(this.$currencies);
+    currencies: function () {
+      return Object.keys(this.$currencies)
     },
-    thisMonth: function() {
-      return this.$moment().format("YYYY-MM");
+    thisMonth: function () {
+      return this.$moment().format('YYYY-MM')
     },
-    locale: function() {
-      return this.$i18n.locale;
+    locale: function () {
+      return this.$i18n.locale
     },
-    periodReport: function() {
-      return this.periodData[this.categoryType];
+    periodReport: function () {
+      return this.periodData[this.categoryType]
     },
-    monthlyReport: function() {
-      var type = this.categoryType;
-      return this.monthlyData[type];
+    monthlyReport: function () {
+      var type = this.categoryType
+      return this.monthlyData[type]
     },
-    headers: function() {
-      var locale = this.$i18n.locale; /* reload binding */
-       var categoryName = this.$t("categories.name");
-       var budgetSum = this.$t("reports.budgetSum");
-       var transactionsSum = this.$t("reports.transactionsSum");
-       var allocationsSum = this.$t("reports.allocationsSum");
-       var averagePerDay = this.$t("reports.averagePerDay");
-       var averagePerMonth = this.$t("reports.averagePerMonth");
+    headers: function () {
+      // eslint-disable-next-line no-unused-vars
+      var locale = this.$i18n.locale /* reload binding */
+      var categoryName = this.$t('categories.name')
+      var budgetSum = this.$t('reports.budgetSum')
+      var transactionsSum = this.$t('reports.transactionsSum')
+      var allocationsSum = this.$t('reports.allocationsSum')
+      var averagePerDay = this.$t('reports.averagePerDay')
+      var averagePerMonth = this.$t('reports.averagePerMonth')
       var headers = [
         {
           text: categoryName,
-          align: "left",
+          align: 'left',
           sortable: true,
-          value: "category.name"  
+          value: 'category.name'
         },
         {
           text: budgetSum,
-          align: "left",
+          align: 'left',
           sortable: true,
-          value: "budgetAmount"
+          value: 'budgetAmount'
         },
         {
           text: transactionsSum,
-          align: "left",
+          align: 'left',
           sortable: true,
-          value: "transactionsSum"
+          value: 'transactionsSum'
         },
         {
           text: allocationsSum,
-          align: "left",
+          align: 'left',
           sortable: true,
-          value: "allocationsSum"
+          value: 'allocationsSum'
         },
         {
           text: averagePerDay,
-          align: "left",
+          align: 'left',
           sortable: true,
-          value: "averagePerDay"
+          value: 'averagePerDay'
         },
         {
           text: averagePerMonth,
-          align: "left",
+          align: 'left',
           sortable: true,
-          value: "averagePerMonth"
+          value: 'averagePerMonth'
         }
-      ];
-      if (this.categoryType != "spendingCategories") {
-        headers = headers.filter(v => v.value != "allocationsSum");
+      ]
+      if (this.categoryType != 'spendingCategories') {
+        headers = headers.filter(v => v.value != 'allocationsSum')
       }
-      return headers;
+      return headers
     },
-    periodTotals: function() {
+    periodTotals: function () {
       var data = {
         budgetAmount: 0,
         transactionsSum: 0,
         allocationsSum: 0,
         averagePerDay: 0,
         averagePerMonth: 0
-      };
+      }
       for (
         var i = 0, n = this.periodData[this.categoryType].length;
         i < n;
         i++
       ) {
-        var cat = this.periodData[this.categoryType][i];
-        data.budgetAmount += cat.budgetAmount;
-        data.transactionsSum += cat.transactionsSum;
-        data.allocationsSum += cat.allocationsSum;
-        data.averagePerDay += cat.averagePerDay;
-        data.averagePerMonth += cat.averagePerMonth;
+        var cat = this.periodData[this.categoryType][i]
+        data.budgetAmount += cat.budgetAmount
+        data.transactionsSum += cat.transactionsSum
+        data.allocationsSum += cat.allocationsSum
+        data.averagePerDay += cat.averagePerDay
+        data.averagePerMonth += cat.averagePerMonth
       }
-      return data;
+      return data
     },
-    chartData: function() {
+    chartData: function () {
       if (!this.monthlyReport) {
-        return null;
+        return null
       }
-      var categoryCount = this.monthlyReport.length;
-      var monthCount = this.monthlyReport[0].data.length;
-      var header = [""];
-      for (var i = 0; i < categoryCount; i++) {
+      var categoryCount = this.monthlyReport.length
+      var monthCount = this.monthlyReport[0].data.length
+      var header = ['']
+      for (let i = 0; i < categoryCount; i++) {
         if (
-          this.selectedCategories.filter(function(v) {
-            return v.categoryId == this.monthlyReport[i].category.categoryId;
+          this.selectedCategories.filter(function (v) {
+            return v.categoryId == this.monthlyReport[i].category.categoryId
           }, this).length > 0
         ) {
-          header.push(this.monthlyReport[i].category.name);
+          header.push(this.monthlyReport[i].category.name)
         }
       }
-      var data = [header];
-      for (var i = 0; i < monthCount; i++) {
+      var data = [header]
+      for (let i = 0; i < monthCount; i++) {
         var month =
           this.monthlyReport[0].data[i].year +
-          "-" +
-          this.monthlyReport[0].data[i].month;
-        var row = [month];
-        for (var n = 0; n < categoryCount; n++) {
+          '-' +
+          this.monthlyReport[0].data[i].month
+        var row = [month]
+        for (let n = 0; n < categoryCount; n++) {
           if (
-            this.selectedCategories.filter(function(v) {
-              return v.categoryId == this.monthlyReport[n].category.categoryId;
+            this.selectedCategories.filter(function (v) {
+              return v.categoryId == this.monthlyReport[n].category.categoryId
             }, this).length > 0
           ) {
-            row.push(this.monthlyReport[n].data[i][this.chartDataType]);
+            row.push(this.monthlyReport[n].data[i][this.chartDataType])
           }
         }
-        data.push(row);
+        data.push(row)
       }
-      return data;
+      return data
     }
   },
-  created: function() {
-    this.debouncedLoadPeriodReport = debounce(this.loadPeriodReport, 800);
-    this.debouncedLoadMonthlyReport = debounce(this.loadMonthlyReport, 800);
+  created: function () {
+    this.debouncedLoadPeriodReport = debounce(this.loadPeriodReport, 800)
+    this.debouncedLoadMonthlyReport = debounce(this.loadMonthlyReport, 800)
     if (this.budget) {
       this.selectedRange = [
-        this.$moment(this.budget.startingDate).format("YYYY-MM"),
-        this.$moment().format("YYYY-MM")
-      ];
+        this.$moment(this.budget.startingDate).format('YYYY-MM'),
+        this.$moment().format('YYYY-MM')
+      ]
     }
   },
   watch: {
-    categoryType: function(type) {
-      this.selectedCategories = [];
+    categoryType: function (type) {
+      this.selectedCategories = []
 
       if (
-        this.chartDataType == "allocationsSum" &&
-        type != "spendingCategories"
+        this.chartDataType == 'allocationsSum' &&
+        type != 'spendingCategories'
       ) {
-        this.chartDataType = "transactionsSum";
+        this.chartDataType = 'transactionsSum'
       }
     },
-    budget: function(budget) {
+    budget: function (budget) {
       if (!budget) {
-        return;
+        return
       }
       this.selectedRange = [
-        this.$moment(budget.startingDate).format("YYYY-MM"),
-        this.$moment().format("YYYY-MM")
-      ];
-      if ((this.mode = "period")) {
-        this.loadPeriodReport();
+        this.$moment(budget.startingDate).format('YYYY-MM'),
+        this.$moment().format('YYYY-MM')
+      ]
+      if ((this.mode == 'period')) {
+        this.loadPeriodReport()
       } else {
-        this.loadMonthlyReport();
+        this.loadMonthlyReport()
       }
     },
-    selectedRange() {
-      this.debouncedLoadPeriodReport();
-      this.debouncedLoadMonthlyReport();
+    selectedRange () {
+      this.debouncedLoadPeriodReport()
+      this.debouncedLoadMonthlyReport()
     }
   },
   methods: {
     ...mapActions({
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success"
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success'
     }),
-    loadPeriodReport: function() {
-      this.periodLoading = true;
-      var startingDate = this.selectedRange[0] + "-01";
-      var endDate = this.$moment(this.selectedRange[1] + "-01").endOf("month");
+    loadPeriodReport: function () {
+      this.periodLoading = true
+      var startingDate = this.selectedRange[0] + '-01'
+      var endDate = this.$moment(this.selectedRange[1] + '-01').endOf('month')
       budgetService
         .getPeriodReport(
           this.budget.id,
           startingDate,
-          endDate.format("YYYY-MM-DD")
+          endDate.format('YYYY-MM-DD')
         )
         .then(response => {
           if (response.ok) {
             response.json().then(data => {
-              this.periodLoading = false;
-              this.periodData.spendingCategories = data.spending;
-              this.periodData.savingCategories = data.saving;
-              this.periodData.incomeCategories = data.income;
-            });
+              this.periodLoading = false
+              this.periodData.spendingCategories = data.spending
+              this.periodData.savingCategories = data.saving
+              this.periodData.incomeCategories = data.income
+            })
           } else {
             response.json().then(data => {
-              this.periodLoading = false;
-              this.dispatchError(data.message);
-            });
+              this.periodLoading = false
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     },
-    loadMonthlyReport: function() {
-      this.monthlyLoading = true;
-      var startingDate = this.selectedRange[0] + "-01";
-      var endDate = this.$moment(this.selectedRange[1] + "-01").endOf("month");
+    loadMonthlyReport: function () {
+      this.monthlyLoading = true
+      var startingDate = this.selectedRange[0] + '-01'
+      var endDate = this.$moment(this.selectedRange[1] + '-01').endOf('month')
       budgetService
         .getMonthlyReport(
           this.budget.id,
           startingDate,
-          endDate.format("YYYY-MM-DD")
+          endDate.format('YYYY-MM-DD')
         )
         .then(response => {
           if (response.ok) {
             response.json().then(data => {
-              this.monthlyLoading = false;
-              this.monthlyData.spendingCategories = data.spending;
-              this.monthlyData.savingCategories = data.saving;
-              this.monthlyData.incomeCategories = data.income;
-            });
+              this.monthlyLoading = false
+              this.monthlyData.spendingCategories = data.spending
+              this.monthlyData.savingCategories = data.saving
+              this.monthlyData.incomeCategories = data.income
+            })
           } else {
             response.json().then(data => {
-              this.monthlyLoading = false;
-              this.dispatchError(data.message);
-            });
+              this.monthlyLoading = false
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     }
   }
-};
+}
 </script>

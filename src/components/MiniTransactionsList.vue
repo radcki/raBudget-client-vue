@@ -43,21 +43,21 @@
   </v-list>
 </template>
 <script>
-import { transactionsService } from "../_services/transactions.service";
-import { mapActions } from "vuex";
-import { mdiPencil, mdiTrashCan } from "@mdi/js"
+import { transactionsService } from '../_services/transactions.service'
+import { mapActions } from 'vuex'
+import { mdiPencil, mdiTrashCan } from '@mdi/js'
 
 export default {
-  name: "VMiniTransactionsList",
+  name: 'VMiniTransactionsList',
   components: {
-    "v-transaction-editor": () => import("../components/TransactionEditor")
+    'v-transaction-editor': () => import('../components/TransactionEditor')
   },
   props: {
     items: Array,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     },
     title: {
@@ -65,75 +65,76 @@ export default {
     },
     color: String
   },
-  data: function() {
+  data: function () {
     return {
       budget: this.dataBudget,
-      mdiPencil, mdiTrashCan
-    };
+      mdiPencil,
+      mdiTrashCan
+    }
   },
-  computed: {    
-    itemsByDate: function() {
+  computed: {
+    itemsByDate: function () {
       if (this.items) {
         return this.items.reduce((acc, transaction) => {
           (acc[transaction.date] = acc[transaction.date] || []).push(
             transaction
-          );
-          return acc;
-        }, {});
+          )
+          return acc
+        }, {})
       }
     }
   },
   methods: {
     ...mapActions({
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success",
-      reloadInitialized: "budgets/reloadInitialized",
-      fetchTransactions: "transactions/fetchTransactions"
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success',
+      reloadInitialized: 'budgets/reloadInitialized',
+      fetchTransactions: 'transactions/fetchTransactions'
     }),
-    updateTransaction(transaction) {
-      this.$wait.start("saving.transaction");
+    updateTransaction (transaction) {
+      this.$wait.start('saving.transaction')
       transactionsService
         .updateTransaction(transaction)
         .then(response => {
           if (response.ok) {
-            this.$wait.end("saving.transaction");
-            this.reloadInitialized();
-            this.fetchTransactions();
+            this.$wait.end('saving.transaction')
+            this.reloadInitialized()
+            this.fetchTransactions()
           } else {
             response.json().then(data => {
-              this.$wait.end("saving.transaction");
-              this.dispatchError(data.message);
-            });
+              this.$wait.end('saving.transaction')
+              this.dispatchError(data.message)
+            })
           }
         })
         .catch(error => {
-          this.$wait.end("saving.transaction");
+          this.$wait.end('saving.transaction')
           error.json().then(data => {
-            this.dispatchError(data.message);
-          });
-        });
+            this.dispatchError(data.message)
+          })
+        })
     },
-    deleteTransaction(id) {
+    deleteTransaction (id) {
       this.$root
-        .$confirm("general.remove", "transactions.deleteConfirm", {
-          color: "red",
+        .$confirm('general.remove', 'transactions.deleteConfirm', {
+          color: 'red',
           buttons: { yes: true, no: true, cancel: false, ok: false }
         })
         .then(confirm => {
           if (confirm) {
             transactionsService.deleteTransaction(id).then(response => {
               if (response.ok) {
-                this.fetchTransactions();
-                this.reloadInitialized();
+                this.fetchTransactions()
+                this.reloadInitialized()
               } else {
                 response.json().then(data => {
-                  this.dispatchError(data.message);
-                });
+                  this.dispatchError(data.message)
+                })
               }
-            });
+            })
           }
-        });
+        })
     }
   }
-};
+}
 </script>

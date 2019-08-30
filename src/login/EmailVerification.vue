@@ -27,15 +27,15 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapState, mapActions } from 'vuex'
 import { userService } from '../_services/user.service'
 
 export default {
-  data() {
+  data () {
     return {
       verificationCode: null,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")]
-    };
+      requiredRule: [v => !!v || this.$t('forms.requiredField')]
+    }
   },
   computed: {
     ...mapState({
@@ -43,44 +43,44 @@ export default {
     })
   },
   watch: {
-    "user.emailVerified": function(ifVerified) {
+    'user.emailVerified': function (ifVerified) {
       if (ifVerified) {
-        this.$router.push("home");
+        this.$router.push('home')
       }
     }
   },
-  created() {
+  created () {
     if (this.user.emailVerified) {
-      this.$router.push("home");
+      this.$router.push('home')
     }
   },
   methods: {
     ...mapActions({
-      dispatchInfo: "alert/info",
-      verifyEmail: "account/verifyEmail",
+      dispatchInfo: 'alert/info',
+      verifyEmail: 'account/verifyEmail'
     }),
-    requestCode(){
-      userService.requestEmailConfirmationCode().then(response=>{
-        if (response.ok){
-          this.dispatchInfo("account.emailVerificationSent")
+    requestCode () {
+      userService.requestEmailConfirmationCode().then(response => {
+        if (response.ok) {
+          this.dispatchInfo('account.emailVerificationSent')
         } else {
-          this.dispatchError("account.emailVerificationSendingError")
+          this.dispatchError('account.emailVerificationSendingError')
         }
-      }).catch(()=>{
-        this.dispatchError("account.emailVerificationSendingError")
-      });
+      }).catch(() => {
+        this.dispatchError('account.emailVerificationSendingError')
+      })
     },
-    submitCode(){
-      if (!this.verificationCode){
-        return
+    submitCode () {
+      if (!this.verificationCode) {
+
       } else {
-        this.verifyEmail(this.verificationCode).then( confirmed =>{
-          if(confirmed){
-            this.$router.push("home");
+        this.verifyEmail(this.verificationCode).then(confirmed => {
+          if (confirmed) {
+            this.$router.push('home')
           }
         })
       }
     }
   }
-};
+}
 </script>

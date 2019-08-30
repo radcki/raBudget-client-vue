@@ -7,7 +7,7 @@
           class="blue-grey darken-2 headline white--text"
         >{{ $t('account.passwordReset') }}</v-card-title>
 
-        <v-card-text>   
+        <v-card-text>
           <v-form ref="formPassChange" v-model="validPasswordForm" @submit.prevent="resetPassword">
             <v-text-field
               v-model="email"
@@ -50,7 +50,7 @@
                     @click:append="show2 = !show2"
                 ></v-text-field>
               </template>
-            
+
             </v-form>
         </v-card-text>
         <v-card-actions>
@@ -65,12 +65,12 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import { mapActions } from 'vuex'
 import { userService } from '../_services/user.service'
-import { mdiEye, mdiEyeOff } from "@mdi/js"
+import { mdiEye, mdiEyeOff } from '@mdi/js'
 
 export default {
-  data() {
+  data () {
     return {
       email: null,
       haveCode: false,
@@ -80,76 +80,78 @@ export default {
       newpasswordConfirm: null,
       validPasswordForm: false,
       verificationCode: null,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
       emailRule: [
-        v => !!v || this.$t("forms.requiredField"),
+        v => !!v || this.$t('forms.requiredField'),
         v => {
-          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(v) || this.$t("forms.incorrectEmail");
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          return pattern.test(v) || this.$t('forms.incorrectEmail')
         }
       ],
       passwordRule: [
-        v => (v && v.length > 5) || this.$t("forms.tooShortPassword"),
-        v => !!v || this.$t("forms.requiredField")
+        v => (v && v.length > 5) || this.$t('forms.tooShortPassword'),
+        v => !!v || this.$t('forms.requiredField')
       ],
       passwordMatch: [
-        v => !!v || this.$t("forms.requiredField"),
+        v => !!v || this.$t('forms.requiredField'),
         v =>
-          this.newpassword == v || this.$t("forms.passwordDontMatch")
-      ]
-    };
+          this.newpassword == v || this.$t('forms.passwordDontMatch')
+      ],
+      mdiEye,
+      mdiEyeOff
+    }
   },
   watch: {
-    haveCode: function(){
-      this.newpassword = null,
-      this.newpasswordConfirm = null,
-      this.$refs.formPassChange.resetValidation();
+    haveCode: function () {
+      this.newpassword = null
+      this.newpasswordConfirm = null
+      this.$refs.formPassChange.resetValidation()
     }
   },
   methods: {
     ...mapActions({
-      dispatchInfo: "alert/info",
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success",
+      dispatchInfo: 'alert/info',
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success'
     }),
 
-    passwordChangeRequest() {
-      if (this.email){
-        this.$wait.start("processing");
+    passwordChangeRequest () {
+      if (this.email) {
+        this.$wait.start('processing')
         userService.requestPasswordReset(this.email).then(response => {
-          if (response.ok){
-            this.$wait.end("processing");
-            this.dispatchInfo("account.emailVerificationSent")
-            this.haveCode = true;
+          if (response.ok) {
+            this.$wait.end('processing')
+            this.dispatchInfo('account.emailVerificationSent')
+            this.haveCode = true
           } else {
-            this.$wait.end("processing");
-            this.dispatchError("account.emailVerificationSendingError")
+            this.$wait.end('processing')
+            this.dispatchError('account.emailVerificationSendingError')
           }
-        }).catch(()=>{
-          this.$wait.end("processing");
-          this.dispatchError("account.emailVerificationSendingError")
-        });
+        }).catch(() => {
+          this.$wait.end('processing')
+          this.dispatchError('account.emailVerificationSendingError')
+        })
       }
     },
-    resetPassword(){
+    resetPassword () {
       if (this.$refs.formPassChange.validate()) {
-        this.$wait.start("processing");
+        this.$wait.start('processing')
         userService.submitPasswordResetCode(this.email, this.verificationCode, this.newpassword)
-        .then(response => {
-          if (response.ok){
-            this.$wait.end("processing");
-            this.dispatchSuccess("account.passwordResetSuccess")
-            this.$router.push('/login')
-          } else {
-            this.$wait.end("processing");
-            this.dispatchError("account.passwordResetError")
-          }
-        }).catch(()=>{
-          this.$wait.end("processing");
-          this.dispatchError("account.passwordResetError")
-        });
+          .then(response => {
+            if (response.ok) {
+              this.$wait.end('processing')
+              this.dispatchSuccess('account.passwordResetSuccess')
+              this.$router.push('/login')
+            } else {
+              this.$wait.end('processing')
+              this.dispatchError('account.passwordResetError')
+            }
+          }).catch(() => {
+            this.$wait.end('processing')
+            this.dispatchError('account.passwordResetError')
+          })
       }
     }
   }
-};
+}
 </script>

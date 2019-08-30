@@ -135,23 +135,23 @@
 </template>
 
 <script>
-import {mdiClose} from "@mdi/js"
+import { mdiClose } from '@mdi/js'
 export default {
-  name: "TransactionScheduleEditor",
+  name: 'TransactionScheduleEditor',
   components: {
-    "v-category-select": () => import("../components/CategorySelect"),
-    "v-date-field": () => import("../components/DateField.vue")
+    'v-category-select': () => import('../components/CategorySelect'),
+    'v-date-field': () => import('../components/DateField.vue')
   },
   props: {
     value: Object,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: "PLN" };
+        return { currency: 'PLN' }
       }
     }
   },
-  data: function() {
+  data: function () {
     return {
       startDateMenu: false,
       endDateMenu: false,
@@ -160,24 +160,24 @@ export default {
       dialog: false,
 
       occurrenceFrequencies: [
-        { value: 1, text: "transactionSchedules.day" },
-        { value: 2, text: "transactionSchedules.week" },
-        { value: 3, text: "transactionSchedules.month" }
+        { value: 1, text: 'transactionSchedules.day' },
+        { value: 2, text: 'transactionSchedules.week' },
+        { value: 3, text: 'transactionSchedules.month' }
       ],
       categoryTypes: [
-        { value: "spendingCategories", text: "general.spendings" },
-        { value: "incomeCategories", text: "general.incomes" },
-        { value: "savingCategories", text: "general.savings" }
+        { value: 'spendingCategories', text: 'general.spendings' },
+        { value: 'incomeCategories', text: 'general.incomes' },
+        { value: 'savingCategories', text: 'general.savings' }
       ],
-      categoryType: "spendingCategories",
-      frequencyCombo: "once",
+      categoryType: 'spendingCategories',
+      frequencyCombo: 'once',
       editor: {
         ...{
           transactionScheduleId: null,
           description: null,
           budgetCategory: null,
           amount: null,
-          startDate: this.$moment().format("YYYY-MM-DD"),
+          startDate: this.$moment().format('YYYY-MM-DD'),
           endDate: null,
           frequency: 0,
           periodStep: null
@@ -187,29 +187,29 @@ export default {
       budget: this.dataBudget,
 
       mdiClose
-    };
+    }
   },
   computed: {
-    mobile() {
-      return !this.$vuetify.breakpoint.smAndUp;
+    mobile () {
+      return !this.$vuetify.breakpoint.smAndUp
     },
-    categories() {
-      return this.budget;
+    categories () {
+      return this.budget
     },
-    totalAmount() {
-      var amount = this.editor.amount * 1;
+    totalAmount () {
+      var amount = this.editor.amount * 1
       if (amount == 0 || this.editor.frequency == 0) {
-        return amount;
+        return amount
       }
       if (!this.editor.endDate) {
         if (this.editor.frequency == 1) {
-          return Math.ceil(365 / this.editor.periodStep) * amount;
+          return Math.ceil(365 / this.editor.periodStep) * amount
         }
         if (this.editor.frequency == 2) {
-          return Math.ceil(52 / this.editor.periodStep) * amount;
+          return Math.ceil(52 / this.editor.periodStep) * amount
         }
         if (this.editor.frequency == 3) {
-          return Math.ceil(12 / this.editor.periodStep) * amount;
+          return Math.ceil(12 / this.editor.periodStep) * amount
         }
       } else {
         if (this.editor.frequency == 1) {
@@ -218,12 +218,12 @@ export default {
               Math.max(
                 this.$moment(this.editor.endDate).diff(
                   this.editor.startDate,
-                  "days"
+                  'days'
                 ) + 1,
                 1
               ) / this.editor.periodStep
             ) * amount
-          );
+          )
         }
         if (this.editor.frequency == 2) {
           return (
@@ -231,12 +231,12 @@ export default {
               Math.max(
                 this.$moment(this.editor.endDate).diff(
                   this.editor.startDate,
-                  "weeks"
+                  'weeks'
                 ) + 1,
                 1
               ) / this.editor.periodStep
             ) * amount
-          );
+          )
         }
         if (this.editor.frequency == 3) {
           return (
@@ -244,77 +244,78 @@ export default {
               Math.max(
                 this.$moment(this.editor.endDate).diff(
                   this.editor.startDate,
-                  "months"
+                  'months'
                 ) + 1,
                 1
               ) / this.editor.periodStep
             ) * amount
-          );
+          )
         }
       }
+      return null
     }
   },
   watch: {
-    dialog(open) {
+    dialog (open) {
       if (open) {
-        this.$wait.start("dialog");
+        this.$wait.start('dialog')
         this.editor = {
           ...{
             transactionScheduleId: null,
             description: null,
             budgetCategory: null,
             amount: null,
-            startDate: this.$moment().format("YYYY-MM-DD"),
+            startDate: this.$moment().format('YYYY-MM-DD'),
             endDate: null,
             frequency: 0,
             periodStep: null
           },
           ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
         }
-        if (this.$refs.editor){
+        if (this.$refs.editor) {
           this.$refs.editor.resetValidation()
         }
       } else {
-        this.$wait.end("dialog");
+        this.$wait.end('dialog')
       }
     },
-    categoryType: function() {
-      this.editor.budgetCategory = null;
+    categoryType: function () {
+      this.editor.budgetCategory = null
     },
-    frequencyCombo: function(frequencyCombo) {
-      if (frequencyCombo == "once") {
-        this.editor.frequency = 0;
-        this.editor.periodStep = null;
+    frequencyCombo: function (frequencyCombo) {
+      if (frequencyCombo == 'once') {
+        this.editor.frequency = 0
+        this.editor.periodStep = null
       } else {
-        this.editor.frequency = this.editor.frequency || 3;
-        this.editor.periodStep = this.editor.periodStep || 1;
+        this.editor.frequency = this.editor.frequency || 3
+        this.editor.periodStep = this.editor.periodStep || 1
       }
     }
   },
-  mounted: function() {
-    this.$root.$on("closeDialogs", () => {
-      this.dialog = false;
-    });
-    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
-    if (this.value && this.value.frequency>0){
-      this.frequencyCombo = "periodic"
+  mounted: function () {
+    this.$root.$on('closeDialogs', () => {
+      this.dialog = false
+    })
+    this.requiredRule = [v => !!v || this.$t('forms.requiredField')]
+    if (this.value && this.value.frequency > 0) {
+      this.frequencyCombo = 'periodic'
       this.editor.frequency = this.value.frequency
       this.editor.periodStep = this.value.periodStep
     }
   },
-  beforeDestroy: function() {
-    this.$wait.end("dialog");
+  beforeDestroy: function () {
+    this.$wait.end('dialog')
   },
   methods: {
-    save() {
+    save () {
       if (this.$refs.editor.validate()) {
-        this.dialog = false;
-        this.$emit("save", this.editor);
+        this.dialog = false
+        this.$emit('save', this.editor)
       }
     },
-    cancel() {
-      this.dialog = false;
+    cancel () {
+      this.dialog = false
     }
   }
-};
+}
 </script>

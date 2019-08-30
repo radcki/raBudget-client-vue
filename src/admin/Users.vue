@@ -137,12 +137,12 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
-import { userService } from "../_services/user.service";
-import { mdiMagnify, mdiClose } from "@mdi/js"
+import { mapState, mapActions } from 'vuex'
+import { userService } from '../_services/user.service'
+import { mdiMagnify, mdiClose } from '@mdi/js'
 
 export default {
-  data() {
+  data () {
     return {
       users: [],
       search: null,
@@ -153,65 +153,66 @@ export default {
         roles: []
       },
       roles: [
-        { value: 0, text: this.$t("account.user") },
-        { value: 1, text: this.$t("account.admin") }
+        { value: 0, text: this.$t('account.user') },
+        { value: 1, text: this.$t('account.admin') }
       ],
       headers: [
         {
-          text: "admin.userId",
+          text: 'admin.userId',
           sortable: true,
-          value: "id"
+          value: 'id'
         },
         {
-          text: "account.username",
+          text: 'account.username',
           sortable: true,
-          value: "username"
+          value: 'username'
         },
         {
-          text: "account.email",
+          text: 'account.email',
           sortable: true,
-          value: "email"
+          value: 'email'
         },
         {
-          text: "account.creationDate",
+          text: 'account.creationDate',
           sortable: true,
-          value: "creationDate"
+          value: 'creationDate'
         },
         {
-          text: "general.actions",
+          text: 'general.actions',
           sortable: false
         }
       ],
-      mdiMagnify, mdiClose
-    };
+      mdiMagnify,
+      mdiClose
+    }
   },
   computed: {
     ...mapState({
       account: state => state.account
     })
   },
-  created() {
-    this.fetchUsers();
+  created () {
+    this.fetchUsers()
   },
   methods: {
     ...mapActions({
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success"
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success'
     }),
-    fetchUsers: function() {
+    fetchUsers: function () {
       userService.getAll().then(response => {
         if (response.ok) {
           response.json().then(data => {
-            this.users = data;
-          });
+            this.users = data
+          })
         }
-      });
+      })
     },
-    accountDelete: function(user) {
+    accountDelete: function (user) {
       this.$root
-        .$confirm("account.deleteAccount", "account.confirmRemove", {
-          color: "red",
-          input: "password",
+        .$confirm('account.deleteAccount', 'account.confirmRemove', {
+          color: 'red',
+          input: 'password',
           width: 400,
           buttons: { yes: false, no: false, cancel: true, ok: true }
         })
@@ -219,32 +220,32 @@ export default {
           if (input) {
             userService.delete(user.id, input).then(response => {
               if (response.ok) {
-                this.dispatchSuccess("admin.userDeleted");
-                this.fetchUsers();
+                this.dispatchSuccess('admin.userDeleted')
+                this.fetchUsers()
               } else {
-                this.dispatchError("admin.deletionFailure");
+                this.dispatchError('admin.deletionFailure')
               }
-            });
+            })
           }
-        });
+        })
     },
-    openEditDialog: function(user) {
-      this.userEdit = user;
-      this.userEditDialog = true;
+    openEditDialog: function (user) {
+      this.userEdit = user
+      this.userEditDialog = true
     },
-    updateProfile: function() {
+    updateProfile: function () {
       userService.adminUpdate(this.userEdit).then(response => {
         if (response.ok) {
-          this.dispatchSuccess("general.changesSaved");
-          this.userEditDialog = false;
+          this.dispatchSuccess('general.changesSaved')
+          this.userEditDialog = false
         } else {
-          this.dispatchError("general.changesNotSaved");
+          this.dispatchError('general.changesNotSaved')
           response.json().then(error => {
-            this.dispatchError(error.message);
-          });
+            this.dispatchError(error.message)
+          })
         }
-      });
+      })
     }
   }
-};
+}
 </script>

@@ -32,14 +32,14 @@ function login (username, password) {
       password
     })
   }
-  return fetch(`${config.apiUrl}/users/authenticate`, requestOptions)
+  return fetch(`${process.env.apiUrl}/users/authenticate`, requestOptions)
 }
 
 function logout () {
   return apiHandler.logout()
 }
 function confirmAuthorization () {
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/confirm-authorization`, {
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/confirm-authorization`, {
     method: 'GET'
   })
 }
@@ -52,17 +52,17 @@ function register (user) {
     },
     body: JSON.stringify(user)
   }
-  return fetch(`${config.apiUrl}/users/register`, requestOptions)
+  return fetch(`${process.env.apiUrl}/users/register`, requestOptions)
 }
 
 function getAll () {
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users`, {
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users`, {
     method: 'GET'
   })
 }
 
 function getProfile () {
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/profile`, {
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/profile`, {
     method: 'GET'
   })
     .then(response => {
@@ -71,7 +71,7 @@ function getProfile () {
 }
 
 function getById (id) {
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/${id}`, {
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/${id}`, {
     method: 'GET'
   })
 }
@@ -85,7 +85,7 @@ function update (user) {
     body: JSON.stringify(user)
   }
 
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/updateprofile`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/updateprofile`, requestOptions)
 }
 
 function adminUpdate (user) {
@@ -97,7 +97,7 @@ function adminUpdate (user) {
     body: JSON.stringify(user)
   }
 
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/admin-updateprofile`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/admin-updateprofile`, requestOptions)
 }
 
 function changePassword (oldpassword, newpassword) {
@@ -112,7 +112,7 @@ function changePassword (oldpassword, newpassword) {
     })
   }
 
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/changepassword`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/changepassword`, requestOptions)
 }
 
 // prefixed function name with underscore because delete is a reserved word in javascript
@@ -126,7 +126,7 @@ function _delete (id, password) {
       password: password
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/${id}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/${id}`, requestOptions)
 }
 
 function requestEmailConfirmationCode () {
@@ -137,7 +137,7 @@ function requestEmailConfirmationCode () {
     }
   }
 
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/request-email-confirmation`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/request-email-confirmation`, requestOptions)
 }
 
 function submitEmailConfirmationCode (confirmCode) {
@@ -151,7 +151,7 @@ function submitEmailConfirmationCode (confirmCode) {
     })
   }
 
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/users/confirm-email`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/users/confirm-email`, requestOptions)
 }
 
 function requestPasswordReset (email) {
@@ -165,7 +165,7 @@ function requestPasswordReset (email) {
     })
   }
 
-  return fetch(`${config.apiUrl}/users/request-password-reset`, requestOptions)
+  return fetch(`${process.env.apiUrl}/users/request-password-reset`, requestOptions)
 }
 
 function submitPasswordResetCode (email, confirmCode, newPassword) {
@@ -181,5 +181,5 @@ function submitPasswordResetCode (email, confirmCode, newPassword) {
     })
   }
 
-  return fetch(`${config.apiUrl}/users/submit-password-reset`, requestOptions)
+  return fetch(`${process.env.apiUrl}/users/submit-password-reset`, requestOptions)
 }

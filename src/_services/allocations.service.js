@@ -24,14 +24,14 @@ function createAllocation (allocationData) {
       sourceCategory: allocationData.sourceCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/create`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/create`, requestOptions)
 }
 
 function deleteAllocation (id) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/${id}/delete`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${id}/delete`, requestOptions)
 }
 
 function updateAllocation (allocationData) {
@@ -47,7 +47,7 @@ function updateAllocation (allocationData) {
       destinationCategory: allocationData.destinationCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/${allocationData.allocationId}/update`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${allocationData.allocationId}/update`, requestOptions)
 }
 
 function listAllocations (budgetId, limitCount, startDate, endDate, categories) {
@@ -64,12 +64,12 @@ function listAllocations (budgetId, limitCount, startDate, endDate, categories) 
       categories: categories
     })
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/list`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/list`, requestOptions)
 }
 
 function getAllocation (allocationId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${config.apiUrl}/allocations/` + allocationId, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/` + allocationId, requestOptions)
 }

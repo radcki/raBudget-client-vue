@@ -187,7 +187,7 @@
         <v-icon>{{mdiPlus}}</v-icon>
       </v-btn>
       </template>
-      
+
     </v-new-entry>
 
     <transaction-editor ref="transactionEditor"></transaction-editor>
@@ -195,29 +195,26 @@
 </template>
 
 <script>
-import { budgetService } from "../_services/budget.service";
-import { transactionsService } from "../_services/transactions.service";
-import { allocationsService } from "../_services/allocations.service";
-import { mapState, mapActions, mapGetters } from "vuex";
-import { mdiPlus } from "@mdi/js"
+import { transactionsService } from '../_services/transactions.service'
+import { mapState, mapActions, mapGetters } from 'vuex'
+import { mdiPlus } from '@mdi/js'
 
 export default {
-  name: "Overview",
+  name: 'Overview',
   components: {
-    "transaction-editor": () => import("../components/TransactionEditor"),
-    "v-category-select": () => import("../components/CategorySelect"),
-    "v-mini-transactions-list": () =>
-      import("../components/MiniTransactionsList"),
-    "v-scheduled-transactions-list": () =>
-      import("../components/ScheduledTransactionsList"),
-    "v-mini-categories-summary": () =>
-      import("../components/MiniCategoriesSummary"),
-    "v-large-categories-summary": () =>
-      import("../components/LargeCategoriesSummary"),
-    "v-new-entry": () => import("./NewEntry"),
-    "v-animated-number": () => import("../components/AnimatedNumber")
+    'transaction-editor': () => import('../components/TransactionEditor'),
+    'v-mini-transactions-list': () =>
+      import('../components/MiniTransactionsList'),
+    'v-scheduled-transactions-list': () =>
+      import('../components/ScheduledTransactionsList'),
+    'v-mini-categories-summary': () =>
+      import('../components/MiniCategoriesSummary'),
+    'v-large-categories-summary': () =>
+      import('../components/LargeCategoriesSummary'),
+    'v-new-entry': () => import('./NewEntry'),
+    'v-animated-number': () => import('../components/AnimatedNumber')
   },
-  data() {
+  data () {
     return {
       categories: {
         incomes: [],
@@ -227,7 +224,7 @@ export default {
       newEntryVisible: 'manual',
       newEntryInputData: null,
       mdiPlus
-    };
+    }
   },
   computed: {
     ...mapState({
@@ -239,89 +236,88 @@ export default {
       closestScheduledTransactions: state =>
         state.transactions.closestScheduledTransactions
     }),
-    ...mapGetters("budgets", [
-      "budget",
-      "spendingCategoriesBalance",
-      "savingCategoriesBalance"
+    ...mapGetters('budgets', [
+      'budget',
+      'spendingCategoriesBalance',
+      'savingCategoriesBalance'
     ]),
     ...mapGetters({
-      transactions: "transactions/getTransactions"
+      transactions: 'transactions/getTransactions'
     }),
 
-    budgetId() {
-      return this.$route.params.id;
+    budgetId () {
+      return this.$route.params.id
     }
   },
-  mounted: function() {
-    this.activeBudgetChange(this.$route.params.id);
+  mounted: function () {
+    this.activeBudgetChange(this.$route.params.id)
 
-    this.$store.dispatch("transactions/setFilters", {
+    this.$store.dispatch('transactions/setFilters', {
       budgetId: this.$route.params.id,
       limitCount: 8,
       startDate: null,
       endDate: null,
       categories: null
-    });
-    
-    setTimeout(() => {
-      this.initializeCategoriesBalance();
-      this.initializeUnassignedFunds();
-    }, 300);
+    })
 
-    this.fetchClosestScheduledTransactions();
-    
+    setTimeout(() => {
+      this.initializeCategoriesBalance()
+      this.initializeUnassignedFunds()
+    }, 300)
+
+    this.fetchClosestScheduledTransactions()
   },
   watch: {
-    $route(to, from) {
+    $route (to, from) {
       if (from.params.id != to.params.id) {
-        this.activeBudgetChange(to.params.id);
-        this.reloadInitialized();
+        this.activeBudgetChange(to.params.id)
+        this.reloadInitialized()
       }
     },
-    budget: function(budget) {
+    budget: function (budget) {
       if (budget) {
-        this.initializeCategoriesBalance();
-        this.initializeUnassignedFunds();
-        this.reloadInitialized();
-        this.fetchTransactions();
-        this.fetchClosestScheduledTransactions();
+        this.initializeCategoriesBalance()
+        this.initializeUnassignedFunds()
+        this.reloadInitialized()
+        this.fetchTransactions()
+        this.fetchClosestScheduledTransactions()
       }
     }
   },
   methods: {
     ...mapActions({
-      dispatchError: "alert/error",
-      dispatchSuccess: "alert/success",
-      initializeCategoriesBalance: "budgets/initializeCategoriesBalance",
-      initializeUnassignedFunds: "budgets/initializeUnassignedFunds",
-      fetchCategoriesBalance: "budgets/fetchCategoriesBalance",
+      dispatchError: 'alert/error',
+      dispatchSuccess: 'alert/success',
+      initializeCategoriesBalance: 'budgets/initializeCategoriesBalance',
+      initializeUnassignedFunds: 'budgets/initializeUnassignedFunds',
+      fetchCategoriesBalance: 'budgets/fetchCategoriesBalance',
       fetchClosestScheduledTransactions:
-        "transactions/fetchClosestScheduledTransactions",
-      reloadInitialized: "budgets/reloadInitialized",
-      activeBudgetChange: "budgets/activeBudgetChange",
-      fetchTransactions: "transactions/fetchTransactions",
-      unloadTransactionFromStore: "transactions/unloadTransactionFromStore"
+        'transactions/fetchClosestScheduledTransactions',
+      reloadInitialized: 'budgets/reloadInitialized',
+      activeBudgetChange: 'budgets/activeBudgetChange',
+      fetchTransactions: 'transactions/fetchTransactions',
+      unloadTransactionFromStore: 'transactions/unloadTransactionFromStore'
     }),
-    formatAmount(value) {
+    formatAmount (value) {
       return this.$options.filters.currency(
         value,
         this.$currencies[this.budget.currency]
-      );
+      )
     },
-    editTransaction(id) {
+    editTransaction (id) {
       this.$refs.transactionEditor.open(id).then(response => {
         if (response && response.ok) {
         } else if (response) {
           response.json().then(data => {
-            this.dispatchError(data.message);
-          });
+            this.dispatchError(data.message)
+          })
         }
-      });
+      })
     },
-    deleteTransaction(id) {
+    deleteTransaction (id) {
       this.$root
-        .$confirm("general.remove", "transactions.deleteConfirm", {
-          color: "red",
+        .$confirm('general.remove', 'transactions.deleteConfirm', {
+          color: 'red',
           buttons: { yes: true, no: true, cancel: false, ok: false }
         })
         .then(confirm => {
@@ -331,22 +327,22 @@ export default {
                 this.unloadTransactionFromStore(id)
               } else {
                 response.json().then(data => {
-                  this.dispatchError(data.message);
-                });
+                  this.dispatchError(data.message)
+                })
               }
-            });
+            })
           }
-        });
+        })
     },
-    passScheduledToEditor(transaction){
+    passScheduledToEditor (transaction) {
       this.newEntryInputData = null
-      this.$nextTick(function(){this.newEntryInputData = transaction})
-      
+      this.$nextTick(function () { this.newEntryInputData = transaction })
+
       this.newEntryVisible = 'manual'
-      if (this.$vuetify.breakpoint.xs){
-          this.$refs.newEntryDialog.editorDialog = true;
+      if (this.$vuetify.breakpoint.xs) {
+        this.$refs.newEntryDialog.editorDialog = true
       }
     }
   }
-};
+}
 </script>

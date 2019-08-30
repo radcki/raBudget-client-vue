@@ -390,28 +390,28 @@
 </template>
 
 <script>
-import { budgetService } from "../_services/budget.service";
-import { mapActions } from "vuex";
+import { budgetService } from '../_services/budget.service'
+import { mapActions } from 'vuex'
 import {
   mdiFormatTitle,
   mdiCash,
   mdiPlus,
   mdiPencil,
   mdiCancel
-} from "@mdi/js";
+} from '@mdi/js'
 
 export default {
   components: {
-    "categories-list": () => import("../components/CategoriesList"),
-    "v-date-field": () => import("../components/DateField.vue")
+    'categories-list': () => import('../components/CategoriesList'),
+    'v-date-field': () => import('../components/DateField.vue')
   },
-  data() {
+  data () {
     return {
       step: 1,
       budget: {
         name: null,
         startingDate: null,
-        currency: "pln"
+        currency: 'pln'
       },
       categories: {
         income: [],
@@ -439,126 +439,126 @@ export default {
       validStep2: true,
       validStep3: true,
       validStep4: true,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
       mdiFormatTitle,
       mdiCash,
       mdiPlus,
       mdiPencil,
       mdiCancel
-    };
+    }
   },
   computed: {
-    incomeCategoriesSum: function() {
-      var sum = 0;
+    incomeCategoriesSum: function () {
+      var sum = 0
       for (var i = 0; i < this.categories.income.length; i++) {
-        sum += this.categories.income[i].amount * 1;
+        sum += this.categories.income[i].amount * 1
       }
-      return sum;
+      return sum
     },
-    spendingCategoriesSum: function() {
-      var sum = 0;
+    spendingCategoriesSum: function () {
+      var sum = 0
       for (var i = 0; i < this.categories.spending.length; i++) {
-        sum += this.categories.spending[i].amount * 1;
+        sum += this.categories.spending[i].amount * 1
       }
-      return sum;
+      return sum
     },
-    savingsCategoriesSum: function() {
-      var sum = 0;
+    savingsCategoriesSum: function () {
+      var sum = 0
       for (var i = 0; i < this.categories.savings.length; i++) {
-        sum += this.categories.savings[i].amount * 1;
+        sum += this.categories.savings[i].amount * 1
       }
-      return sum;
+      return sum
     },
-    currencies: function() {
-      return Object.keys(this.$currencies);
+    currencies: function () {
+      return Object.keys(this.$currencies)
     }
   },
   methods: {
     ...mapActions({
-      budgetsFetch: "budgets/fetchBudgets"
+      budgetsFetch: 'budgets/fetchBudgets'
     }),
-    addIncome() {
+    addIncome () {
       if (this.$refs.formIncomeCategory.validate()) {
         // unbind
-        const data = JSON.parse(JSON.stringify(this.newIncomeCategory));
+        const data = JSON.parse(JSON.stringify(this.newIncomeCategory))
         data.amountConfigs = [
           {
             validFrom: this.budget.startingDate,
             amount: data.amount
           }
-        ];
-        this.categories.income.push(data);
-        this.$refs.formIncomeCategory.reset();
+        ]
+        this.categories.income.push(data)
+        this.$refs.formIncomeCategory.reset()
       }
     },
-    removeIncome(index) {
-      this.categories.income.splice(index, 1);
+    removeIncome (index) {
+      this.categories.income.splice(index, 1)
     },
-    editIncome(index) {
-      this.newIncomeCategory = this.categories.income[index];
-      this.categories.income.splice(index, 1);
+    editIncome (index) {
+      this.newIncomeCategory = this.categories.income[index]
+      this.categories.income.splice(index, 1)
     },
 
-    addSpending() {
+    addSpending () {
       if (this.$refs.formSpendingCategory.validate()) {
         // unbind
-        var data = JSON.parse(JSON.stringify(this.newSpendingCategory));
+        var data = JSON.parse(JSON.stringify(this.newSpendingCategory))
         data.amountConfigs = [
           {
             validFrom: this.budget.startingDate,
             amount: data.amount
           }
-        ];
-        this.categories.spending.push(data);
-        this.$refs.formSpendingCategory.reset();
+        ]
+        this.categories.spending.push(data)
+        this.$refs.formSpendingCategory.reset()
       }
     },
-    removeSpending(index) {
-      this.categories.spending.splice(index, 1);
+    removeSpending (index) {
+      this.categories.spending.splice(index, 1)
     },
-    editSpending(index) {
-      this.newSpendingCategory = this.categories.spending[index];
-      this.categories.spending.splice(index, 1);
+    editSpending (index) {
+      this.newSpendingCategory = this.categories.spending[index]
+      this.categories.spending.splice(index, 1)
     },
 
-    addSaving() {
+    addSaving () {
       if (this.$refs.formSavingCategory.validate()) {
         // unbind
-        const data = JSON.parse(JSON.stringify(this.newSavingCategory));
+        const data = JSON.parse(JSON.stringify(this.newSavingCategory))
         data.amountConfigs = [
           {
             validFrom: this.budget.startingDate,
             amount: data.amount
           }
-        ];
-        this.categories.savings.push(data);
-        this.$refs.formSavingCategory.reset();
+        ]
+        this.categories.savings.push(data)
+        this.$refs.formSavingCategory.reset()
       }
     },
-    removeSaving(index) {
-      this.categories.savings.splice(index, 1);
+    removeSaving (index) {
+      this.categories.savings.splice(index, 1)
     },
-    editSaving(index) {
-      this.newSavingCategory = this.categories.savings[index];
-      this.categories.savings.splice(index, 1);
+    editSaving (index) {
+      this.newSavingCategory = this.categories.savings[index]
+      this.categories.savings.splice(index, 1)
     },
-    createBudget() {
+    createBudget () {
       budgetService
         .createBudget(this.budget, this.categories)
         .then(response => {
           if (response.ok) {
             response.json().then(data => {
               this.budgetsFetch().then(() => {
-                this.$router.push("/");
-              });
-            });
+                this.$router.push('/')
+              })
+            })
           } else {
             response.json().then(data => {
-              this.dispatchError(data.message);
-            });
+              this.dispatchError(data.message)
+            })
           }
-        });
+        })
     }
   }
-};
+}
 </script>

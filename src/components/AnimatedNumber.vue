@@ -2,26 +2,26 @@
   <span>{{formatValue(Number(animatedValue))}}</span>
 </template>
 <script>
-import anime from 'animejs';
+import anime from 'animejs'
 
 export default {
   props: {
     value: {
       type: [Number, String],
       default: '0',
-      required: true,
+      required: true
     },
     formatValue: {
       type: Function,
-      default: value => value,
+      default: value => value
     },
     easing: {
       type: String,
-      default: 'linear',
+      default: 'linear'
     },
     duration: {
       type: Number,
-      default: 1000,
+      default: 1000
     },
     update: Function,
     begin: Function,
@@ -29,27 +29,27 @@ export default {
     run: Function,
     delay: {
       type: Number,
-      default: 0,
+      default: 0
     },
     round: {
-      default: null,
-    },
+      default: null
+    }
   },
-  data() {
+  data () {
     return {
-      animatedValue: 0,
-    };
+      animatedValue: 0
+    }
   },
-  mounted() {
-    this.animateValue(this.value);
+  mounted () {
+    this.animateValue(this.value)
   },
   watch: {
-    value(value) {
-      this.animateValue(value);
-    },
+    value (value) {
+      this.animateValue(value)
+    }
   },
   methods: {
-    animateValue(value) {
+    animateValue (value) {
       const {
         begin,
         easing,
@@ -58,8 +58,8 @@ export default {
         update,
         run,
         delay,
-        round,
-      } = this;
+        round
+      } = this
       anime({
         targets: this,
         animatedValue: value,
@@ -70,9 +70,9 @@ export default {
         complete,
         run,
         delay,
-        round,
-      });
-    },
-  },
-};
+        round
+      })
+    }
+  }
+}
 </script>

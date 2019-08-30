@@ -53,25 +53,25 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
-import { mdiEye, mdiEyeOff } from "@mdi/js"
+import { mapState, mapActions } from 'vuex'
+import { mdiEye, mdiEyeOff } from '@mdi/js'
 
 export default {
-  data() {
+  data () {
     return {
       valid: true,
       show: false,
       submitted: false,
-      requiredRule: [v => !!v || this.$t("forms.requiredField")],
+      requiredRule: [v => !!v || this.$t('forms.requiredField')],
       passwordRule: [
-        v => !!v || this.$t("forms.requiredField"),
-        v => (v && v.length > 5) || this.$t("forms.tooShortPassword")
+        v => !!v || this.$t('forms.requiredField'),
+        v => (v && v.length > 5) || this.$t('forms.tooShortPassword')
       ],
       emailRule: [
-        v => !!v || this.$t("forms.requiredField"),
+        v => !!v || this.$t('forms.requiredField'),
         v => {
-          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(v) || this.$t("forms.incorrectEmail");
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          return pattern.test(v) || this.$t('forms.incorrectEmail')
         }
       ],
       user: {
@@ -79,28 +79,29 @@ export default {
         username: null,
         password: null
       },
-      submitted: false
-    };
+      mdiEye,
+      mdiEyeOff
+    }
   },
   computed: {
-    ...mapState("account", ["status"])
+    ...mapState('account', ['status'])
   },
   methods: {
-    ...mapActions("account", ["register"]),
-    handleSubmit(e) {
-      this.submitted = true;
+    ...mapActions('account', ['register']),
+    handleSubmit (e) {
+      this.submitted = true
       if (this.$refs.form.validate()) {
-        this.$wait.start("register");
-        this.register(this.user).then((success)=>{
-          this.$wait.end("register");
+        this.$wait.start('register')
+        this.register(this.user).then((success) => {
+          this.$wait.end('register')
           if (success) {
-            this.$router.push("login")
+            this.$router.push('login')
           }
-        }).catch(()=>{
-          this.$wait.end("register");
-        });
+        }).catch(() => {
+          this.$wait.end('register')
+        })
       }
     }
   }
-};
+}
 </script>

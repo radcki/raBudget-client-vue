@@ -6,10 +6,10 @@
       </v-toolbar>
       <v-card-text v-if="!options.input && !options.select" v-html="$t(message)" v-show="!!message"></v-card-text>
       <v-card-text v-if="options.input">
-        <v-text-field 
+        <v-text-field
           v-model="input" :type="options.input" :label="$t(message)"></v-text-field>
       </v-card-text>
-      <v-card-text v-if="options.select">        
+      <v-card-text v-if="options.select">
         <v-select
           v-model="selection"
           :items="options.selectList"
@@ -32,18 +32,18 @@
 
 <script>
 export default {
-  name: "confirm",
+  name: 'confirm',
   data: () => ({
     selection: null,
     dialog: false,
     input: null,
-    inputType: "text",
+    inputType: 'text',
     resolve: null,
     reject: null,
     message: null,
     title: null,
     options: {
-      color: "primary",
+      color: 'primary',
       selectList: null,
       select: false,
       width: 290,
@@ -56,19 +56,19 @@ export default {
       }
     }
   }),
-  beforeDestroy: function(){
-    this.$wait.end("dialog")
-  },  
+  beforeDestroy: function () {
+    this.$wait.end('dialog')
+  },
   methods: {
-    open(title, message, options) {
-      this.input = null;
-      this.inputType = "text";
-      this.resolve = null;
-      this.reject = null;
-      this.message = null;
-      this.title = null;
+    open (title, message, options) {
+      this.input = null
+      this.inputType = 'text'
+      this.resolve = null
+      this.reject = null
+      this.message = null
+      this.title = null
       this.options = {
-        color: "primary",
+        color: 'primary',
         selectList: null,
         select: false,
         width: 290,
@@ -79,32 +79,32 @@ export default {
           cancel: true,
           ok: true
         }
-      };
-
-      this.dialog = true;
-      this.title = title;
-      this.message = message;
-      this.options = Object.assign(this.options, options);
-      return new Promise((resolve, reject) => {
-        this.resolve = resolve;
-        this.reject = reject;
-      });
-    },
-    agree() {
-      if (this.options.input) {
-        this.resolve(this.input);
-      } else if (this.options.select) {
-        this.resolve(this.selection);
-      } else {
-        this.resolve(true);
       }
-      this.dialog = false;
+
+      this.dialog = true
+      this.title = title
+      this.message = message
+      this.options = Object.assign(this.options, options)
+      return new Promise((resolve, reject) => {
+        this.resolve = resolve
+        this.reject = reject
+      })
     },
-    cancel() {
-      this.resolve(false);      
-      
-      this.dialog = false;
+    agree () {
+      if (this.options.input) {
+        this.resolve(this.input)
+      } else if (this.options.select) {
+        this.resolve(this.selection)
+      } else {
+        this.resolve(true)
+      }
+      this.dialog = false
+    },
+    cancel () {
+      this.resolve(false)
+
+      this.dialog = false
     }
   }
-};
+}
 </script>
