@@ -8,8 +8,6 @@ script:
 
 deploy:
   provider: script
-  script: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-  script: docker tag $DOCKER_IMAGE:latest
-  script: docker push $DOCKER_IMAGE:latest
+  script: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD && docker tag $DOCKER_IMAGE:latest && docker push $DOCKER_IMAGE:latest
   on:
     branch: master
