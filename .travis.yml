@@ -1,9 +1,15 @@
-language: node_js
-
 services:
   - docker
 
-before_install:
-  - docker build -t radekadamczewski/rabudget-vue .
-  - docker run -d -p 127.0.0.1:80:80 radekadamczewski/rabudget-vue
+script:
+  - docker build -t $DOCKER_IMAGE .
+  - docker run -d -p 127.0.0.1:80:80 $DOCKER_IMAGE
   - docker ps -a
+
+deploy:
+  provider: script
+  script: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  script: docker tag $DOCKER_IMAGE:latest
+  script: docker push $DOCKER_IMAGE:latest
+  on:
+    branch: master
