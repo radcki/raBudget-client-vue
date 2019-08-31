@@ -23,7 +23,7 @@ function transferTransactions (budgetId, sourceCategory, targetCategory) {
       targetCategory: targetCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/transfer`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/transactions/transfer`, requestOptions)
 }
 
 function createTransaction (transactionData) {
@@ -40,14 +40,14 @@ function createTransaction (transactionData) {
       transactionSchedule: transactionData.transactionSchedule
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/transactions`, requestOptions)
 }
 
 function deleteTransaction (id) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${id}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/transactions/${id}`, requestOptions)
 }
 
 function updateTransaction (transactionData) {
@@ -63,7 +63,7 @@ function updateTransaction (transactionData) {
       category: transactionData.category
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${transactionData.transactionId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/transactions/${transactionData.transactionId}`, requestOptions)
 }
 
 function listTransactions (budgetId, limitCount, startDate, endDate, categories) {
@@ -80,12 +80,12 @@ function listTransactions (budgetId, limitCount, startDate, endDate, categories)
       categories: categories
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/list`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/transactions/list`, requestOptions)
 }
 
 function getTransaction (transactionId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/` + transactionId, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/transactions/` + transactionId, requestOptions)
 }

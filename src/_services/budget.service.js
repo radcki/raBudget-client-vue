@@ -27,7 +27,7 @@ function userBudgets () {
       'Content-Type': 'application/json'
     }
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets`, requestOptions)
 }
 
 function createBudget (budgetData, budgetCategories) {
@@ -45,7 +45,7 @@ function createBudget (budgetData, budgetCategories) {
       savingCategories: budgetCategories.savings
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/create`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/create`, requestOptions)
 }
 
 function saveBudget (budgetId, budgetData) {
@@ -61,60 +61,60 @@ function saveBudget (budgetId, budgetData) {
       default: budgetData.default
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}`, requestOptions)
 }
 
 function setDefault (budgetId) {
   const requestOptions = {
     method: 'POST'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/setDefault`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/setDefault`, requestOptions)
 }
 
 function deleteBudget (budgetId) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}`, requestOptions)
 }
 
 function getBudget (id) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${id}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${id}`, requestOptions)
 }
 
 function getUnassigned (budgetId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/unassigned`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/unassigned`, requestOptions)
 }
 
 function getSpendingCategoriesBalance (budgetId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/categoriesbalance/spending`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categoriesbalance/spending`, requestOptions)
 }
 
 function getIncomeCategoriesBalance (budgetId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/categoriesbalance/income`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categoriesbalance/income`, requestOptions)
 }
 
 function getSavingCategoriesBalance (budgetId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/categoriesbalance/saving`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categoriesbalance/saving`, requestOptions)
 }
 
 function getPeriodReport (budgetId, startDate, endDate) {
-  var url = new URL(`${process.env.apiUrl}/budgets/${budgetId}/report/period`, document.location)
+  var url = new URL(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/report/period`, document.location)
   var params = {
     startDate: startDate,
     endDate: endDate
@@ -127,7 +127,7 @@ function getPeriodReport (budgetId, startDate, endDate) {
 }
 
 function getMonthlyReport (budgetId, startDate, endDate) {
-  var url = new URL(`${process.env.apiUrl}/budgets/${budgetId}/report/monthly`, document.location)
+  var url = new URL(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/report/monthly`, document.location)
   var params = {
     startDate: startDate,
     endDate: endDate
@@ -148,7 +148,7 @@ function createCategory (budgetId, category) {
     },
     body: JSON.stringify(category)
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}`, requestOptions)
 }
 
 function updateCategory (budgetId, category) {
@@ -159,12 +159,12 @@ function updateCategory (budgetId, category) {
     },
     body: JSON.stringify(category)
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/categories/${category.categoryId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categories/${category.categoryId}`, requestOptions)
 }
 
 function deleteCategory (budgetId, categoryId) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/categories/${categoryId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categories/${categoryId}`, requestOptions)
 }

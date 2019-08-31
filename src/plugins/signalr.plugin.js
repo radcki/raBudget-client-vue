@@ -3,20 +3,20 @@ import * as signalR from '@aspnet/signalr'
 import { store } from '../_store/index'
 
 new signalR.HubConnectionBuilder()
-  .withUrl(`${process.env.apiUrl}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
+  .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
   .build()
 
 const signalrPlugin = {
   install (Vue) {
     const transactionsHubConnection = new signalR.HubConnectionBuilder()
       .configureLogging(signalR.LogLevel.Warning)
-      .withUrl(`${process.env.apiUrl}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
+      .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
       .build()
     transactionsHubConnection.start()
 
     const budgetsHubConnection = new signalR.HubConnectionBuilder()
       .configureLogging(signalR.LogLevel.Warning)
-      .withUrl(`${process.env.apiUrl}/hubs/budgets`, { accessTokenFactory: () => apiHandler.getAccessToken() })
+      .withUrl(`${process.env.VUE_APP_APIURL}/hubs/budgets`, { accessTokenFactory: () => apiHandler.getAccessToken() })
       .build()
     budgetsHubConnection.start()
 

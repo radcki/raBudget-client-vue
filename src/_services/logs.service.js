@@ -8,13 +8,13 @@ export const logsService = {
 }
 
 function getAll () {
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/logs/all`, {
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/logs/all`, {
     method: 'GET'
   })
 }
 
 function getPeriod (from, to) {
-  var url = new URL(`${process.env.apiUrl}/logs/period`, document.location)
+  var url = new URL(`${process.env.VUE_APP_APIURL}/logs/period`, document.location)
   var params = {
     from: from,
     to: to

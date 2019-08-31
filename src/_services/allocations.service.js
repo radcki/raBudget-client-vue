@@ -24,14 +24,14 @@ function createAllocation (allocationData) {
       sourceCategory: allocationData.sourceCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/allocations`, requestOptions)
 }
 
 function deleteAllocation (id) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${id}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/allocations/${id}`, requestOptions)
 }
 
 function updateAllocation (allocationData) {
@@ -47,7 +47,7 @@ function updateAllocation (allocationData) {
       destinationCategory: allocationData.destinationCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${allocationData.allocationId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/allocations/${allocationData.allocationId}`, requestOptions)
 }
 
 function listAllocations (budgetId, limitCount, startDate, endDate, categories) {
@@ -64,12 +64,12 @@ function listAllocations (budgetId, limitCount, startDate, endDate, categories) 
       categories: categories
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/list`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/allocations/list`, requestOptions)
 }
 
 function getAllocation (allocationId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/` + allocationId, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/allocations/` + allocationId, requestOptions)
 }
