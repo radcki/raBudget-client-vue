@@ -4,7 +4,7 @@
       <v-toolbar dark :color="options.color" dense flat>
         <v-toolbar-title class="white--text">{{ $t(title) }}</v-toolbar-title>
       </v-toolbar>
-      <v-card-text v-if="!options.input && !options.select" v-html="$t(message)" v-show="!!message"></v-card-text>
+      <v-card-text class="pa-3" v-if="!options.input && !options.select" v-html="$t(message)" v-show="!!message"></v-card-text>
       <v-card-text v-if="options.input">
         <v-text-field
           v-model="input" :type="options.input" :label="$t(message)"></v-text-field>

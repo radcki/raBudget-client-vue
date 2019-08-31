@@ -23,7 +23,6 @@
     </template>
     <v-date-picker :readonly="readonly" v-model="date" @input="dateMenu = false"></v-date-picker>
   </v-menu>
-
 </template>
 
 <script>
@@ -43,7 +42,7 @@ export default {
       this.$emit('input', value)
     },
     value: function (value) {
-      this.date != value ? null : this.$moment(value).format('YYYY-MM-DD')
+      this.date = !value ? null : this.$moment(value).format('YYYY-MM-DD')
     }
   },
   mounted: function () {

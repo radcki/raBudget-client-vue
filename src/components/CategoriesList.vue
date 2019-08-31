@@ -6,7 +6,7 @@
       <v-category-editor
         :data-budget="dataBudget"
         :value="{type: categoriesType}"
-        v-on:save="emitSave"
+        v-on:save="emitCreate"
       >
         <template v-slot:activator="{on}">
           <v-btn icon v-on="on">
@@ -38,7 +38,7 @@
             </v-btn>
           </template>
           <v-list light dense single-line>
-            <v-list-item @click>
+            <v-list-item @click="function(){return}">
               <v-category-editor :data-budget="dataBudget" :value="category" v-on:save="emitSave">
                 <template v-slot:activator="{on, open}">
                   <v-list-item-action @click="start(open)" class="mr-0 pr-5">
@@ -126,6 +126,9 @@ export default {
   methods: {
     emitSave: function (payload) {
       this.$emit('edit', payload)
+    },
+    emitCreate: function (payload) {
+      this.$emit('create', payload)
     },
     readCurrentAmount (category) {
       var matching = category.amountConfigs.filter(v => {

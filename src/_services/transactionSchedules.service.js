@@ -29,7 +29,7 @@ function createTransactionSchedule (data) {
     })
   }
 
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/create`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules`, requestOptions)
 }
 
 function updateTransactionSchedule (data) {
@@ -50,14 +50,14 @@ function updateTransactionSchedule (data) {
       step: data.step
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/${data.transactionScheduleId}/update`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/${data.transactionScheduleId}`, requestOptions)
 }
 
 function deleteTransactionSchedule (id, deleteTransactions) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/${id}/delete/${(!!deleteTransactions)}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactionSchedules/${id}/${(!!deleteTransactions)}`, requestOptions)
 }
 
 function listTransactionSchedules (budgetId, startDate, endDate) {

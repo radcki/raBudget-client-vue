@@ -128,11 +128,10 @@ export default {
   },
   computed: {
     format () {
-      if (this.step == 'days') {
-        return 'YYYY-MM-DD'
-      } else if (this.step == 'months') {
+      if (this.step == 'months') {
         return 'YYYY-MM'
       }
+      return 'YYYY-MM-DD'
     },
     pickerType () {
       return this.step == 'months' ? 'month' : 'date'

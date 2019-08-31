@@ -24,14 +24,14 @@ function createAllocation (allocationData) {
       sourceCategory: allocationData.sourceCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/create`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations`, requestOptions)
 }
 
 function deleteAllocation (id) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${id}/delete`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${id}`, requestOptions)
 }
 
 function updateAllocation (allocationData) {
@@ -47,7 +47,7 @@ function updateAllocation (allocationData) {
       destinationCategory: allocationData.destinationCategory
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${allocationData.allocationId}/update`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/allocations/${allocationData.allocationId}`, requestOptions)
 }
 
 function listAllocations (budgetId, limitCount, startDate, endDate, categories) {

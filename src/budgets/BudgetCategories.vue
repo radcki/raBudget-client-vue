@@ -31,6 +31,7 @@
                 :data-budget="budget"
                 categories-type="0"
                 v-on:edit="editCategory"
+                v-on:create="createCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
                 :title="$t('categories.spendingCategories')"
@@ -153,8 +154,23 @@ export default {
       activeBudgetChange: 'budgets/activeBudgetChange'
     }),
 
+    createCategory (category) {
+      budgetService.createCategory(this.budget.id, category).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.reloadInitialized()
+          })
+        } else {
+          response.json().then(data => {
+            this.dispatchError(data.message)
+            this.reloadInitialized()
+          })
+        }
+      })
+    },
+
     editCategory (category) {
-      budgetService.saveCategory(this.budget.id, category).then(response => {
+      budgetService.updateCategory(this.budget.id, category).then(response => {
         if (response.ok) {
           response.json().then(data => {
             this.reloadInitialized()

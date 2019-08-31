@@ -82,6 +82,7 @@ export default {
           return acc
         }, {})
       }
+      return null
     }
   },
   methods: {

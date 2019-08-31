@@ -40,14 +40,14 @@ function createTransaction (transactionData) {
       transactionSchedule: transactionData.transactionSchedule
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/create`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions`, requestOptions)
 }
 
 function deleteTransaction (id) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${id}/delete`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${id}`, requestOptions)
 }
 
 function updateTransaction (transactionData) {
@@ -63,7 +63,7 @@ function updateTransaction (transactionData) {
       category: transactionData.category
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${transactionData.transactionId}/update`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/transactions/${transactionData.transactionId}`, requestOptions)
 }
 
 function listTransactions (budgetId, limitCount, startDate, endDate, categories) {

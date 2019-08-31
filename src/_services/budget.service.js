@@ -8,7 +8,8 @@ export const budgetService = {
   deleteBudget,
   saveBudget,
   getBudget,
-  saveCategory,
+  createCategory,
+  updateCategory,
   deleteCategory,
   getSpendingCategoriesBalance,
   getIncomeCategoriesBalance,
@@ -31,14 +32,14 @@ function userBudgets () {
 
 function createBudget (budgetData, budgetCategories) {
   const requestOptions = {
-    method: 'PUT',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       name: budgetData.name,
       currency: budgetData.currency,
-      startingDate: budgetData.startingDate,
+      startingDate: budgetData.startingDate + '-01',
       spendingCategories: budgetCategories.spending,
       incomeCategories: budgetCategories.income,
       savingCategories: budgetCategories.savings
@@ -60,7 +61,7 @@ function saveBudget (budgetId, budgetData) {
       default: budgetData.default
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/update`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}`, requestOptions)
 }
 
 function setDefault (budgetId) {
@@ -74,7 +75,7 @@ function deleteBudget (budgetId) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/delete`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}`, requestOptions)
 }
 
 function getBudget (id) {
@@ -138,8 +139,8 @@ function getMonthlyReport (budgetId, startDate, endDate) {
   })
 }
 
-function saveCategory (budgetId, category) {
-  category.categoryId = category.categoryId || 0
+function createCategory (budgetId, category) {
+  category.categoryId = 0
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -147,12 +148,23 @@ function saveCategory (budgetId, category) {
     },
     body: JSON.stringify(category)
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/savecategory`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}`, requestOptions)
+}
+
+function updateCategory (budgetId, category) {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(category)
+  }
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/categories/${category.categoryId}`, requestOptions)
 }
 
 function deleteCategory (budgetId, categoryId) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/deletecategory/${categoryId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.apiUrl}/budgets/${budgetId}/categories/${categoryId}`, requestOptions)
 }
