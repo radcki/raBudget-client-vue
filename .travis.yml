@@ -1,0 +1,9 @@
+language: nodejs
+
+services:
+  - docker
+
+before_install:
+  - docker build -t radekadamczewski/rabudget-vue .
+  - docker run -d -p 127.0.0.1:80:80 radekadamczewski/rabudget-vue
+  - docker ps -a
