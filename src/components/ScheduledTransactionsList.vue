@@ -7,7 +7,7 @@
       <div class="white" :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
         <v-list-item
           :key="'tr_' + transaction.transactionSchedule.transactionScheduleId  + transaction.date"
-          v-for="(transaction, i) in items"
+          v-for="(transaction) in items"
           class="pb-1"
         >
           <v-list-item-avatar size="30">

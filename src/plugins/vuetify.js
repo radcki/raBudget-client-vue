@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import /* webpackPrefetch: true */ Vuetify from 'vuetify/lib'
+import Vuetify from 'vuetify/lib'
 import pl from 'vuetify/es5/locale/pl'
 import en from 'vuetify/es5/locale/en'
 
