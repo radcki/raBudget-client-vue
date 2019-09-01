@@ -37,7 +37,6 @@
     "node-sass": "^4.9.0",
     "sass": "^1.17.4",
     "sass-loader": "^7.1.0",
-    "vue-cli-plugin-env": "^1.0.0",
     "vue-cli-plugin-vuetify": "^0.6.3",
     "vue-template-compiler": "^2.6.10",
     "vue-wait": "^1.4.6",
