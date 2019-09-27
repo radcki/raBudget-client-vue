@@ -20,7 +20,7 @@
             <v-list-item-title class="font-weight-medium">{{ transaction.description}}</v-list-item-title>
             <v-list-item-subtitle
               class="text--primary"
-            >{{transaction.date | moment}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-item-subtitle>
+            >{{transaction.date | dateDormat}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
             <v-tooltip top>
@@ -54,7 +54,7 @@
             <v-list-item-title class="font-weight-medium">{{ transaction.description}}</v-list-item-title>
             <v-list-item-subtitle
               class="text--primary"
-            >{{transaction.date | moment}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-item-subtitle>
+            >{{transaction.date | dateDormat}} - {{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
             <v-tooltip top>

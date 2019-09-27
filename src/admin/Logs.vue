@@ -63,7 +63,6 @@
                     :return-value.sync="minDate"
                     transition="scale-transition"
                     offset-y
-                    full-width
                     min-width="290px"
                   >
                     <template v-slot:activator="{ on }">
@@ -86,7 +85,6 @@
                     :return-value.sync="maxDate"
                     transition="scale-transition"
                     offset-y
-                    full-width
                     min-width="290px"
                   >
                     <template v-slot:activator="{ on }">
@@ -138,7 +136,7 @@
                   <span>{{item.name}}</span>
                 </td>
                 <td>
-                  <span>{{item.timeStamp | moment("DD MMMM YYYY HH:mm:ss")}}</span>
+                  <span>{{item.timeStamp | dateDormat("dd MMMM yyyy HH:mm:ss")}}</span>
                 </td>
               </tr>
             </tbody>
@@ -152,6 +150,7 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import { logsService } from '../_services/logs.service'
+import { format, subMonths } from 'date-fns'
 
 export default {
   data () {
@@ -159,11 +158,9 @@ export default {
       logs: [],
       loading: false,
       search: null,
-      minDate: this.$moment()
-        .subtract(1, 'month')
-        .format('YYYY-MM-DD'),
+      minDate: format(subMonths(new Date, 1), 'yyyy-MM-dd'),
       minDateMenu: false,
-      maxDate: this.$moment().format('YYYY-MM-DD'),
+      maxDate: format(new Date, 'yyyy-MM-dd'),
       maxDateMenu: false,
       levels: ['Critical', 'Error', 'Warning', 'None'],
       headers: [
@@ -200,7 +197,7 @@ export default {
       account: state => state.account
     }),
     today: function () {
-      return this.$moment().format('YYYY-MM-DD')
+      return format(new Date(), 'yyyy-MM-dd')
     }
   },
   created () {

@@ -1,28 +1,30 @@
 <template>
-<v-container  grid-list-md v-if="budget">
+  <v-container grid-list-md v-if="budget">
     <v-layout row wrap align-center justify-center>
       <v-flex xs12>
-        <v-subheader class="headline">
-            {{ $t('categories.budgetCategories') }}
-        </v-subheader>
+        <v-subheader class="headline">{{ $t('categories.budgetCategories') }}</v-subheader>
       </v-flex>
 
-      <v-flex xs12 >
+      <v-flex xs12>
         <v-card>
           <v-card-text>
-              <div>Plan wydatków: {{ spendingCategoriesSum | currency($currencies[budget.currency]) }}</div>
-              <div>Plan dochodów: {{ incomeCategoriesSum | currency($currencies[budget.currency]) }}</div>
-              <div>Plan oszczędności: {{ savingsCategoriesSum | currency($currencies[budget.currency]) }}</div>
-              <v-divider></v-divider>
-              <div>Bilans: <v-chip :color="categoriesBalance >= 0 ? 'green lighten-2' : 'red lighten-2' " >{{ categoriesBalance | currency($currencies[budget.currency]) }}</v-chip></div>
+            <div>Plan wydatków: {{ spendingCategoriesSum | currency($currencies[budget.currency]) }}</div>
+            <div>Plan dochodów: {{ incomeCategoriesSum | currency($currencies[budget.currency]) }}</div>
+            <div>Plan oszczędności: {{ savingsCategoriesSum | currency($currencies[budget.currency]) }}</div>
+            <v-divider></v-divider>
+            <div>
+              Bilans:
+              <v-chip
+                :color="categoriesBalance >= 0 ? 'green lighten-2' : 'red lighten-2' "
+              >{{ categoriesBalance | currency($currencies[budget.currency]) }}</v-chip>
+            </div>
           </v-card-text>
         </v-card>
       </v-flex>
 
-      <v-flex xs12 >
+      <v-flex xs12>
         <v-container grid-list-md class="pa-0">
           <v-layout row wrap>
-
             <v-flex xs12 md6 lg4 v-if="categories.spending">
               <categories-list
                 color="amber darken-1"
@@ -35,9 +37,7 @@
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
                 :title="$t('categories.spendingCategories')"
-                >
-              </categories-list>
-
+              ></categories-list>
             </v-flex>
 
             <v-flex xs12 md6 lg4>
@@ -51,9 +51,7 @@
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
                 :title="$t('categories.incomeCategories')"
-                >
-              </categories-list>
-
+              ></categories-list>
             </v-flex>
 
             <v-flex xs12 md6 lg4>
@@ -67,215 +65,253 @@
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
                 :title="$t('categories.savingCategories')"
-                >
-              </categories-list>
-
+              ></categories-list>
             </v-flex>
           </v-layout>
         </v-container>
       </v-flex>
     </v-layout>
-
-</v-container>
+  </v-container>
 </template>
 
-<script>
-import { budgetService } from '../_services/budget.service'
-import { transactionsService } from '../_services/transactions.service'
-import { mapState, mapActions } from 'vuex'
+<script lang="ts">
+import { budgetService } from "../_services/budget.service";
+import { transactionsService } from "../_services/transactions.service";
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { Action, State, namespace } from "vuex-class";
+import { Budget } from "@/typings/Budget";
+import { BudgetCategory } from "@/typings/BudgetCategory";
+import { eCategoryType } from "../typings/enums/eCategoryType";
+import { startOfMonth } from "date-fns";
 
-export default {
+const alertModule = namespace("alert");
+const budgetsModule = namespace("budgets");
+
+@Component({
   components: {
-    'categories-list': () => import('../components/CategoriesList')
-  },
-  data () {
-    return {
-      requiredRule: [v => !!v || this.$t('forms.requiredField')]
-    }
-  },
-  computed: {
-    ...mapState({
-      budgets: state => state.budgets.budgets
-    }),
-    budget () {
-      return this.budgets.find(v => v.id == this.$route.params.id)
-    },
-    categories () {
-      var saving = this.budget ? this.budget.savingCategories : []
-      var income = this.budget ? this.budget.incomeCategories : []
-      var spending = this.budget ? this.budget.spendingCategories : []
-      return {
-        income: income,
-        spending: spending,
-        saving: saving
-      }
-    },
-    incomeCategoriesSum: function () {
-      if (this.categories.income.length == 0) { return 0 }
-      return this.categories.income.map(v => this.readCurrentAmount(v)).reduce(function (a, b) { return 1 * a + 1 * b })
-    },
-    spendingCategoriesSum: function () {
-      if (this.categories.spending.length == 0) { return 0 }
-      return this.categories.spending.map(v => this.readCurrentAmount(v)).reduce(function (a, b) { return 1 * a + 1 * b })
-    },
-    savingsCategoriesSum: function () {
-      if (this.categories.saving.length == 0) { return 0 }
-      return this.categories.saving.map(v => this.readCurrentAmount(v)).reduce(function (a, b) { return 1 * a + 1 * b })
-    },
-    categoriesBalance: function () {
-      return (
-        this.incomeCategoriesSum -
-        this.spendingCategoriesSum -
-        this.savingsCategoriesSum
-      )
-    }
-  },
-  mounted: function () {
-    this.activeBudgetChange(this.$route.params.id)
-    setTimeout(() => {
-      this.initializeBudgets()
-    }, 300)
-    this.initializeBudgets()
-  },
-  watch: {
-    $route (to, from) {
-      if (from.params.id != to.params.id) {
-        this.activeBudgetChange(to.params.id)
-        this.reloadInitialized()
-      }
-    }
-  },
-  methods: {
-    ...mapActions({
-      dispatchError: 'alert/error',
-      dispatchSuccess: 'alert/success',
-      reloadInitialized: 'budgets/reloadInitialized',
-      initializeBudgets: 'budgets/initializeBudgets',
-      activeBudgetChange: 'budgets/activeBudgetChange'
-    }),
+    "categories-list": () => import("../components/CategoriesList.vue")
+  }
+})
+export default class BudgetCategories extends Vue {
+  requiredRule: any[] = [v => !!v || this.$t("forms.requiredField")];
 
-    createCategory (category) {
-      budgetService.createCategory(this.budget.id, category).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.reloadInitialized()
-          })
-        } else {
-          response.json().then(data => {
-            this.dispatchError(data.message)
-            this.reloadInitialized()
-          })
-        }
-      })
-    },
+  @budgetsModule.State("budgets") budgets: Budget[];
+  @alertModule.Action("error") dispatchError;
+  @alertModule.Action("success") dispatchSuccess;
+  @budgetsModule.Action("reloadInitialized") reloadInitialized;
+  @budgetsModule.Action("reloadInitialized") initializeBudgets;
+  @budgetsModule.Action("activeBudgetChange") activeBudgetChange;
 
-    editCategory (category) {
-      budgetService.updateCategory(this.budget.id, category).then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.reloadInitialized()
-          })
-        } else {
-          response.json().then(data => {
-            this.dispatchError(data.message)
-            this.reloadInitialized()
-          })
-        }
-      })
-    },
+  get budget(): Budget {
+    return this.budgets.find(v => v.budgetId == this.$route.params.id as unknown as number);
+  }
 
-    deleteCategory (category) {
-      this.$root
-        .$confirm('general.remove', 'categories.deleteConfirm', {
-          color: 'red',
-          buttons: { yes: true, no: true, cancel: false, ok: false }
-        })
-        .then(confirm => {
-          if (confirm) {
-            var type =
-              category.type == 0
-                ? 'spending'
-                : category.type == 1
-                  ? 'income'
-                  : 'saving'
-            if (this.categories[type].length == 1) {
-              this.dispatchError('categories.oneRequired')
-              return
-            }
-            budgetService
-              .deleteCategory(this.$route.params.id, category.categoryId)
-              .then(response => {
-                if (response.ok) {
-                  this.reloadInitialized()
-                } else {
-                  response.json().then(data => {
-                    this.dispatchError(data.message)
-                  })
-                }
-              })
-          }
-        })
-    },
-    transferTransactions (category) {
-      var type =
-        category.type == 0
-          ? 'spending'
-          : category.type == 1
-            ? 'income'
-            : 'savings'
-
-      var categories = this.categories[type].map(function (value, index) {
-        return { text: value['name'], value: value['categoryId'] }
-      })
-
-      this.$root
-        .$confirm(
-          'transactions.categoryTransfer',
-          'categories.selectCategory',
-          {
-            color: 'primary',
-            selectList: categories,
-            select: true,
-            buttons: { yes: false, no: false, cancel: true, ok: true }
-          }
+  get categories(): {
+    income: BudgetCategory[];
+    spending: BudgetCategory[];
+    saving: BudgetCategory[];
+  } {
+    var saving = this.budget
+      ? this.budget.budgetCategories.filter(v => v.type == eCategoryType.Saving)
+      : [];
+    var income = this.budget
+      ? this.budget.budgetCategories.filter(v => v.type == eCategoryType.Income)
+      : [];
+    var spending = this.budget
+      ? this.budget.budgetCategories.filter(
+          v => v.type == eCategoryType.Spending
         )
-        .then(selection => {
-          if (selection) {
-            var type =
-              category.type == 0
-                ? 'spending'
-                : category.type == 1
-                  ? 'income'
-                  : 'savings'
-            if (this.categories[type].length == 1) {
-              this.dispatchError('categories.oneRequired')
-              return
-            }
-            transactionsService
-              .transferTransactions(
-                this.$route.params.id,
-                category.categoryId,
-                selection.value
-              )
-              .then(response => {
-                if (response.ok) {
-                  this.reloadInitialized()
-                  this.dispatchSuccess('general.changesSaved')
-                } else {
-                  response.json().then(data => {
-                    this.dispatchError(data.message)
-                  })
-                }
-              })
-          }
-        })
-    },
-    readCurrentAmount (category) {
-      var matching = category.amountConfigs.filter(v => {
-        return this.$moment().startOf('month') >= this.$moment(v.validFrom, 'YYYY-MM') && (!v.validTo || this.$moment(v.validTo, 'YYYY-MM') >= this.$moment().startOf('month'))
-      })
-      return matching && matching.length > 0 ? matching[0].amount : null
+      : [];
+    return {
+      income: income,
+      spending: spending,
+      saving: saving
+    };
+  }
+
+  get incomeCategoriesSum() {
+    if (this.categories.income.length == 0) {
+      return 0;
     }
+    return this.categories.income
+      .map(v => this.readCurrentAmount(v))
+      .reduce(function(a, b) {
+        return 1 * a + 1 * b;
+      });
+  }
+
+  get spendingCategoriesSum() {
+    if (this.categories.spending.length == 0) {
+      return 0;
+    }
+    return this.categories.spending
+      .map(v => this.readCurrentAmount(v))
+      .reduce(function(a, b) {
+        return 1 * a + 1 * b;
+      });
+  }
+
+  get savingsCategoriesSum() {
+    if (this.categories.saving.length == 0) {
+      return 0;
+    }
+    return this.categories.saving
+      .map(v => this.readCurrentAmount(v))
+      .reduce(function(a, b) {
+        return 1 * a + 1 * b;
+      });
+  }
+
+  get categoriesBalance() {
+    return (
+      this.incomeCategoriesSum -
+      this.spendingCategoriesSum -
+      this.savingsCategoriesSum
+    );
+  }
+
+  mounted() {
+    this.activeBudgetChange(this.$route.params.id);
+    setTimeout(() => {
+      this.initializeBudgets();
+    }, 300);
+    this.initializeBudgets();
+  }
+
+  @Watch("$route")
+  RouteChange(to, from) {
+    if (from.params.id != to.params.id) {
+      this.activeBudgetChange(to.params.id);
+      this.reloadInitialized();
+    }
+  }
+
+  createCategory(category: BudgetCategory) {
+    budgetService.createCategory(this.budget.id, category).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          this.reloadInitialized();
+        });
+      } else {
+        response.json().then(data => {
+          this.dispatchError(data.message);
+          this.reloadInitialized();
+        });
+      }
+    });
+  }
+
+  editCategory(category: BudgetCategory) {
+    budgetService.updateCategory(this.budget.budgetId, category).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          this.reloadInitialized();
+        });
+      } else {
+        response.json().then(data => {
+          this.dispatchError(data.message);
+          this.reloadInitialized();
+        });
+      }
+    });
+  }
+
+  deleteCategory(category: BudgetCategory) {
+    this.$confirm({
+      title: "general.remove",
+      message: "categories.deleteConfirm",
+      options: {
+        color: "red",
+        buttons: { yes: true, no: true, cancel: false, ok: false }
+      }
+    }).then(confirm => {
+      if (confirm) {
+        var type =
+          category.type == 0
+            ? "spending"
+            : category.type == 1
+            ? "income"
+            : "saving";
+        if (this.categories[type].length == 1) {
+          this.dispatchError("categories.oneRequired");
+          return;
+        }
+        budgetService
+          .deleteCategory(this.$route.params.id, category.budgetCategoryId)
+          .then(response => {
+            if (response.ok) {
+              this.reloadInitialized();
+            } else {
+              response.json().then(data => {
+                this.dispatchError(data.message);
+              });
+            }
+          });
+      }
+    });
+  }
+
+  transferTransactions(category: BudgetCategory) {
+    var type =
+      category.type == 0
+        ? "spending"
+        : category.type == 1
+        ? "income"
+        : "savings";
+
+    var categories = this.categories[type].map(function(value, index) {
+      return { text: value["name"], value: value["categoryId"] };
+    });
+
+    this.$confirm({
+      title: "transactions.categoryTransfer",
+      message: "categories.selectCategory",
+      options: {
+        color: "primary",
+        selectList: categories,
+        select: true,
+        buttons: { yes: false, no: false, cancel: true, ok: true }
+      }
+    }).then(selection => {
+      if (selection) {
+        var type =
+          category.type == 0
+            ? "spending"
+            : category.type == 1
+            ? "income"
+            : "savings";
+        if (this.categories[type].length == 1) {
+          this.dispatchError("categories.oneRequired");
+          return;
+        }
+        transactionsService
+          .transferTransactions(
+            (this.$route.params.id as unknown) as number,
+            category,
+            selection.value as BudgetCategory
+          )
+          .then(response => {
+            if (response.ok) {
+              this.reloadInitialized();
+              this.dispatchSuccess("general.changesSaved");
+            } else {
+              response.json().then(data => {
+                this.dispatchError(data.message);
+              });
+            }
+          });
+      }
+    });
+  }
+
+  readCurrentAmount(category: BudgetCategory) {
+    var matching = category.amountConfigs.filter(v => {
+      return (
+        startOfMonth(new Date()) >= v.validFrom &&
+        (!v.validTo || v.validTo >= startOfMonth(new Date()))
+      );
+    });
+    return matching && matching.length > 0 ? matching[0].amount : null;
   }
 }
 </script>

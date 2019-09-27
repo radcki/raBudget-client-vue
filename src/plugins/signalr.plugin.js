@@ -1,6 +1,6 @@
 import { apiHandler } from '../_services/apiHandler'
 import * as signalR from '@aspnet/signalr'
-import { store } from '../_store/index'
+import store from '../_store/index'
 
 new signalR.HubConnectionBuilder()
   .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
@@ -8,6 +8,7 @@ new signalR.HubConnectionBuilder()
 
 const signalrPlugin = {
   install (Vue) {
+
     const transactionsHubConnection = new signalR.HubConnectionBuilder()
       .configureLogging(signalR.LogLevel.Warning)
       .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
@@ -19,7 +20,7 @@ const signalrPlugin = {
       .withUrl(`${process.env.VUE_APP_APIURL}/hubs/budgets`, { accessTokenFactory: () => apiHandler.getAccessToken() })
       .build()
     budgetsHubConnection.start()
-
+/*
     transactionsHubConnection.on('TransactionAdded', (newTransaction) => {
       store.dispatch('transactions/loadTransactionToStore', newTransaction)
     })
@@ -55,6 +56,7 @@ const signalrPlugin = {
     budgetsHubConnection.on('CategoryUpdated', (updatedCategory) => {
       store.dispatch('budgets/reloadInitialized', updatedCategory.budget.id)
     })
+    */
   }
 }
 

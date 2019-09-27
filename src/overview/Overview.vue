@@ -140,7 +140,7 @@
         <v-subheader class="headline">{{$t('transactions.recentTransactions')}}</v-subheader>
       </v-flex>
 
-      <v-flex xs12 sm6 lg4 v-if="categories.spendings">
+      <v-flex xs12 sm6 lg4 v-if="budget && transactions && transactions.spendings">
         <v-mini-transactions-list
           :items="transactions.spendings"
           color="amber darken-1"
@@ -151,7 +151,7 @@
         ></v-mini-transactions-list>
       </v-flex>
 
-      <v-flex xs12 sm6 lg4 v-if="categories.incomes">
+      <v-flex xs12 sm6 lg4 v-if="budget && transactions && transactions.incomes">
         <v-mini-transactions-list
           :items="transactions.incomes"
           color="green darken-1"
@@ -162,7 +162,7 @@
         ></v-mini-transactions-list>
       </v-flex>
 
-      <v-flex xs12 sm6 lg4 v-if="categories.savings">
+      <v-flex xs12 sm6 lg4 v-if="budget && transactions && transactions.savings">
         <v-mini-transactions-list
           :items="transactions.savings"
           color="blue darken-1"
@@ -194,7 +194,7 @@
   </v-container>
 </template>
 
-<script>
+<script lang="js">
 import { transactionsService } from '../_services/transactions.service'
 import { mapState, mapActions, mapGetters } from 'vuex'
 import { mdiPlus } from '@mdi/js'
@@ -214,7 +214,7 @@ export default {
     'v-new-entry': () => import('./NewEntry'),
     'v-animated-number': () => import('../components/AnimatedNumber')
   },
-  data () {
+  data() {
     return {
       categories: {
         incomes: [],
@@ -227,31 +227,22 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      spendingCategoriesBalance: state =>
-        state.budgets.activeBudget.spendingCategoriesBalance,
-      savingCategoriesBalance: state =>
-        state.budgets.activeBudget.savingCategoriesBalance,
-      budgets: state => state.budgets.budgets,
-      closestScheduledTransactions: state =>
-        state.transactions.closestScheduledTransactions
-    }),
-    ...mapGetters('budgets', [
-      'budget',
-      'spendingCategoriesBalance',
-      'savingCategoriesBalance'
-    ]),
-    ...mapGetters({
-      transactions: 'transactions/getTransactions'
-    }),
+    account() {return this.$store.state.account},
+    budgets() {return this.$store.state.budgets.budgets},
+    closestScheduledTransactions() {return this.$store.state.transactions.closestScheduledTransactions},
+    spendingCategoriesBalance() {return this.$store.state.budgets.activeBudget.spendingCategoriesBalance},
+    spendingCategoriesBalance() {return this.$store.state.budgets.activeBudget.savingCategoriesBalance},
+    budget() {return this.$store.getters['budgets/budget']},
+    spendingCategoriesBalance() {return this.$store.getters['budgets/spendingCategoriesBalance']},
+    savingCategoriesBalance() {return this.$store.getters['budgets/savingCategoriesBalance']},
+    transactions() {return this.$store.getters['transactions/getTransactions']},
 
     budgetId () {
       return this.$route.params.id
     }
   },
   mounted: function () {
-    this.activeBudgetChange(this.$route.params.id)
-
+    this.activeBudgetChange(this.$route.params.id);
     this.$store.dispatch('transactions/setFilters', {
       budgetId: this.$route.params.id,
       limitCount: 8,
@@ -260,12 +251,13 @@ export default {
       categories: null
     })
 
+/*
     setTimeout(() => {
       this.initializeCategoriesBalance()
       this.initializeUnassignedFunds()
     }, 300)
-
-    this.fetchClosestScheduledTransactions()
+*/
+    // this.fetchClosestScheduledTransactions()
   },
   watch: {
     $route (to, from) {
@@ -275,6 +267,7 @@ export default {
       }
     },
     budget: function (budget) {
+
       if (budget) {
         this.initializeCategoriesBalance()
         this.initializeUnassignedFunds()

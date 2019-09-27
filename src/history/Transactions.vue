@@ -49,7 +49,7 @@
 
                 <v-flex xs12 md6 v-if="budget">
                   <v-date-range-slider
-                    :min="$moment(budget.startingDate).format('YYYY-MM-DD')"
+                    :min="format(budget.startingDate, 'yyyy-MM-dd')"
                     :max="today"
                     v-model="selectedRange"
                     step="days"
@@ -108,10 +108,10 @@
             <tbody>
               <tr v-for="item in items" :key="item.transactionId">
                 <td>
-                  <v-icon class="px-2" size="40">{{ $categoryIcons[item.category.icon] }}</v-icon>
-                  {{ item.category.name }}
+                  <v-icon class="px-2" size="40">{{ $categoryIcons[item.budgetCategory.icon] }}</v-icon>
+                  {{ item.budgetCategory.name }}
                 </td>
-                <td>{{ item.date | moment("dddd, D.MM.YYYY") }}</td>
+                <td>{{ new Date(item.transactionDate) | dateDormat("EEEE, d.MM.yyyy") }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.amount | currency($currencies[budget.currency]) }}</td>
                 <td>
@@ -139,7 +139,7 @@
           <template v-for="(transaction, index) in transactions[transactionTypes[categoryType]]">
             <v-list-item :key="index" class="pb-1">
               <v-list-item-avatar>
-                <v-icon>{{ $categoryIcons[transaction.category.icon] }}</v-icon>
+                <v-icon>{{ $categoryIcons[transaction.budgetCategory.icon] }}</v-icon>
               </v-list-item-avatar>
 
               <v-list-item-content>
@@ -147,7 +147,7 @@
                   {{ transaction.description}}
                   <span
                     class="grey--text text--lighten-1 caption"
-                  >- {{ transaction.date | moment("dddd, D.MM.YYYY") }}</span>
+                  >- {{ transaction.transactionDate | dateDormat("EEEE, d.MM.yyyy") }}</span>
                 </v-list-item-title>
 
                 <v-list-item-subtitle
@@ -178,184 +178,187 @@
 </template>
 
 <script>
-import { transactionsService } from '../_services/transactions.service'
-import { mapActions, mapGetters } from 'vuex'
+import { transactionsService } from "../_services/transactions.service";
+import { mapActions, mapGetters } from "vuex";
+import { subMonths, format } from 'date-fns';
 
-import { mdiMagnify, mdiPencil, mdiTrashCan } from '@mdi/js'
+import { mdiMagnify, mdiPencil, mdiTrashCan } from "@mdi/js";
 
 export default {
   components: {
-    'v-transaction-editor': () => import('../components/TransactionEditor'),
-    'v-category-select': () => import('../components/CategorySelect'),
-    'v-date-range-slider': () => import('../components/DateRangeSlider')
+    "v-transaction-editor": () => import("../components/TransactionEditor"),
+    "v-category-select": () => import("../components/CategorySelect"),
+    "v-date-range-slider": () => import("../components/DateRangeSlider")
   },
-  data () {
+  data() {
     return {
       search: null,
 
-      categoryType: 'spendingCategories',
+      categoryType: "spendingCategories",
       transactionTypes: {
-        spendingCategories: 'spendings',
-        incomeCategories: 'incomes',
-        savingCategories: 'savings'
+        spendingCategories: "spendings",
+        incomeCategories: "incomes",
+        savingCategories: "savings"
       },
       selectedRange: [null, null],
       selectedCategories: null,
 
       headers: [
         {
-          text: this.$t('general.category'),
+          text: this.$t("general.category"),
           sortable: true,
-          value: 'category'
+          value: "category"
         },
         {
-          text: this.$t('general.date'),
+          text: this.$t("general.date"),
           sortable: true,
-          value: 'date'
+          value: "date"
         },
         {
-          text: this.$t('general.description'),
+          text: this.$t("general.description"),
           sortable: true,
-          value: 'description'
+          value: "description"
         },
         {
-          text: this.$t('general.amount'),
+          text: this.$t("general.amount"),
           sortable: true,
-          value: 'amount'
+          value: "amount"
         },
         {
-          text: this.$t('general.actions'),
+          text: this.$t("general.actions"),
           sortable: false
         }
       ],
 
       tab: 0,
       color: [
-        'amber darken-1',
-        'green darken-1',
-        'blue darken-1',
-        'purple darken-1'
+        "amber darken-1",
+        "green darken-1",
+        "blue darken-1",
+        "purple darken-1"
       ],
-      requiredRule: [v => !!v || this.$t('forms.requiredField')],
+      requiredRule: [v => !!v || this.$t("forms.requiredField")],
 
       mdiMagnify,
       mdiPencil,
-      mdiTrashCan
-    }
+      mdiTrashCan,
+      format
+    };
   },
   computed: {
     ...mapGetters({
-      budget: 'budgets/budget',
-      transactions: 'transactions/getTransactions'
+      budget: "budgets/budget",
+      transactions: "transactions/getTransactions"
     }),
-    currencies: function () {
-      return Object.keys(this.$currencies)
+    currencies: function() {
+      return Object.keys(this.$currencies);
     },
-    today: function () {
-      return this.$moment().format('YYYY-MM-DD')
+    today: function() {
+      return format(new Date(), "yyyy-MM-dd");
     },
-    monthAgoOrStart () {
-      return this.$moment().subtract(1, 'month') <
-        this.$moment(this.budget.startingDate)
-        ? this.$moment(this.budget.startingDate).format('YYYY-MM-DD')
-        : this.$moment()
-          .subtract(1, 'month')
-          .format('YYYY-MM-DD')
+    monthAgoOrStart() {
+      return subMonths(new Date(), 1) < this.budget.startingDate
+        ? format(this.budget.startingDate, "yyyy-MM-dd")
+        : format(subMonths(new Date(), 1), "yyyy-MM-dd");
     }
   },
-  created: function () {
-    this.activeBudgetChange(this.$route.params.id)
+  created: function() {
+    this.activeBudgetChange(this.$route.params.id);
     if (this.budget) {
-      this.selectedCategories = this.budget[this.categoryType]
-      this.selectedRange = [this.monthAgoOrStart, this.today]
-      this.setFilters()
+      this.selectedCategories = this.budget[this.categoryType];
+      this.selectedRange = [this.monthAgoOrStart, this.today];
+      this.setFilters();
     }
   },
   watch: {
-    $route (to, from) {
+    $route(to, from) {
       if (from.params.id != to.params.id) {
-        this.activeBudgetChange(to.params.id)
-        this.reloadInitialized()
-        this.fetchTransactions()
+        this.activeBudgetChange(to.params.id);
+        this.reloadInitialized();
+        this.fetchTransactions();
       }
       if (this.budget) {
-        this.selectedRange = [this.monthAgoOrStart, this.today]
+        this.selectedRange = [this.monthAgoOrStart, this.today];
       }
     },
-    budget: function (budget) {
+    budget: function(budget) {
       if (this.budget && this.budget[this.categoryType]) {
-        this.selectedRange = [this.monthAgoOrStart, this.today]
-        this.selectedCategories = this.budget[this.categoryType]
+        this.selectedRange = [this.monthAgoOrStart, this.today];
+        this.selectedCategories = this.budget[this.categoryType];
       }
-      this.setFilters()
+      this.setFilters();
     },
-    categoryType: function (value) {
+    categoryType: function(value) {
       if (this.budget && this.budget[value]) {
-        this.selectedCategories = this.budget[value]
+        this.selectedCategories = this.budget[value];
       }
-      this.setFilters()
+      this.setFilters();
     }
   },
   methods: {
     ...mapActions({
-      dispatchError: 'alert/error',
-      dispatchSuccess: 'alert/success',
-      activeBudgetChange: 'budgets/activeBudgetChange',
-      reloadInitialized: 'budgets/reloadInitialized',
-      fetchTransactions: 'transactions/fetchTransactions'
+      dispatchError: "alert/error",
+      dispatchSuccess: "alert/success",
+      activeBudgetChange: "budgets/activeBudgetChange",
+      reloadInitialized: "budgets/reloadInitialized",
+      fetchTransactions: "transactions/fetchTransactions"
     }),
-    setFilters () {
-      this.$store.dispatch('transactions/setFilters', {
+    setFilters() {
+      this.$store.dispatch("transactions/setFilters", {
         budgetId: this.$route.params.id,
         limitCount: null,
         startDate: this.selectedRange[0],
         endDate: this.selectedRange[1],
         categories: this.selectedCategories
-      })
+      });
     },
-    updateTransaction (transaction) {
-      this.$wait.start('saving.transaction')
+    updateTransaction(transaction) {
+      this.$wait.start("saving.transaction");
       transactionsService
         .updateTransaction(transaction)
         .then(response => {
           if (response.ok) {
-            this.$wait.end('saving.transaction')
-            this.reloadInitialized()
+            this.$wait.end("saving.transaction");
+            this.reloadInitialized();
           } else {
             response.json().then(data => {
-              this.$wait.end('saving.transaction')
-              this.dispatchError(data.message)
-            })
+              this.$wait.end("saving.transaction");
+              this.dispatchError(data.message);
+            });
           }
         })
         .catch(error => {
-          this.$wait.end('saving.transaction')
+          this.$wait.end("saving.transaction");
           error.json().then(data => {
-            this.dispatchError(data.message)
-          })
-        })
+            this.dispatchError(data.message);
+          });
+        });
     },
-    deleteTransaction (id) {
+    deleteTransaction(id) {
       this.$root
-        .$confirm('general.remove', 'transactions.deleteConfirm', {
-          color: 'red',
-          buttons: { yes: true, no: true, cancel: false, ok: false }
+        .$confirm({
+          title: "general.remove",
+          message: "transactions.deleteConfirm",
+          options: {
+            color: "red",
+            buttons: { yes: true, no: true, cancel: false, ok: false }
+          }
         })
         .then(confirm => {
           if (confirm) {
             transactionsService.deleteTransaction(id).then(response => {
               if (response.ok) {
-                this.reloadInitialized()
-                this.fetchTransactions()
+                this.reloadInitialized();
+                this.fetchTransactions();
               } else {
                 response.json().then(data => {
-                  this.dispatchError(data.message)
-                })
+                  this.dispatchError(data.message);
+                });
               }
-            })
+            });
           }
-        })
+        });
     }
   }
-}
+};
 </script>

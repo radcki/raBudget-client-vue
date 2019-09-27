@@ -99,7 +99,8 @@
         "refresh": "Odśwież",
         "selectAll": "Wszystko",
         "every": "Co",
-        "reset": "Resetuj"
+        "reset": "Resetuj",
+        "from": "Od"
     },
     "forms": {
         "requiredField": "Pole jest wymagane.",

@@ -386,7 +386,7 @@ table.v-table tbody th {
   height: 20px;
 }
 </style>
-<script>
+<script  lang="js">
 import { budgetService } from '../_services/budget.service'
 import { mapState, mapActions } from 'vuex'
 import { debounce } from 'debounce'

@@ -83,7 +83,7 @@
                   <v-icon class="px-2">{{ $categoryIcons[item.destinationCategory.icon] }}</v-icon>
                   {{ item.destinationCategory.name }}
                 </td>
-                <td>{{ item.date | moment("dddd, D.MM.YYYY") }}</td>
+                <td>{{ item.date | dateDormat("dddd, d.MM.yyyy") }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.amount | currency($currencies[budget.currency]) }}</td>
                 <td>
@@ -118,7 +118,7 @@
                   {{ transaction.description}}
                   <span
                     class="grey--text text--lighten-1 caption"
-                  >- {{ transaction.date | moment("dddd, D.MM.YYYY") }}</span>
+                  >- {{ transaction.date | dateDormat("dddd, d.MM.yyyy") }}</span>
                 </v-list-item-title>
 
                 <v-list-item-subtitle

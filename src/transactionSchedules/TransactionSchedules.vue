@@ -178,7 +178,7 @@
   </v-container>
 </template>
 
-<script>
+<script lang="js">
 import { transactionSchedulesService } from '../_services/transactionSchedules.service'
 import { mapState, mapActions } from 'vuex'
 import {

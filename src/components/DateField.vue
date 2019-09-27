@@ -5,7 +5,6 @@
     :nudge-right="40"
     transition="scale-transition"
     offset-y
-    full-width
     min-width="290px"
   >
     <template v-slot:activator="{ on }">
@@ -27,6 +26,7 @@
 
 <script>
 import { mdiCalendar } from '@mdi/js'
+import { format } from 'date-fns'
 
 export default {
   name: 'VDateField',
@@ -39,16 +39,16 @@ export default {
   }),
   watch: {
     date: function (value) {
-      this.$emit('input', value)
+      this.$emit('input', new Date(value))
     },
     value: function (value) {
-      this.date = !value ? null : this.$moment(value).format('YYYY-MM-DD')
+      this.date = !value ? null : format(value, 'yyyy-MM-dd')
     }
   },
   mounted: function () {
     this.date = !this.value
       ? null
-      : this.$moment(this.value).format('YYYY-MM-DD')
+      : format(this.value, 'yyyy-MM-dd')
   }
 }
 </script>

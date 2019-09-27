@@ -67,7 +67,7 @@
                         <v-date-field
                           :rules="requiredRule"
                           v-model="amountConfig.validFrom"
-                          :label="$t('transactions.date')"
+                          :label="$t('general.from')"
                         ></v-date-field>
                       </v-flex>
 
@@ -93,7 +93,7 @@
                           dark
                           @click="category.amountConfigs.splice(amountConfigIndex, 1)"
                         >
-                          <v-icon>close</v-icon>
+                          <v-icon>{{mdiClose}}</v-icon>
                         </v-btn>
                       </v-flex>
 
@@ -123,8 +123,10 @@
   </v-dialog>
 </template>
 
-<script>
+<script  lang="js">
 import { mdiClose, mdiCreditCard } from '@mdi/js'
+import { format } from 'date-fns'
+
 export default {
   name: 'VCategoryEditor',
   props: {
@@ -153,7 +155,7 @@ export default {
           type: null,
           amountConfigs: []
         },
-        ...JSON.parse(JSON.stringify(this.value))
+        ...Object.assign({},this.value))
       },
       mdiCreditCard,
       mdiClose
@@ -169,7 +171,7 @@ export default {
       setTimeout(() => {
         this.category = {
           ...this.category,
-          ...JSON.parse(JSON.stringify(this.value))
+          ...Object.assign({},this.value))
         }
       }, 500)
     }
@@ -183,9 +185,9 @@ export default {
     })
     for (var config of this.category.amountConfigs) {
       config.dateMenu = false
-      config.validFrom = this.$moment(config.validFrom).format('YYYY-MM')
+      config.validFrom = format(new Date(config.validFrom), 'yyyy-MM')
       config.validTo = config.validTo
-        ? this.$moment(config.validTo).format('YYYY-MM')
+        ? format(new Date(), 'yyyy-MM')
         : null
     }
   },
@@ -198,7 +200,7 @@ export default {
     addPeriod () {
       this.category.amountConfigs.push({
         dateMenu: false,
-        validFrom: this.$moment().format('YYYY-MM'),
+        validFrom: new Date() ,
         amount: null
       })
     },

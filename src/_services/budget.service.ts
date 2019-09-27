@@ -1,8 +1,11 @@
 import {
   apiHandler
 } from './apiHandler'
+import { BudgetCategory } from '@/typings/BudgetCategory'
+import { Budget } from '@/typings/Budget'
 
 export const budgetService = {
+  supportedCurrencies,
   userBudgets,
   createBudget,
   deleteBudget,
@@ -20,6 +23,16 @@ export const budgetService = {
   getMonthlyReport
 }
 
+function supportedCurrencies () {
+  const requestOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/supported-currencies`, requestOptions)
+}
+
 function userBudgets () {
   const requestOptions = {
     method: 'GET',
@@ -30,7 +43,7 @@ function userBudgets () {
   return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets`, requestOptions)
 }
 
-function createBudget (budgetData, budgetCategories) {
+function createBudget (budgetData: Budget) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -40,12 +53,10 @@ function createBudget (budgetData, budgetCategories) {
       name: budgetData.name,
       currency: budgetData.currency,
       startingDate: budgetData.startingDate + '-01',
-      spendingCategories: budgetCategories.spending,
-      incomeCategories: budgetCategories.income,
-      savingCategories: budgetCategories.savings
+      budgetCategories: budgetData.budgetCategories
     })
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/create`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets`, requestOptions)
 }
 
 function saveBudget (budgetId, budgetData) {
@@ -114,7 +125,7 @@ function getSavingCategoriesBalance (budgetId) {
 }
 
 function getPeriodReport (budgetId, startDate, endDate) {
-  var url = new URL(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/report/period`, document.location)
+  var url = new URL(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/report/period`, document.location.toString())
   var params = {
     startDate: startDate,
     endDate: endDate
@@ -127,7 +138,7 @@ function getPeriodReport (budgetId, startDate, endDate) {
 }
 
 function getMonthlyReport (budgetId, startDate, endDate) {
-  var url = new URL(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/report/monthly`, document.location)
+  var url = new URL(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/report/monthly`, document.location.toString())
   var params = {
     startDate: startDate,
     endDate: endDate
@@ -139,8 +150,8 @@ function getMonthlyReport (budgetId, startDate, endDate) {
   })
 }
 
-function createCategory (budgetId, category) {
-  category.categoryId = 0
+function createCategory (budgetId, category: BudgetCategory) {
+  category.budgetCategoryId = 0
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -151,7 +162,7 @@ function createCategory (budgetId, category) {
   return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}`, requestOptions)
 }
 
-function updateCategory (budgetId, category) {
+function updateCategory (budgetId: number, category: BudgetCategory) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -159,7 +170,7 @@ function updateCategory (budgetId, category) {
     },
     body: JSON.stringify(category)
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categories/${category.categoryId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categories/${category.budgetCategoryId}`, requestOptions)
 }
 
 function deleteCategory (budgetId, categoryId) {

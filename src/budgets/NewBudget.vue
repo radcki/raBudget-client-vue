@@ -1,4 +1,4 @@
-<template>
+  <template>
   <v-container>
     <v-layout wrap align-center justify-center>
       <v-flex xs12>
@@ -43,11 +43,13 @@
                     </v-flex>
 
                     <v-flex xs4 sm2>
-                      <v-select
+                      <v-autocomplete
                         v-model="budget.currency"
                         :items="currencies"
+                        return-object
+                        item-text="code"
                         :label="$t('budgets.currency')"
-                      ></v-select>
+                      ></v-autocomplete>
                     </v-flex>
 
                     <v-date-field
@@ -439,6 +441,7 @@ export default {
       validStep2: true,
       validStep3: true,
       validStep4: true,
+      currencies: [],
       requiredRule: [v => !!v || this.$t('forms.requiredField')],
       mdiFormatTitle,
       mdiCash,
@@ -468,9 +471,6 @@ export default {
         sum += this.categories.savings[i].amount * 1
       }
       return sum
-    },
-    currencies: function () {
-      return Object.keys(this.$currencies)
     }
   },
   methods: {
@@ -543,22 +543,43 @@ export default {
       this.categories.savings.splice(index, 1)
     },
     createBudget () {
-      budgetService
-        .createBudget(this.budget, this.categories)
-        .then(response => {
-          if (response.ok) {
-            response.json().then(data => {
-              this.budgetsFetch().then(() => {
-                this.$router.push('/')
-              })
-            })
-          } else {
-            response.json().then(data => {
-              this.dispatchError(data.message)
-            })
-          }
+      this.budget.budgetCategories = {
+        0: this.categories.spending.map(v => {
+          v.type = 0
+          return v
+        }),
+        1: this.categories.income.map(v => {
+          v.type = 1
+          return v
+        }),
+        2: this.categories.savings.map(v => {
+          v.type = 2
+          return v
         })
+      }
+      budgetService.createBudget(this.budget).then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.budgetsFetch().then(() => {
+              this.$router.push('/')
+            })
+          })
+        } else {
+          response.json().then(data => {
+            this.dispatchError(data.message)
+          })
+        }
+      })
+    },
+    async getCurrencies () {
+      var response = await budgetService.supportedCurrencies()
+      if (response.ok) {
+        this.currencies = await response.json()
+      }
     }
+  },
+  mounted () {
+    this.getCurrencies()
   }
 }
 </script>

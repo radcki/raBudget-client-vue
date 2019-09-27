@@ -5,7 +5,6 @@
         <v-chip
           small
           class="my-1"
-
           :color="period == 'full'? 'primary' : 'grey'"
           @click="period = 'full'"
           text-color="white"
@@ -42,7 +41,6 @@
                 :return-value.sync="selectedMin"
                 transition="scale-transition"
                 offset-y
-                full-width
                 min-width="290px"
               >
                 <template v-slot:activator="{ on }">
@@ -74,7 +72,6 @@
                 :return-value.sync="selectedMax"
                 transition="scale-transition"
                 offset-y
-                full-width
                 min-width="290px"
               >
                 <template v-slot:activator="{ on }">
@@ -105,7 +102,9 @@
     </v-layout>
   </v-container>
 </template>
-<script>
+<script  lang="js">
+import moment from 'moment';
+
 export default {
   name: 'VDateRangeSlider',
   props: {
@@ -113,7 +112,7 @@ export default {
     max: String,
     value: Array,
     step: String,
-    chips: Boolean
+    chips: Boolean,
   },
   data () {
     return {
@@ -241,6 +240,7 @@ export default {
         .add(value, this.addSign)
         .format(this.format)
     },
+    $moment: moment,
     dateToInt (value) {
       return this.$moment(value, this.format).diff(this.minMoment, this.step)
     },
