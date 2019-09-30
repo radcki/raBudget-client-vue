@@ -20,7 +20,7 @@
         readonly
       ></v-text-field>
     </template>
-    <v-date-picker :readonly="readonly" v-model="date" @input="dateMenu = false"></v-date-picker>
+    <v-date-picker :readonly="readonly" :type="pickerType" v-model="date" @input="dateMenu = false"></v-date-picker>
   </v-menu>
 </template>
 
@@ -30,25 +30,28 @@ import { format } from 'date-fns'
 
 export default {
   name: 'VDateField',
-  props: ['value', 'label', 'rules', 'clearable', 'readonly', 'hideDetails'],
+  props: ['value', 'label', 'rules', 'clearable', 'readonly', 'hideDetails', 'type'],
 
   data: () => ({
     date: null,
     dateMenu: false,
     mdiCalendar
   }),
+  computed: {
+    pickerType(){return this.type == 'month' ? 'month' : 'date'}
+  },
   watch: {
     date: function (value) {
       this.$emit('input', new Date(value))
     },
     value: function (value) {
-      this.date = !value ? null : format(value, 'yyyy-MM-dd')
+      this.date = !value ? null : format(value, this.pickerType == 'date' ? 'yyyy-MM-dd' : 'yyyy-MM')
     }
   },
   mounted: function () {
     this.date = !this.value
       ? null
-      : format(this.value, 'yyyy-MM-dd')
+      : format(this.value, this.pickerType == 'date' ? 'yyyy-MM-dd' : 'yyyy-MM')
   }
 }
 </script>

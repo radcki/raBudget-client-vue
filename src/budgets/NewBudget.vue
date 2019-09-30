@@ -129,7 +129,7 @@
                   <v-list-item-content>
                     <v-list-item-title>{{ category.name }}</v-list-item-title>
 
-                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencies[budget.currency]) }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencyConfig(budget)) }}</v-list-item-subtitle>
                   </v-list-item-content>
 
                   <v-list-item-action>
@@ -144,7 +144,7 @@
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ incomeCategoriesSum | currency($currencies[budget.currency]) }}</v-list-item-content>
+                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ incomeCategoriesSum | currency($currencyConfig(budget)) }}</v-list-item-content>
                 </v-list-item>
               </v-list>
 
@@ -218,7 +218,7 @@
                   <v-list-item-content>
                     <v-list-item-title>{{ category.name }}</v-list-item-title>
 
-                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencies[budget.currency]) }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencyConfig(budget)) }}</v-list-item-subtitle>
                   </v-list-item-content>
 
                   <v-list-item-action>
@@ -233,7 +233,7 @@
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ spendingCategoriesSum | currency($currencies[budget.currency]) }}</v-list-item-content>
+                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ spendingCategoriesSum | currency($currencyConfig(budget)) }}</v-list-item-content>
                 </v-list-item>
               </v-list>
 
@@ -306,7 +306,7 @@
                   <v-list-item-content>
                     <v-list-item-title>{{ category.name }}</v-list-item-title>
 
-                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencies[budget.currency]) }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencyConfig(budget)) }}</v-list-item-subtitle>
                   </v-list-item-content>
 
                   <v-list-item-action>
@@ -321,7 +321,7 @@
                   </v-list-item-action>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ savingsCategoriesSum | currency($currencies[budget.currency]) }}</v-list-item-content>
+                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ savingsCategoriesSum | currency($currencyConfig(budget)) }}</v-list-item-content>
                 </v-list-item>
               </v-list>
 

@@ -1,5 +1,4 @@
 import { budgetService } from '../_services/budget.service';
-import { format } from 'date-fns';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { RootState } from '.';
 import { Module, ActionTree, MutationTree, GetterTree } from 'vuex';
@@ -26,6 +25,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
           dispatch('fetchBudget', budget.budgetId);
         });
     } else {
+
 
       if (!budget) {return}
 
@@ -95,7 +95,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
       .then(response => {
         if (response.ok) {
           response.json().then(data => {
-            commit('setUnassignedFunds', data.funds);
+            commit('setUnassignedFunds', data);
             dispatch('wait/end', 'loading.unassignedFunds', { root: true });
           });
         } else {
@@ -150,7 +150,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
 
   fetchSpendingCategoriesBalance({ commit, dispatch }, budgetId) {
     dispatch('wait/start', 'loading.spendingCategoriesBalance', { root: true });
-    budgetService.getSpendingCategoriesBalance(budgetId).then(response => {
+    budgetService.getCategoriesBalance(budgetId, eCategoryType.Spending).then(response => {
       if (response.ok) {
         response.json().then(data => {
           commit('setSpendingCategoriesBalance', data);
@@ -171,7 +171,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
 
   fetchSavingCategoriesBalance({ commit, dispatch }, budgetId) {
     dispatch('wait/start', 'loading.savingCategoriesBalance', { root: true });
-    budgetService.getSavingCategoriesBalance(budgetId).then(response => {
+    budgetService.getCategoriesBalance(budgetId, eCategoryType.Saving).then(response => {
       if (response.ok) {
         response.json().then(data => {
           commit('setSavingCategoriesBalance', data);
@@ -253,12 +253,12 @@ const mutations: MutationTree<BudgetsState> = {
   changeActiveBudget(state, newActiveBudgetId) {
     state.activeBudgetId = newActiveBudgetId;
   },
-  setUnassignedFunds(state, funds) {
+  setUnassignedFunds(state, funds: number) {
     state.budgets.find(
       v => v.budgetId == state.activeBudgetId
     ).unassignedFunds = funds;
   },
-  setBudgets(state, data) {
+  setBudgets(state, data: Budget[]) {
     let budgetsToSet = data.map(budget => {
       return {
         ...budget,
@@ -273,14 +273,16 @@ const mutations: MutationTree<BudgetsState> = {
     });
     for (let budget of budgetsToSet) {
       if (budget.budgetCategories) {
-        for (let category of budget.budgetCategories) {
-          for (let config of category.amountConfigs) {
-            config.validFrom =  new Date(config.validFrom);
+        budget.budgetCategories = budget.budgetCategories.map((category) => {
+          category.amountConfigs = category.amountConfigs.map((config)=>{
+            config.validFrom = new Date(config.validFrom);
             config.validTo = config.validTo
               ?  new Date(config.validTo)
               : null;
-          }
-        }
+              return config;
+          })
+          return category;
+        })
       }
     }
     state.budgets = budgetsToSet;

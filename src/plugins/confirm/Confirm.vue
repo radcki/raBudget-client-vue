@@ -91,7 +91,7 @@ export default class VueConfirm extends Vue {
     title: string,
     message: string,
     options: ConfirmDialogOptions
-  ): Promise<boolean> {
+  ): Promise<boolean | any> {
     this.input = null;
     this.inputType = "text";
     this.resolve = null;
@@ -116,7 +116,7 @@ export default class VueConfirm extends Vue {
     this.title = title;
     this.message = message;
     this.options = Object.assign(this.options, options);
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean | any>((resolve, reject) => {
       this.resolve = resolve;
       this.reject = reject;
     });

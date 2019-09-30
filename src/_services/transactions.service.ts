@@ -62,7 +62,7 @@ function updateTransaction(budgetId, transactionData) {
   return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactions/${transactionData.transactionId}`, requestOptions)
 }
 
-function listTransactions(budgetId, limitCount, startDate, endDate, categories) {
+function listTransactions(budgetId: number, limitCount: number, startDate: Date, endDate: Date, categories: BudgetCategory[]) {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -72,7 +72,7 @@ function listTransactions(budgetId, limitCount, startDate, endDate, categories) 
       limitResults: limitCount,
       transactionDateStartFilter: startDate,
       transactionDateEndFilter: endDate,
-      transactionIdFilter: categories
+      transactionIdFilter: categories ? categories.map(v=>v.budgetCategoryId) : null
     })
   }
   return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactions/filter`, requestOptions)

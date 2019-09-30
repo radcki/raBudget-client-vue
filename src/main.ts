@@ -58,7 +58,8 @@ import {
   mdiMotorbike,
   mdiWalletGiftcard
 } from '@mdi/js';
-import { format } from 'date-fns'
+import { format } from 'date-fns';
+import { Budget } from './typings/Budget';
 
 Vue.use(signalrPlugin);
 
@@ -154,6 +155,18 @@ Vue.filter('percentage', (value, decimals) => {
   );
 });
 
+Vue.prototype.$currencyConfig = function(budget: Budget) {
+  let nf = budget.currency.numberFormat;
+  return {
+    symbol: nf.currencySymbol,
+    thousandsSeparator: nf.currencyGroupSeparator,
+    fractionCount: nf.currencyDecimalDigits,
+    fractionSeparator: nf.currencyDecimalSeparator,
+    symbolPosition: ([0, 2].includes(nf.currencyPositivePattern) ? 'front' : 'back'),
+    symbolSpacing: (nf.currencyPositivePattern == 0 ? false : true)
+  }
+}
+
 Vue.use(VueKeycloakJs, {
   init: {
     // Use 'login-required' to always require authentication
@@ -174,7 +187,7 @@ Vue.use(VueKeycloakJs, {
       vuetify,
       router,
       wait: new VueWait({
-        useVuex: true,
+        useVuex: true
       }),
       i18n,
       render: h => h(App)

@@ -66,6 +66,7 @@
                       <v-flex :xs4="!mobile" :xs9="mobile">
                         <v-date-field
                           :rules="requiredRule"
+                          type="month"
                           v-model="amountConfig.validFrom"
                           :label="$t('general.from')"
                         ></v-date-field>
@@ -80,8 +81,8 @@
                       </v-flex>
 
                       <v-flex xs3 v-if="!mobile">
-                        <div>{{$t("categories.daily")}}: {{ (amountConfig.amount / 30) | currency($currencies[dataBudget.currency]) }}</div>
-                        <div>{{$t("categories.annual")}}: {{ (amountConfig.amount * 12) | currency($currencies[dataBudget.currency]) }}</div>
+                        <div>{{$t("categories.daily")}}: {{ (amountConfig.amount / 30) | currency($currencyConfig(dataBudget)) }}</div>
+                        <div>{{$t("categories.annual")}}: {{ (amountConfig.amount * 12) | currency($currencyConfig(dataBudget)) }}</div>
                       </v-flex>
 
                       <v-flex xs1>
@@ -98,8 +99,8 @@
                       </v-flex>
 
                       <v-flex xs9 v-if="mobile" class="pb-3">
-                        <div>{{$t("categories.daily")}}: {{ (amountConfig.amount / 30) | currency($currencies[dataBudget.currency]) }}</div>
-                        <div>{{$t("categories.annual")}}: {{ (amountConfig.amount * 12) | currency($currencies[dataBudget.currency]) }}</div>
+                        <div>{{$t("categories.daily")}}: {{ (amountConfig.amount / 30) | currency($currencyConfig(dataBudget)) }}</div>
+                        <div>{{$t("categories.annual")}}: {{ (amountConfig.amount * 12) | currency($currencyConfig(dataBudget)) }}</div>
                       </v-flex>
                     </v-layout>
                   </v-container>
@@ -126,6 +127,7 @@
 <script  lang="js">
 import { mdiClose, mdiCreditCard } from '@mdi/js'
 import { format } from 'date-fns'
+import clone from 'clone'
 
 export default {
   name: 'VCategoryEditor',
@@ -155,7 +157,7 @@ export default {
           type: null,
           amountConfigs: []
         },
-        ...Object.assign({},this.value))
+        ...(clone(this.value))
       },
       mdiCreditCard,
       mdiClose
@@ -171,7 +173,7 @@ export default {
       setTimeout(() => {
         this.category = {
           ...this.category,
-          ...Object.assign({},this.value))
+          ...clone(this.value)
         }
       }, 500)
     }
@@ -184,11 +186,7 @@ export default {
       this.dialog = false
     })
     for (var config of this.category.amountConfigs) {
-      config.dateMenu = false
-      config.validFrom = format(new Date(config.validFrom), 'yyyy-MM')
-      config.validTo = config.validTo
-        ? format(new Date(), 'yyyy-MM')
-        : null
+
     }
   },
   computed: {

@@ -93,7 +93,7 @@
                 </td>
                 <td>{{ item.description }}</td>
 
-                <td>{{ item.amount | currency($currencies[budget.currency]) }}</td>
+                <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
                 <td>
                   <v-transaction-schedule-editor
                     v-on:save="updateSchedule"
@@ -140,7 +140,7 @@
                 </v-list-item-title>
 
                 <v-list-item-subtitle class="text--primary">
-                  {{transaction.amount | currency($currencies[budget.currency])}}
+                  {{transaction.amount | currency($currencyConfig(budget))}}
                   <span
                     class="grey--text text--lighten-1 caption"
                   >

@@ -8,15 +8,15 @@
       <v-flex xs12>
         <v-card>
           <v-card-text>
-            <div>Plan wydatków: {{ spendingCategoriesSum | currency($currencies[budget.currency]) }}</div>
-            <div>Plan dochodów: {{ incomeCategoriesSum | currency($currencies[budget.currency]) }}</div>
-            <div>Plan oszczędności: {{ savingsCategoriesSum | currency($currencies[budget.currency]) }}</div>
+            <div>Plan wydatków: {{ spendingCategoriesSum | currency($currencyConfig(budget)) }}</div>
+            <div>Plan dochodów: {{ incomeCategoriesSum | currency($currencyConfig(budget)) }}</div>
+            <div>Plan oszczędności: {{ savingsCategoriesSum | currency($currencyConfig(budget)) }}</div>
             <v-divider></v-divider>
             <div>
               Bilans:
               <v-chip
                 :color="categoriesBalance >= 0 ? 'green lighten-2' : 'red lighten-2' "
-              >{{ categoriesBalance | currency($currencies[budget.currency]) }}</v-chip>
+              >{{ categoriesBalance | currency($currencyConfig(budget)) }}</v-chip>
             </div>
           </v-card-text>
         </v-card>
@@ -48,6 +48,7 @@
                 :data-budget="budget"
                 categories-type="1"
                 v-on:edit="editCategory"
+                v-on:create="createCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
                 :title="$t('categories.incomeCategories')"
@@ -62,6 +63,7 @@
                 :data-budget="budget"
                 categories-type="2"
                 v-on:edit="editCategory"
+                v-on:create="createCategory"
                 v-on:transfer="transferTransactions"
                 v-on:delete="deleteCategory"
                 :title="$t('categories.savingCategories')"
@@ -99,7 +101,7 @@ export default class BudgetCategories extends Vue {
   @alertModule.Action("error") dispatchError;
   @alertModule.Action("success") dispatchSuccess;
   @budgetsModule.Action("reloadInitialized") reloadInitialized;
-  @budgetsModule.Action("reloadInitialized") initializeBudgets;
+  @budgetsModule.Action("initializeBudgets") initializeBudgets;
   @budgetsModule.Action("activeBudgetChange") activeBudgetChange;
 
   get budget(): Budget {
@@ -187,11 +189,9 @@ export default class BudgetCategories extends Vue {
   }
 
   createCategory(category: BudgetCategory) {
-    budgetService.createCategory(this.budget.id, category).then(response => {
+    budgetService.createCategory(this.budget.budgetId, category).then(response => {
       if (response.ok) {
-        response.json().then(data => {
-          this.reloadInitialized();
-        });
+        this.reloadInitialized();
       } else {
         response.json().then(data => {
           this.dispatchError(data.message);
@@ -204,9 +204,7 @@ export default class BudgetCategories extends Vue {
   editCategory(category: BudgetCategory) {
     budgetService.updateCategory(this.budget.budgetId, category).then(response => {
       if (response.ok) {
-        response.json().then(data => {
-          this.reloadInitialized();
-        });
+        this.reloadInitialized();
       } else {
         response.json().then(data => {
           this.dispatchError(data.message);

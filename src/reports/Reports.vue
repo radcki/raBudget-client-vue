@@ -81,7 +81,7 @@
                               <span class="px-2 caption">{{item.category.name}}</span>
                             </td>
                             <td class="py-1">
-                              {{item.budgetAmount | currency($currencies[budget.currency])}}
+                              {{item.budgetAmount | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
@@ -95,7 +95,7 @@
                               </v-tooltip>
                             </td>
                             <td class="py-1">
-                              {{item.transactionsSum | currency($currencies[budget.currency])}}
+                              {{item.transactionsSum | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
@@ -110,7 +110,7 @@
                               </v-tooltip>
                             </td>
                             <td class="py-1" v-if="categoryType=='spendingCategories'">
-                              {{item.allocationsSum | currency($currencies[budget.currency])}}
+                              {{item.allocationsSum | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
@@ -125,7 +125,7 @@
                               </v-tooltip>
                             </td>
                             <td class="py-1">
-                              {{item.averagePerDay | currency($currencies[budget.currency])}}
+                              {{item.averagePerDay | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
@@ -140,7 +140,7 @@
                               </v-tooltip>
                             </td>
                             <td class="py-1">
-                              {{item.averagePerMonth | currency($currencies[budget.currency])}}
+                              {{item.averagePerMonth | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
@@ -163,20 +163,20 @@
                             </td>
                             <td
                               class="py-1"
-                            >{{periodTotals.budgetAmount | currency($currencies[budget.currency])}}</td>
+                            >{{periodTotals.budgetAmount | currency($currencyConfig(budget))}}</td>
                             <td
                               class="py-1"
-                            >{{periodTotals.transactionsSum | currency($currencies[budget.currency])}}</td>
+                            >{{periodTotals.transactionsSum | currency($currencyConfig(budget))}}</td>
                             <td
                               class="py-1"
                               v-if="categoryType=='spendingCategories'"
-                            >{{periodTotals.allocationsSum | currency($currencies[budget.currency])}}</td>
+                            >{{periodTotals.allocationsSum | currency($currencyConfig(budget))}}</td>
                             <td
                               class="py-1"
-                            >{{periodTotals.averagePerDay | currency($currencies[budget.currency])}}</td>
+                            >{{periodTotals.averagePerDay | currency($currencyConfig(budget))}}</td>
                             <td
                               class="py-1"
-                            >{{periodTotals.averagePerMonth | currency($currencies[budget.currency])}}</td>
+                            >{{periodTotals.averagePerMonth | currency($currencyConfig(budget))}}</td>
                           </tr>
                         </tfoot>
                       </template>
@@ -206,7 +206,7 @@
                           <v-flex :key="index+'_budgeted'" sm2 xs6>
                             <div
                               class="text-xs-center caption"
-                            >{{data.budgetAmount | currency($currencies[budget.currency])}}</div>
+                            >{{data.budgetAmount | currency($currencyConfig(budget))}}</div>
                           </v-flex>
 
                           <v-flex
@@ -217,7 +217,7 @@
                           <v-flex :key="index+'_transactions'" sm2 xs6>
                             <div
                               class="text-xs-center caption"
-                            >{{data.transactionsSum | currency($currencies[budget.currency])}}</div>
+                            >{{data.transactionsSum | currency($currencyConfig(budget))}}</div>
                           </v-flex>
 
                           <v-flex
@@ -228,7 +228,7 @@
                           <v-flex :key="index+'_allocations'" sm2 xs6>
                             <div
                               class="text-xs-center caption"
-                            >{{data.allocationsSum | currency($currencies[budget.currency])}}</div>
+                            >{{data.allocationsSum | currency($currencyConfig(budget))}}</div>
                           </v-flex>
 
                           <v-flex
@@ -239,7 +239,7 @@
                           <v-flex :key="index+'_perDay'" sm2 xs6>
                             <div
                               class="text-xs-center caption"
-                            >{{data.averagePerDay | currency($currencies[budget.currency])}}</div>
+                            >{{data.averagePerDay | currency($currencyConfig(budget))}}</div>
                           </v-flex>
 
                           <v-flex
@@ -250,7 +250,7 @@
                           <v-flex :key="index+'_perMonth'" sm2 xs6>
                             <div
                               class="text-xs-center caption"
-                            >{{data.averagePerMonth | currency($currencies[budget.currency])}}</div>
+                            >{{data.averagePerMonth | currency($currencyConfig(budget))}}</div>
                           </v-flex>
                         </template>
 
@@ -266,7 +266,7 @@
                         <v-flex sm2 xs6>
                           <div
                             class="text-xs-center caption"
-                          >{{periodTotals.budgetAmount | currency($currencies[budget.currency])}}</div>
+                          >{{periodTotals.budgetAmount | currency($currencyConfig(budget))}}</div>
                         </v-flex>
 
                         <v-flex
@@ -276,21 +276,21 @@
                         <v-flex sm2 xs6>
                           <div
                             class="text-xs-center caption"
-                          >{{periodTotals.transactionsSum | currency($currencies[budget.currency])}}</div>
+                          >{{periodTotals.transactionsSum | currency($currencyConfig(budget))}}</div>
                         </v-flex>
 
                         <v-flex class="text-xs-center body-2" xs6>{{ $t("reports.allocationsSum") }}</v-flex>
                         <v-flex sm2 xs6>
                           <div
                             class="text-xs-center caption"
-                          >{{periodTotals.allocationsSum | currency($currencies[budget.currency])}}</div>
+                          >{{periodTotals.allocationsSum | currency($currencyConfig(budget))}}</div>
                         </v-flex>
 
                         <v-flex class="text-xs-center body-2" xs6>{{ $t("reports.averagePerDay") }}</v-flex>
                         <v-flex sm2 xs6>
                           <div
                             class="text-xs-center caption"
-                          >{{periodTotals.averagePerDay | currency($currencies[budget.currency])}}</div>
+                          >{{periodTotals.averagePerDay | currency($currencyConfig(budget))}}</div>
                         </v-flex>
 
                         <v-flex
@@ -300,7 +300,7 @@
                         <v-flex sm2 xs6>
                           <div
                             class="text-xs-center caption"
-                          >{{periodTotals.averagePerMonth | currency($currencies[budget.currency])}}</div>
+                          >{{periodTotals.averagePerMonth | currency($currencyConfig(budget))}}</div>
                         </v-flex>
                       </v-layout>
                     </v-container>

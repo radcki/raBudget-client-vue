@@ -75,7 +75,7 @@
           </v-container>
         </v-form>
         <span class="subheading">{{ $t("transactions.finalAmount") }}:</span>
-        <span class="headline">{{finalAmount | currency($currencies[budget.currency])}}</span>
+        <span class="headline">{{finalAmount | currency($currencyConfig(budget))}}</span>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>

@@ -74,8 +74,8 @@
               <v-card-title class="subtitle-2">{{$t('budgets.availablefunds')}}</v-card-title>
               <v-card-text class="display-1 pb-1">
                 <v-animated-number
-                  v-if="budget.balance"
-                  :value="budget.balance"
+                  v-if="budget.currentFunds"
+                  :value="budget.currentFunds"
                   :formatValue="formatAmount"
                   :duration="300"
                 />
@@ -251,12 +251,12 @@ export default {
       categories: null
     })
 
-/*
+
     setTimeout(() => {
       this.initializeCategoriesBalance()
       this.initializeUnassignedFunds()
     }, 300)
-*/
+
     // this.fetchClosestScheduledTransactions()
   },
   watch: {
@@ -294,7 +294,7 @@ export default {
     formatAmount (value) {
       return this.$options.filters.currency(
         value,
-        this.$currencies[this.budget.currency]
+        this.$currencyConfig(this.budget)
       )
     },
     editTransaction (id) {

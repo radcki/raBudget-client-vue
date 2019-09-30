@@ -253,7 +253,7 @@ const getters: GetterTree<TransactionsState, RootState>  = {
         transactionsClone[transactionType] = state.transactions[transactionType].filter(
           (v) =>
             !!state.mainFilters.categories.find(
-              (c) => c.budgetCategoryId == v.category.budgetCategoryId,
+              (c) => c.budgetCategoryId == v.budgetCategoryId,
             ),
         );
       }

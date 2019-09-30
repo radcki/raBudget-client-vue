@@ -118,7 +118,7 @@
           </v-container>
         </v-form>
         <span class="subheading">{{ $t("transactionSchedules.totalAmount") }}:</span>
-        <span class="headline">{{totalAmount | currency($currencies[budget.currency])}}</span>
+        <span class="headline">{{totalAmount | currency($currencyConfig(budget))}}</span>
         <span
           v-if="editor.amount > 0 && editor.frequency > 0 && !editor.endDate"
           class="subheading"

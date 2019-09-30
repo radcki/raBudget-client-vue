@@ -15,14 +15,14 @@
         class="pb-1"
       >
         <v-list-item-avatar :size="24">
-          <v-icon>{{ categoryIcon(transaction.budgetCategoryID) ? $categoryIcons[categoryIcon(transaction.budgetCategoryID)] : null }}</v-icon>
+          <v-icon>{{ categoryIcon(transaction.budgetCategoryId) ? $categoryIcons[categoryIcon(transaction.budgetCategoryId)] : null }}</v-icon>
         </v-list-item-avatar>
 
         <v-list-item-content>
           <v-list-item-title class="font-weight-medium">{{ transaction.description}}</v-list-item-title>
           <v-list-item-subtitle
             class="text--primary"
-          >{{transaction.amount | currency($currencies[dataBudget.currency])}}</v-list-item-subtitle>
+          >{{transaction.amount | currency($currencyConfig(dataBudget))}}</v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action>
           <v-transaction-editor

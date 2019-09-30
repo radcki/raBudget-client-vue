@@ -85,7 +85,7 @@
                 </td>
                 <td>{{ item.date | dateDormat("dddd, d.MM.yyyy") }}</td>
                 <td>{{ item.description }}</td>
-                <td>{{ item.amount | currency($currencies[budget.currency]) }}</td>
+                <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
                 <td>
                   <v-allocation-editor
                     v-on:save="updateAllocation"
@@ -123,7 +123,7 @@
 
                 <v-list-item-subtitle
                   class="text--primary"
-                >{{transaction.amount | currency($currencies[budget.currency])}}</v-list-item-subtitle>
+                >{{transaction.amount | currency($currencyConfig(budget))}}</v-list-item-subtitle>
               </v-list-item-content>
 
                <v-list-item-action>

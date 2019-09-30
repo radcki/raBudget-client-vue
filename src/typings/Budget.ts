@@ -10,10 +10,11 @@ export interface Budget {
   budgetCategories: BudgetCategory[];
   startingDate: Date;
   ownedByUser: User;
-  isDefault: boolean;
+  default: boolean;
 
-  unassignedFunds: any;
-  spendingCategoriesBalance: any;
-  savingCategoriesBalance: any;
-  incomeCategoriesBalance: any;
+  currentFunds?: number;
+  unassignedFunds?: number;
+  spendingCategoriesBalance?: any[];
+  savingCategoriesBalance?: any[];
+  incomeCategoriesBalance?: any[];
 }

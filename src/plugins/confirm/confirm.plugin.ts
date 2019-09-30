@@ -17,8 +17,6 @@ export const VueConfirm = {
     document.querySelector('body').appendChild(vm.$el);
 
     // Create generic method
-    Vue.prototype.$confirm = (dialogOptions: ConfirmOptions): Promise<boolean> => {
-      return ConfirmInstance.open(dialogOptions.title, dialogOptions.message, dialogOptions.options);
-    }
+    Vue.prototype.$confirm = (dialogOptions: ConfirmOptions): Promise<boolean | any> => ConfirmInstance.open(dialogOptions.title, dialogOptions.message, dialogOptions.options)
   }
 }

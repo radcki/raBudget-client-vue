@@ -1,7 +1,7 @@
 declare module 'vue/types/vue' {
   interface Vue {
-    $confirm(options: ConfirmOptions): Promise<boolean>,
-    open(title: string, message: string, options: ConfirmDialogOptions): Promise<boolean>
+    $confirm(options: ConfirmOptions): Promise<boolean | any>,
+    open(title: string, message: string, options: ConfirmDialogOptions): Promise<boolean | any>
   }
 }
 

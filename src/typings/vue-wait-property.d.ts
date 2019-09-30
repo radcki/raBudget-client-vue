@@ -5,6 +5,7 @@ declare module 'vue/types/vue' {
   interface Vue {
     $wait: VueWait;
     $keycloak: any;
+    $currencyConfig: any;
   }
 }
 

@@ -11,7 +11,7 @@
       <v-flex xs4 align-center class="subtitle-2">{{ $t('categories.monthPlanLeft') }}</v-flex>
         <template v-for="(category, index) in dataBalance" >
           <v-flex :key="index + '_name'" xs4 align-center class="subtitle-2">
-            {{category.budgetCategory.name}}
+            {{findCategoryById(category.budgetCategoryId).name}}
           </v-flex>
           <v-flex :key="index + '_savingsum'" xs4>
             <v-chip class="amber darken-3 elevation-3 white--text" small>
@@ -33,26 +33,37 @@
     </v-layout>
   </v-container>
 </template>
-<script>
-export default {
-  name: 'VMiniCategoriesSummary',
-  props: {
-    loading: Boolean,
-    dataBalance: Array,
-    dataBudget: {
-      type: Object,
-      default: () => { return { currency: 'PLN' } }
-    },
-    backgroundColor: String,
-    color: String
-  },
+<script lang="ts">
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { BudgetCategory } from "../typings/BudgetCategory";
+import { BudgetCategoryBalance } from "../typings/BudgetCategoryBalance";
+import { Budget } from "../typings/Budget";
+
+@Component({
   components: {
-    'v-animated-number': () => import('../components/AnimatedNumber')
-  },
-  methods: {
-    formatAmount (value) {
-      return this.$options.filters.currency(value, this.$currencies[this.dataBudget.currency])
-    }
+    "v-animated-number": () => import("../components/AnimatedNumber.vue")
+  }
+})
+export default class MiniCategoriesSummary extends Vue {
+  @Prop(Boolean) readonly loading: boolean;
+  @Prop(Array) readonly dataBalance: BudgetCategoryBalance[];
+  @Prop(Object) readonly dataBudget: Budget;
+  @Prop(String) readonly backgroundColor: string;
+  @Prop(String) readonly color: string;
+
+  get budgetCategories() { return this.dataBudget.budgetCategories}
+
+  formatAmount(value) {
+    return this.$options.filters.currency(
+      value,
+      this.$currencyConfig(this.dataBudget)
+    )
+  }
+
+  findCategoryById(budgetCategoryId: number) {
+    return this.budgetCategories.find(
+      v => v.budgetCategoryId == budgetCategoryId
+    );
   }
 }
 </script>

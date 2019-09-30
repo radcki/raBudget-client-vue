@@ -3,6 +3,9 @@ import {
 } from './apiHandler'
 import { BudgetCategory } from '@/typings/BudgetCategory'
 import { Budget } from '@/typings/Budget'
+import { eAlertType } from '@/typings/enums/eAlertType'
+import { eCategoryType } from '@/typings/enums/eCategoryType'
+import { format } from 'date-fns'
 
 export const budgetService = {
   supportedCurrencies,
@@ -14,9 +17,7 @@ export const budgetService = {
   createCategory,
   updateCategory,
   deleteCategory,
-  getSpendingCategoriesBalance,
-  getIncomeCategoriesBalance,
-  getSavingCategoriesBalance,
+  getCategoriesBalance,
   getUnassigned,
   setDefault,
   getPeriodReport,
@@ -52,24 +53,24 @@ function createBudget (budgetData: Budget) {
     body: JSON.stringify({
       name: budgetData.name,
       currency: budgetData.currency,
-      startingDate: budgetData.startingDate + '-01',
+      startingDate: format(budgetData.startingDate, 'yyyy-MM-dd'),
       budgetCategories: budgetData.budgetCategories
     })
   }
   return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets`, requestOptions)
 }
 
-function saveBudget (budgetId, budgetData) {
+function saveBudget (budgetId, budgetData: Budget) {
   const requestOptions = {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       name: budgetData.name,
-      startingDate: budgetData.startingDate + '-01',
+      startingDate: format(budgetData.startingDate, 'yyyy-MM-dd'),
       currency: budgetData.currency,
-      default: budgetData.default
+      ownedByUser: budgetData.ownedByUser
     })
   }
   return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}`, requestOptions)
@@ -77,9 +78,9 @@ function saveBudget (budgetId, budgetData) {
 
 function setDefault (budgetId) {
   const requestOptions = {
-    method: 'POST'
+    method: 'PATCH'
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/setDefault`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/default`, requestOptions)
 }
 
 function deleteBudget (budgetId) {
@@ -100,29 +101,16 @@ function getUnassigned (budgetId) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/unassigned`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/unassigned-funds`, requestOptions)
 }
 
-function getSpendingCategoriesBalance (budgetId) {
+function getCategoriesBalance (budgetId: number, categoryType: eCategoryType) {
   const requestOptions = {
     method: 'GET'
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categoriesbalance/spending`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categories-balance/${categoryType}`, requestOptions)
 }
 
-function getIncomeCategoriesBalance (budgetId) {
-  const requestOptions = {
-    method: 'GET'
-  }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categoriesbalance/income`, requestOptions)
-}
-
-function getSavingCategoriesBalance (budgetId) {
-  const requestOptions = {
-    method: 'GET'
-  }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categoriesbalance/saving`, requestOptions)
-}
 
 function getPeriodReport (budgetId, startDate, endDate) {
   var url = new URL(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/report/period`, document.location.toString())
@@ -159,23 +147,23 @@ function createCategory (budgetId, category: BudgetCategory) {
     },
     body: JSON.stringify(category)
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/budgetcategories/`, requestOptions)
 }
 
 function updateCategory (budgetId: number, category: BudgetCategory) {
   const requestOptions = {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(category)
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categories/${category.budgetCategoryId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/budgetcategories/${category.budgetCategoryId}`, requestOptions)
 }
 
 function deleteCategory (budgetId, categoryId) {
   const requestOptions = {
     method: 'DELETE'
   }
-  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/categories/${categoryId}`, requestOptions)
+  return apiHandler.fetchAuthorized(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/budgetcategories/${categoryId}`, requestOptions)
 }

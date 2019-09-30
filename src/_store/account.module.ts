@@ -1,4 +1,3 @@
-import { userService } from '../_services/user.service';
 import { User } from '@/typings/User';
 import { Module, ActionTree, MutationTree, GetterTree } from 'vuex';
 import Vue from 'vue';
@@ -25,7 +24,7 @@ const getters: GetterTree<UserState, RootState> = {
 
 const mutations: MutationTree<UserState> = {};
 
-export const account = {
+export const account: Module<UserState, RootState> = {
   namespaced: true,
   state: userState,
   actions,

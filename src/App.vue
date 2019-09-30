@@ -34,7 +34,7 @@
             <v-list-item-content>
               <v-list-item-title>{{ budget.name }}</v-list-item-title>
               <v-list-item-subtitle>
-                <small>{{ $t("general.funds") }}: {{ budget.balance | currency($currencies[budget.currency]) }}</small>
+                <small>{{ $t("general.funds") }}: {{ budget.currentFunds | currency($currencyConfig(budget)) }}</small>
               </v-list-item-subtitle>
             </v-list-item-content>
 
@@ -334,7 +334,6 @@ export default class App extends Vue {
 
     if (this.$keycloak.authenticated) {
       this.initializeBudgets().then(() => {
-        console.log("pp");
         this.noBudgetsGuard();
       });
     }
@@ -367,7 +366,7 @@ export default class App extends Vue {
     if (this.budgets.length == 0 && !this.$wait.is("loading.budgets")) {
       this.$router.push({ name: "newBudget" });
     } else if (this.$route.name === "home") {
-      var defaultBudget = this.budgets.find(v => v.isDefault);
+      var defaultBudget = this.budgets.find(v => v.default);
       var activeBudget = null;
 
       if (defaultBudget) {
