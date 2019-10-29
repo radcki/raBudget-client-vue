@@ -11,9 +11,6 @@ import vuetify from './plugins/vuetify';
 import i18n from './plugins/i18n';
 import VueKeycloakJs from '@dsb-norge/vue-keycloak-js';
 
-import 'moment/locale/pl';
-import 'moment/locale/en-gb';
-
 import {
   mdiCar,
   mdiBabyFace,
@@ -61,11 +58,21 @@ import {
 import { format } from 'date-fns';
 import { Budget } from './typings/Budget';
 
+import plDateLocale from "date-fns/locale/pl";
+import enDateLocale from "date-fns/locale/en-GB";
+import { eCategoryType } from './typings/enums/eCategoryType';
+
 Vue.use(signalrPlugin);
 
-Vue.filter('dateDormat', (value, formatString) => {
-  return !value ? '-' : format(value, formatString || 'yyyy-MM-dd');
+Vue.filter('dateFormat', (value, formatString, locale) => {
+  return !value ? '-' : format(value, formatString || 'yyyy-MM-dd', {locale: locale});
 });
+
+Vue.prototype.$dateLocales = {
+  pl: plDateLocale,
+  en: enDateLocale,
+}
+Vue.prototype.$locale =  localStorage.getItem("locale");
 
 Vue.prototype.$currencies = {
   PLN: {
@@ -139,6 +146,17 @@ Vue.prototype.$categoryIcons = {
   card_giftcard: mdiWalletGiftcard
 };
 
+Vue.prototype.$categoryColor = function(categoryType: eCategoryType) {
+  switch (categoryType) {
+    case eCategoryType.Income:
+      return "income";
+    case eCategoryType.Spending:
+      return "spending";
+    case eCategoryType.Saving:
+      return "saving";
+  }
+}
+
 Vue.use(VueCurrencyFilter);
 
 Vue.filter('percentage', (value, decimals) => {
@@ -156,6 +174,9 @@ Vue.filter('percentage', (value, decimals) => {
 });
 
 Vue.prototype.$currencyConfig = function(budget: Budget) {
+  if (!budget.currency){
+    return null
+  }
   let nf = budget.currency.numberFormat;
   return {
     symbol: nf.currencySymbol,
@@ -169,8 +190,6 @@ Vue.prototype.$currencyConfig = function(budget: Budget) {
 
 Vue.use(VueKeycloakJs, {
   init: {
-    // Use 'login-required' to always require authentication
-    // If using 'login-required', there is no need for the router guards in router.js
     onLoad: 'check-sso'
   },
   config: {

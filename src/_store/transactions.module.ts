@@ -6,6 +6,7 @@ import { BudgetCategory } from '@/typings/BudgetCategory';
 import { MutationTree, GetterTree, ActionTree } from 'vuex';
 import { RootState } from '.';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
+import { ErrorMessage } from '@/typings/TypedResponse';
 
 export interface TranscationFilters {
   budgetId: number | null;
@@ -13,6 +14,7 @@ export interface TranscationFilters {
   startDate: Date | null;
   endDate: Date | null;
   categories: BudgetCategory[];
+  categoryType?: eCategoryType;
 }
 
 export interface TransactionsState {
@@ -123,24 +125,30 @@ const actions: ActionTree<TransactionsState, RootState> = {
     }
   },
 
-  fetchTransactions({ commit, dispatch, state }) {
+  async fetchTransactions({ commit, dispatch, state, rootGetters }) {
     dispatch('wait/start', 'loading.transactions', { root: true });
+
     transactionsService
       .listTransactions(
         state.mainFilters.budgetId,
         state.dataLoadFilters.limitCount,
         state.dataLoadFilters.startDate,
         state.dataLoadFilters.endDate,
-        state.dataLoadFilters.categories
+        state.dataLoadFilters.categories,
+        state.dataLoadFilters.categoryType
       )
       .then(response => {
         if (response.ok) {
           response.json().then(responseData => {
-            commit('setTransactions', responseData);
+            let getBudgetCategoryById: (categoryId: number) => BudgetCategory = rootGetters['budgets/budgetCategoryById'];
+            commit('setSpendingTransactions', responseData.filter(v=>getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Spending));
+            commit('setSavingTransactions', responseData.filter(v=>getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Saving));
+            commit('setIncomeTransactions', responseData.filter(v=>getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Income));
+
             dispatch('wait/end', 'loading.transactions', { root: true });
           });
         } else {
-          response.json().then(responseData => {
+          response.json<ErrorMessage>().then(responseData => {
             commit('alert/error', responseData.message, { root: true });
             dispatch('wait/end', 'loading.transactions', { root: true });
           });
@@ -198,6 +206,10 @@ const actions: ActionTree<TransactionsState, RootState> = {
       spendings: filteredSpendings
     });
 
+    commit('setSpendingTransactions', filteredSpendings);
+    commit('setSavingTransactions', filteredSavings);
+    commit('setIncomeTransactions', filteredIncomes);
+
     if (state.mainFilters.limitCount && countChanged) {
       dispatch('fetchTransactions');
     }
@@ -205,7 +217,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
   },
 
   loadTransactionToStore({ state, dispatch }, newTransaction: Transaction) {
-    if (!newTransaction.budgetCategoryId ) {
+    if (!newTransaction.budgetCategoryId) {
       dispatch('fetchTransactions');
     }
     dispatch('budgets/reloadInitialized', null, {
@@ -213,7 +225,10 @@ const actions: ActionTree<TransactionsState, RootState> = {
     });
   },
 
-  updateTransactionInStore({ state, commit, dispatch }, updatedTransaction: Transaction) {
+  updateTransactionInStore(
+    { state, commit, dispatch },
+    updatedTransaction: Transaction
+  ) {
     dispatch('fetchTransactions');
     dispatch('budgets/reloadInitialized', null, {
       root: true
@@ -221,45 +236,47 @@ const actions: ActionTree<TransactionsState, RootState> = {
   }
 };
 
-const getters: GetterTree<TransactionsState, RootState>  = {
-
-  startDateMoment: (state) => {
-    return state.mainFilters.startDate ? moment(state.mainFilters.startDate) : null;
+const getters: GetterTree<TransactionsState, RootState> = {
+  startDateMoment: state => {
+    return state.mainFilters.startDate
+      ? moment(state.mainFilters.startDate)
+      : null;
   },
-  endDateMoment: (state) => {
+  endDateMoment: state => {
     return state.mainFilters.endDate ? moment(state.mainFilters.endDate) : null;
   },
   getTransactions: (state, getter) => {
-    let transactionsClone = {}
+    let transactionsClone = {};
     // tslint:disable-next-line: forin
     for (let transactionType in state.transactions) {
       if (state.mainFilters.limitCount) {
-        transactionsClone[transactionType] = state.transactions[transactionType].slice(
-          0,
-          state.mainFilters.limitCount,
-        );
+        transactionsClone[transactionType] = state.transactions[
+          transactionType
+        ].slice(0, state.mainFilters.limitCount);
       }
       if (getter.startDateMoment) {
-        transactionsClone[transactionType] = state.transactions[transactionType].filter(
-          (v) => moment(v.date) >= getter.startDateMoment,
-        );
+        transactionsClone[transactionType] = state.transactions[
+          transactionType
+        ].filter(v => moment(v.date) >= getter.startDateMoment);
       }
       if (getter.endDateMoment) {
-        transactionsClone[transactionType] = state.transactions[transactionType].filter(
-          (v) => moment(v.date) <= getter.endDateMoment,
-        );
+        transactionsClone[transactionType] = state.transactions[
+          transactionType
+        ].filter(v => moment(v.date) <= getter.endDateMoment);
       }
       if (state.mainFilters.categories) {
-        transactionsClone[transactionType] = state.transactions[transactionType].filter(
-          (v) =>
+        transactionsClone[transactionType] = state.transactions[
+          transactionType
+        ].filter(
+          v =>
             !!state.mainFilters.categories.find(
-              (c) => c.budgetCategoryId == v.budgetCategoryId,
-            ),
+              c => c.budgetCategoryId == v.budgetCategoryId
+            )
         );
       }
     }
     return transactionsClone;
-  },
+  }
 };
 
 const mutations: MutationTree<TransactionsState> = {
@@ -327,18 +344,37 @@ const mutations: MutationTree<TransactionsState> = {
     }
     state.dataLoadFilters.categories = filter;
   },
-  setTransactions( state, payload: Transaction[] ) {
-    payload = payload.map(function(transaction){
-      transaction.transactionDate = new Date(transaction.transactionDate)
-      transaction.registeredDate = new Date(transaction.registeredDate)
-      return transaction
-    })
-    state.transactions.spendings = payload.filter(v => v.type == eCategoryType.Spending);
-    state.transactions.savings = payload.filter(v => v.type == eCategoryType.Saving);
-    state.transactions.incomes = payload.filter(v => v.type == eCategoryType.Income);
+
+  setSpendingTransactions(state, payload: Transaction[]) {
+    payload = payload.map(function(transaction) {
+      transaction.transactionDate = new Date(transaction.transactionDate);
+      transaction.registeredDate = new Date(transaction.registeredDate);
+      return transaction;
+    });
+    state.transactions.spendings = payload;
+  },
+  setSavingTransactions(state, payload: Transaction[]) {
+    payload = payload.map(function(transaction) {
+      transaction.transactionDate = new Date(transaction.transactionDate);
+      transaction.registeredDate = new Date(transaction.registeredDate);
+      return transaction;
+    });
+    state.transactions.savings = payload;
+  },
+  setIncomeTransactions(state, payload: Transaction[]) {
+    payload = payload.map(function(transaction) {
+      transaction.transactionDate = new Date(transaction.transactionDate);
+      transaction.registeredDate = new Date(transaction.registeredDate);
+      return transaction;
+    });
+    state.transactions.incomes = payload;
   },
   setClosestScheduledTransactions(state, payload) {
-    state.closestScheduledTransactions = payload;
+    state.closestScheduledTransactions = payload.map(v => {
+      v.transactionDate = new Date(v.transactionDate);
+      v.registeredDate = new Date(v.registeredDate);
+      return v;
+    });
   }
 };
 

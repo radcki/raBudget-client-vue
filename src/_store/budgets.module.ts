@@ -3,6 +3,7 @@ import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { RootState } from '.';
 import { Module, ActionTree, MutationTree, GetterTree } from 'vuex';
 import { Budget } from '@/typings/Budget';
+import { ErrorMessage } from '@/typings/TypedResponse';
 
 export interface BudgetsState {
   budgets: Budget[];
@@ -25,12 +26,9 @@ const actions: ActionTree<BudgetsState, RootState> = {
           dispatch('fetchBudget', budget.budgetId);
         });
     } else {
-
-
       if (!budget) {return}
 
       dispatch('fetchBudget', budget.budgetId);
-
       if (budget.unassignedFunds) {
         dispatch('fetchUnassignedFunds', budget.budgetId);
       }
@@ -52,17 +50,13 @@ const actions: ActionTree<BudgetsState, RootState> = {
       if (response.ok) {
         let data = await response.json();
         commit('setBudgets', data);
-        dispatch('wait/end', 'loading.budgets', { root: true });
-        return true
-
       } else if (response.status == 404) {
         commit('setBudgets', []);
-        dispatch('wait/end', 'loading.budgets', { root: true });
       } else {
         commit('setBudgets', []);
-        dispatch('wait/end', 'loading.budgets', { root: true });
       }
-    } catch (error) {
+        dispatch('wait/end', 'loading.budgets', { root: true });
+      } catch (error) {
       dispatch('wait/end', 'loading.budgets', { root: true });
     }
   },
@@ -159,7 +153,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
           });
         });
       } else {
-        response.json().then(data => {
+        response.json<ErrorMessage>().then(data => {
           commit('alert/error', data.message, { root: true });
           dispatch('wait/end', 'loading.spendingCategoriesBalance', {
             root: true
@@ -180,7 +174,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
           });
         });
       } else {
-        response.json().then(data => {
+        response.json<ErrorMessage>().then(data => {
           commit('alert/error', data.message, { root: true });
           dispatch('wait/end', 'loading.savingCategoriesBalance', {
             root: true
@@ -216,7 +210,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
 
 const getters: GetterTree<BudgetsState, RootState> = {
 
-  budget(state) {
+  budget(state): Budget | null {
     if (state.activeBudgetId && state.budgets.length > 0) {
       return state.budgets.find(v => v.budgetId == state.activeBudgetId);
     } else {
@@ -224,18 +218,24 @@ const getters: GetterTree<BudgetsState, RootState> = {
     }
   },
 
+  budgetCategoryById: (state, getter) => (categoryId: number) => {
+    if (getter.budget != null) {
+      return (getter.budget as Budget).budgetCategories.find(v=>v.budgetCategoryId == categoryId)
+    }
+  },
+
   spendingCategories: (state, getter) =>
     !getter.budget
       ? null
-      : getter.budget.budgetCategories.filter(v => v.type == eCategoryType.Spending),
+      : (getter.budget as Budget).budgetCategories.filter(v => v.type == eCategoryType.Spending),
   savingCategories: (state, getter) =>
     !getter.budget
       ? null
-      : getter.budget.budgetCategories.filter(v => v.type == eCategoryType.Saving),
+      : (getter.budget as Budget).budgetCategories.filter(v => v.type == eCategoryType.Saving),
   incomeCategories: (state, getter) =>
     !getter.budget
       ? null
-      : getter.budget.budgetCategories.filter(v => v.type == eCategoryType.Income),
+      : (getter.budget as Budget).budgetCategories.filter(v => v.type == eCategoryType.Income),
 
 
   spendingCategoriesBalance: (state, getter) =>

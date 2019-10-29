@@ -136,7 +136,7 @@
                   <span>{{item.name}}</span>
                 </td>
                 <td>
-                  <span>{{item.timeStamp | dateDormat("dd MMMM yyyy HH:mm:ss")}}</span>
+                  <span>{{item.timeStamp | dateFormat("dd MMMM yyyy HH:mm:ss", $dateLocales[$locale])}}</span>
                 </td>
               </tr>
             </tbody>

@@ -1,4 +1,3 @@
-import { BudgetCategory } from './BudgetCategory';
 import { eCategoryType } from './enums/eCategoryType';
 
 export interface Transaction {
@@ -6,7 +5,6 @@ export interface Transaction {
   amount: number;
   description: string;
   budgetCategoryId: number,
-  type?: eCategoryType,
   transactionDate: Date
   registeredDate?: Date | undefined
 }

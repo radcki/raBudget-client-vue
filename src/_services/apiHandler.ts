@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import { TypedResponse } from '@/typings/TypedResponse'
 
 export const apiHandler = {
   logout,
@@ -17,7 +18,7 @@ function logout () {
   localStorage.removeItem('token')
 }
 
-function fetchAuthorized (url, options) {
+function fetchAuthorized<T>(url, options): Promise<TypedResponse<T>> {
   var jwtToken = getAccessToken()
   options = options || {}
   options.headers = options.headers || {}

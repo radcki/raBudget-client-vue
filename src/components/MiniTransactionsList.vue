@@ -7,7 +7,7 @@
       <v-list-item-title
         :key="date"
         class="my-1 px-3 text-xs-right grey--text caption"
-      >{{ new Date(date) | dateDormat("EEEE, d.MM.yyyy") }}</v-list-item-title>
+      >{{ new Date(date) | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale]) }}</v-list-item-title>
       <v-divider :key="date + '_divider'" inset></v-divider>
       <v-list-item
         :key="'tr_' + transaction.transactionId"
@@ -49,6 +49,7 @@ import { Transaction } from "@/typings/Transaction";
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import { Action, namespace } from "vuex-class";
 import { Budget } from "../typings/Budget";
+import { format } from "date-fns";
 
 const alertStore = namespace("alert");
 const transactionsStore = namespace("transactions");
@@ -73,8 +74,8 @@ export default class MiniTransactionsList extends Vue {
   get itemsByDate() {
     if (this.items) {
       return this.items.reduce((acc: any, transaction: Transaction) => {
-        (acc[transaction.transactionDate.toString()] =
-          acc[transaction.transactionDate.toString()] || []).push(transaction);
+        (acc[format(transaction.transactionDate, 'yyyy-MM-dd')] =
+          acc[format(transaction.transactionDate, 'yyyy-MM-dd')] || []).push(transaction);
         return acc;
       }, {});
     }

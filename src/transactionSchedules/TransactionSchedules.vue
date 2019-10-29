@@ -81,12 +81,12 @@
                   <v-icon
                     class="px-2"
                     :size="40"
-                    :color="typeColors[item.budgetCategory.type]"
-                  >{{ $categoryIcons[item.budgetCategory.icon] }}</v-icon>
-                  {{ item.budgetCategory.name }}
+                    :color="$categoryColor[getCategoryById(item.budgetCategoryId).type]"
+                  >{{ $categoryIcons[getCategoryById(item.budgetCategoryId).icon] }}</v-icon>
+                  {{ getCategoryById(item.budgetCategoryId).name }}
                 </td>
-                <td>{{ item.startDate | moment("dddd, D.MM.YYYY") }}</td>
-                <td>{{ item.endDate | moment("dddd, D.MM.YYYY") }}</td>
+                <td>{{ item.startDate | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale]) }}</td>
+                <td>{{ item.endDate | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale]) }}</td>
                 <td>
                   <span v-if="item.frequency > 0">{{$t('general.every')}} {{ item.periodStep }}:</span>
                   {{ $t(occurrenceFrequencies.find(v=>v.value==item.frequency).text) }}
@@ -178,226 +178,237 @@
   </v-container>
 </template>
 
-<script lang="js">
-import { transactionSchedulesService } from '../_services/transactionSchedules.service'
-import { mapState, mapActions } from 'vuex'
+<script lang="ts">
+import { transactionSchedulesService } from "../_services/transactionSchedules.service";
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { Action, namespace } from "vuex-class";
 import {
   mdiPlusCircleOutline,
   mdiPencil,
   mdiTrashCan,
   mdiMagnify
-} from '@mdi/js'
+} from "@mdi/js";
+import { Budget } from "@/typings/Budget";
+import { TransactionSchedule } from "@/typings/TransactionSchedule";
+import { BudgetCategory } from "@/typings/BudgetCategory";
+import { ErrorMessage } from '@/typings/TypedResponse';
 
-export default {
-  name: 'TransactionSchedules',
+interface Filters {
+  startDate: Date | null,
+  endDate: Date | null
+}
+
+const budgetsModule = namespace("budgets");
+const alertModule = namespace("alert");
+@Component({
   components: {
-    'v-transaction-schedule-editor': () =>
-      import('./TransactionScheduleEditor.vue'),
-    'v-date-field': () => import('../components/DateField.vue')
-  },
-  data () {
-    return {
-      requiredRule: [v => !!v || this.$t('forms.requiredField')],
-      filters: {
-        startDate: null,
-        endDate: null
-      },
-      transactionSchedules: [],
+    "v-transaction-schedule-editor": () =>
+      import("./TransactionScheduleEditor.vue"),
+    "v-date-field": () => import("../components/DateField.vue")
+  }
+})
+export default class TransactionSchedules extends Vue {
+  requiredRule = [];
+  filters: Filters = {
+    startDate: null,
+    endDate: null
+  };
 
-      search: null,
-      startDateMenu: false,
-      endDateMenu: false,
-      typeColors: {
-        0: 'amber darken-1',
-        1: 'green darken-1',
-        2: 'blue darken-1'
+  transactionSchedules = [];
+
+  search = null;
+  startDateMenu = false;
+  endDateMenu = false;
+  typeColors = {
+    0: "amber darken-1",
+    1: "green darken-1",
+    2: "blue darken-1"
+  };
+  occurrenceFrequencies = [
+    { value: 0, text: "transactionSchedules.once" },
+    { value: 1, text: "transactionSchedules.day" },
+    { value: 2, text: "transactionSchedules.week" },
+    { value: 3, text: "transactionSchedules.month" }
+  ];
+  headers = [];
+
+  mdiPlusCircleOutline = mdiPlusCircleOutline;
+  mdiPencil = mdiPencil;
+  mdiTrashCan = mdiTrashCan;
+  mdiMagnify = mdiMagnify;
+
+  @Watch("$route")
+  OnRouteChange(to, from) {
+    if (from.params.id != to.params.id) {
+      this.activeBudgetChange(to.params.id);
+      this.reloadInitialized();
+    }
+  }
+
+  @Watch("budget")
+  OnBudgetChange(budget) {
+    this.fetchTransactionSchedules();
+  }
+
+  @budgetsModule.Action("reloadInitialized") reloadInitialized;
+  @alertModule.Action("error") dispatchError;
+  @alertModule.Action("success") dispatchSuccess;
+  @budgetsModule.Action("activeBudgetChange") activeBudgetChange;
+  @budgetsModule.Action("initializeBudgets") initializeBudgets;
+  @budgetsModule.Getter("budget") budget: Budget;
+
+  mounted() {
+    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
+    this.headers = [
+      {
+        text: this.$t("general.category"),
+        sortable: true,
+        value: "category"
       },
-      occurrenceFrequencies: [
-        { value: 0, text: 'transactionSchedules.once' },
-        { value: 1, text: 'transactionSchedules.day' },
-        { value: 2, text: 'transactionSchedules.week' },
-        { value: 3, text: 'transactionSchedules.month' }
-      ],
-      headers: [
-        {
-          text: this.$t('general.category'),
-          sortable: true,
-          value: 'category'
-        },
-        {
-          text: this.$t('general.fromDate'),
-          sortable: true,
-          value: 'startDate'
-        },
-        {
-          text: this.$t('general.toDate'),
-          sortable: true,
-          value: 'endDate'
-        },
-        {
-          text: this.$t('transactionSchedules.frequency'),
-          sortable: true,
-          value: 'frequency'
-        },
-        {
-          text: this.$t('general.description'),
-          sortable: true,
-          value: 'description'
-        },
-        {
-          text: this.$t('general.amount'),
-          sortable: true,
-          value: 'amount'
-        },
-        {
-          text: this.$t('general.actions'),
-          sortable: false
-        }
-      ],
-      mdiPlusCircleOutline,
-      mdiPencil,
-      mdiTrashCan,
-      mdiMagnify
-    }
-  },
-  computed: {
-    ...mapState({
-      budgets: state => state.budgets.budgets
-    }),
-    budget () {
-      return this.budgets.find(v => v.id == this.$route.params.id)
-    }
-  },
-  mounted: function () {
-    this.activeBudgetChange(this.$route.params.id)
-    setTimeout(() => {
-      this.initializeBudgets()
-    }, 300)
-    this.initializeBudgets()
-    if (this.budget) {
-      this.fetchTransactionSchedules()
-    }
-  },
-  watch: {
-    $route (to, from) {
-      if (from.params.id != to.params.id) {
-        this.activeBudgetChange(to.params.id)
-        this.reloadInitialized()
+      {
+        text: this.$t("general.fromDate"),
+        sortable: true,
+        value: "startDate"
+      },
+      {
+        text: this.$t("general.toDate"),
+        sortable: true,
+        value: "endDate"
+      },
+      {
+        text: this.$t("transactionSchedules.frequency"),
+        sortable: true,
+        value: "frequency"
+      },
+      {
+        text: this.$t("general.description"),
+        sortable: true,
+        value: "description"
+      },
+      {
+        text: this.$t("general.amount"),
+        sortable: true,
+        value: "amount"
+      },
+      {
+        text: this.$t("general.actions"),
+        sortable: false
       }
-    },
-    budget: function (budget) {
-      this.fetchTransactionSchedules()
+    ];
+    this.activeBudgetChange(this.$route.params.id);
+    setTimeout(() => {
+      this.initializeBudgets();
+    }, 300);
+    this.initializeBudgets();
+    if (this.budget) {
+      this.fetchTransactionSchedules();
     }
-  },
-  methods: {
-    ...mapActions({
-      dispatchError: 'alert/error',
-      dispatchSuccess: 'alert/success',
-      reloadInitialized: 'budgets/reloadInitialized',
-      initializeBudgets: 'budgets/initializeBudgets',
-      activeBudgetChange: 'budgets/activeBudgetChange'
-    }),
+  }
 
-    fetchTransactionSchedules () {
-      var startDate =
-        this.filters.startDate || this.budget.startingDate + '-01'
+  async fetchTransactionSchedules() {
+    var startDate = this.filters.startDate || this.budget.startingDate;
 
-      this.$wait.start('loading.transactionSchedules')
-      transactionSchedulesService
-        .listTransactionSchedules(
-          this.budget.id,
-          startDate,
-          this.filters.endDate
-        )
-        .then(response => {
-          if (response.ok) {
-            response.json().then(data => {
-              this.$wait.end('loading.transactionSchedules')
-              this.transactionSchedules = data
-            })
-          } else {
-            response.json().then(data => {
-              this.$wait.end('loading.transactionSchedules')
-              this.dispatchError(data.message)
-            })
-          }
-        })
-    },
-    createSchedule: function (scheduleData) {
-      this.$wait.start('saving.transactionSchedules')
-      transactionSchedulesService
-        .createTransactionSchedule(scheduleData)
-        .then(response => {
-          if (response.ok) {
-            this.$wait.end('saving.transactionSchedules')
-            this.fetchTransactionSchedules()
-            this.reloadInitialized()
-          } else {
-            response.json().then(data => {
-              this.$wait.end('saving.transactionSchedules')
-              this.dispatchError(data.message)
-            })
-          }
-        })
-        .catch(error => {
-          this.$wait.end('saving.transactionSchedules')
-          error.json().then(data => {
-            this.dispatchError(data.message)
-          })
-        })
-    },
-    updateSchedule: function (scheduleData) {
-      this.$wait.start('saving.transactionSchedules')
-      transactionSchedulesService
-        .updateTransactionSchedule(scheduleData)
-        .then(response => {
-          if (response.ok) {
-            this.$wait.end('saving.transactionSchedules')
-            this.fetchTransactionSchedules()
-            this.reloadInitialized()
-          } else {
-            response.json().then(data => {
-              this.$wait.end('saving.transactionSchedules')
-              this.dispatchError(data.message)
-            })
-          }
-        })
-        .catch(error => {
-          this.$wait.end('saving.transactionSchedules')
-          error.json().then(data => {
-            this.dispatchError(data.message)
-          })
-        })
-    },
-    deleteSchedule: function (scheduleId) {
-      this.$root
-        .$confirm('general.remove', 'transactionSchedules.deleteConfirm', {
-          color: 'red',
-          buttons: { yes: true, no: true, cancel: false, ok: false }
-        })
-        .then(confirm => {
-          if (confirm) {
-            transactionSchedulesService
-              .deleteTransactionSchedule(scheduleId, false)
-              .then(response => {
-                if (response.ok) {
-                  this.fetchTransactionSchedules()
-                  this.reloadInitialized()
-                } else {
-                  response.json().then(data => {
-                    this.dispatchError(data.message)
-                  })
-                }
-              })
-              .catch(error => {
-                this.$wait.end('saving.transactionSchedules')
-                error.json().then(data => {
-                  this.dispatchError(data.message)
-                })
-              })
-          }
-        })
+    this.$wait.start("loading.transactionSchedules");
+    var response = await transactionSchedulesService.listTransactionSchedules(this.budget.budgetId, startDate, this.filters.endDate);
+
+    if (response.ok) {
+      let data = await response.json() as TransactionSchedule[];
+      this.$wait.end("loading.transactionSchedules");
+      this.transactionSchedules = data.map(v=> {
+        v.startDate = new Date(v.startDate);
+        v.endDate = v.endDate ? new Date(v.endDate) : v.endDate;
+        return v;
+      });
+    } else {
+      response.json<ErrorMessage>().then(data => {
+        this.$wait.end("loading.transactionSchedules");
+        this.dispatchError(data.message);
+      });
     }
+  }
+
+  createSchedule(scheduleData) {
+    this.$wait.start("saving.transactionSchedules");
+    transactionSchedulesService
+      .createTransactionSchedule(this.budget.budgetId, scheduleData)
+      .then(response => {
+        if (response.ok) {
+          this.$wait.end("saving.transactionSchedules");
+          this.fetchTransactionSchedules();
+          this.reloadInitialized();
+        } else {
+          response.json().then(data => {
+            this.$wait.end("saving.transactionSchedules");
+            this.dispatchError(data.message);
+          });
+        }
+      })
+      .catch(error => {
+        this.$wait.end("saving.transactionSchedules");
+        error.json().then(data => {
+          this.dispatchError(data.message);
+        });
+      });
+  }
+
+  updateSchedule(scheduleData) {
+    this.$wait.start("saving.transactionSchedules");
+    transactionSchedulesService
+      .updateTransactionSchedule(this.budget.budgetId, scheduleData)
+      .then(response => {
+        if (response.ok) {
+          this.$wait.end("saving.transactionSchedules");
+          this.fetchTransactionSchedules();
+          this.reloadInitialized();
+        } else {
+          response.json().then(data => {
+            this.$wait.end("saving.transactionSchedules");
+            this.dispatchError(data.message);
+          });
+        }
+      })
+      .catch(error => {
+        this.$wait.end("saving.transactionSchedules");
+        error.json().then(data => {
+          this.dispatchError(data.message);
+        });
+      });
+  }
+
+  getCategoryById(budgetCategoryId: number): BudgetCategory {
+    return this.budget.budgetCategories.find(v=>v.budgetCategoryId == budgetCategoryId);
+  }
+
+  deleteSchedule(scheduleId) {
+    this.$confirm({
+      title: "general.remove",
+      message: "transactionSchedules.deleteConfirm",
+      options: {
+        color: "red",
+        buttons: { yes: true, no: true, cancel: false, ok: false }
+      }
+    }).then(confirm => {
+      if (confirm) {
+        transactionSchedulesService
+          .deleteTransactionSchedule(this.budget.budgetId, scheduleId)
+          .then(response => {
+            if (response.ok) {
+              this.fetchTransactionSchedules();
+              this.reloadInitialized();
+            } else {
+              response.json().then(data => {
+                this.dispatchError(data.message);
+              });
+            }
+          })
+          .catch(error => {
+            this.$wait.end("saving.transactionSchedules");
+            error.json().then(data => {
+              this.dispatchError(data.message);
+            });
+          });
+      }
+    });
   }
 }
 </script>

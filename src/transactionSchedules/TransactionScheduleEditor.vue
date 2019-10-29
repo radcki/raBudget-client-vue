@@ -44,7 +44,7 @@
               <v-flex xs12 md5>
                 <v-category-select
                   :disabled="!!editor.transactionScheduleId"
-                  :items="categories[categoryType]"
+                  :items="categories.filter(v=>v.type == categoryType)"
                   :label="$t('general.category')"
                   :rules="requiredRule"
                   v-model="editor.budgetCategory"
@@ -66,15 +66,12 @@
                 ></v-date-field>
               </v-flex>
               <v-flex xs6>
-                <v-date-field
-                  v-model="editor.endDate"
-                  :label="$t('transactionSchedules.endDate')"
-                ></v-date-field>
+                <v-date-field v-model="editor.endDate" :label="$t('transactionSchedules.endDate')"></v-date-field>
               </v-flex>
               <v-flex xs6>
                 <v-radio-group v-model="frequencyCombo" hide-details>
-                  <v-radio :label="$t('transactionSchedules.once')" value="once"></v-radio>
-                  <v-radio :label="$t('transactionSchedules.periodic')" value="periodic"></v-radio>
+                  <v-radio :label="$t('transactionSchedules.once')" :value="eFrequencyCombo.Once"></v-radio>
+                  <v-radio :label="$t('transactionSchedules.periodic')" :value="eFrequencyCombo.Periodic"></v-radio>
                 </v-radio-group>
               </v-flex>
               <v-flex xs12 md6 align-self-end>
@@ -134,188 +131,222 @@
   </v-dialog>
 </template>
 
-<script>
-import { mdiClose } from '@mdi/js'
-export default {
-  name: 'TransactionScheduleEditor',
+<script lang="ts">
+import { mdiClose } from "@mdi/js";
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { Action, namespace } from "vuex-class";
+import { Transaction } from "@/typings/Transaction";
+import { Budget } from "@/typings/Budget";
+import { BudgetCategory } from "@/typings/BudgetCategory";
+import { eCategoryType } from "@/typings/enums/eCategoryType";
+import { eFrequency } from "@/typings/enums/eFrequency";
+import { TransactionSchedule } from "../typings/TransactionSchedule";
+import { differenceInDays, differenceInWeeks, differenceInMonths } from "date-fns";
+
+enum eFrequencyCombo {
+  Once,
+  Periodic
+}
+
+interface EntryEditor {
+  budgetCategory: BudgetCategory,
+  budgetCategoryId: number,
+  description: string | null,
+  amount: number | null,
+  startDate: Date,
+  endDate?: Date | null,
+  frequency: eFrequency,
+  periodStep: number,
+  transactionScheduleId?: number | null,
+}
+
+@Component({
   components: {
-    'v-category-select': () => import('../components/CategorySelect'),
-    'v-date-field': () => import('../components/DateField.vue')
-  },
-  props: {
-    value: Object,
-    dataBudget: {
-      type: Object,
-      default: () => {
-        return { currency: 'PLN' }
+    "v-category-select": () => import("../components/CategorySelect.vue"),
+    "v-date-field": () => import("../components/DateField.vue")
+  }
+})
+export default class TransactionScheduleEditor extends Vue {
+  @Prop(Object) value: TransactionSchedule;
+  @Prop(Object) dataBudget: Budget;
+
+  startDateMenu: boolean = false;
+  endDateMenu: boolean = false;
+
+  requiredRule: any[] = [v => !!v];
+  dialog: boolean = false;
+
+  occurrenceFrequencies = [
+    { value: eFrequency.Once, text: "transactionSchedules.once" },
+    { value: eFrequency.Daily, text: "transactionSchedules.day" },
+    { value: eFrequency.Weekly, text: "transactionSchedules.week" },
+    { value: eFrequency.Monthly, text: "transactionSchedules.month" }
+  ];
+
+  categoryTypes = [
+    { value: eCategoryType.Spending, text: "general.spendings" },
+    { value: eCategoryType.Income, text: "general.incomes" },
+    { value: eCategoryType.Saving, text: "general.savings" }
+  ];
+  categoryType: eCategoryType = eCategoryType.Spending;
+
+  frequencyCombo: eFrequencyCombo = eFrequencyCombo.Once;
+
+  eFrequency = eFrequency;
+  eFrequencyCombo = eFrequencyCombo;
+  eCategoryType = eCategoryType;
+
+  editor: EntryEditor = {
+    ...{
+      transactionScheduleId: null,
+      description: null,
+      budgetCategory: null,
+      budgetCategoryId: null,
+      amount: null,
+      startDate: new Date(),
+      endDate: null,
+      frequency: 0,
+      periodStep: null
+    },
+    ...Object.assign({},(this.value ? this.value : {}))
+  };
+
+  budget = this.dataBudget;
+
+  mdiClose = mdiClose;
+
+  get mobile() {
+    return !this.$vuetify.breakpoint.smAndUp;
+  }
+  get categories() {
+    return this.budget.budgetCategories;
+  }
+  get totalAmount() {
+    var amount = this.editor.amount * 1;
+    if (amount == 0 || this.editor.frequency == 0) {
+      return amount;
+    }
+    if (!this.editor.endDate) {
+      if (this.editor.frequency == 1) {
+        return Math.ceil(365 / this.editor.periodStep) * amount;
+      }
+      if (this.editor.frequency == 2) {
+        return Math.ceil(52 / this.editor.periodStep) * amount;
+      }
+      if (this.editor.frequency == 3) {
+        return Math.ceil(12 / this.editor.periodStep) * amount;
+      }
+    } else {
+      if (this.editor.frequency == 1) {
+        return (
+          Math.ceil(
+            Math.max(
+              differenceInDays(this.editor.endDate, this.editor.startDate) + 1,
+              1
+            ) / this.editor.periodStep
+          ) * amount
+        );
+      }
+      if (this.editor.frequency == 2) {
+        return (
+          Math.ceil(
+            Math.max(
+              differenceInWeeks(this.editor.endDate, this.editor.startDate) + 1,
+              1
+            ) / this.editor.periodStep
+          ) * amount
+        );
+      }
+      if (this.editor.frequency == 3) {
+        return (
+          Math.ceil(
+            Math.max(
+              differenceInMonths(this.editor.endDate, this.editor.startDate) + 1,
+              1
+            ) / this.editor.periodStep
+          ) * amount
+        );
       }
     }
-  },
-  data: function () {
-    return {
-      startDateMenu: false,
-      endDateMenu: false,
+    return null;
+  }
 
-      requiredRule: [v => !!v],
-      dialog: false,
 
-      occurrenceFrequencies: [
-        { value: 1, text: 'transactionSchedules.day' },
-        { value: 2, text: 'transactionSchedules.week' },
-        { value: 3, text: 'transactionSchedules.month' }
-      ],
-      categoryTypes: [
-        { value: 'spendingCategories', text: 'general.spendings' },
-        { value: 'incomeCategories', text: 'general.incomes' },
-        { value: 'savingCategories', text: 'general.savings' }
-      ],
-      categoryType: 'spendingCategories',
-      frequencyCombo: 'once',
-      editor: {
+  @Watch("dialog")
+  OnDialogOpen(open) {
+    if (open) {
+      this.$wait.start("dialog");
+      this.editor = {
         ...{
           transactionScheduleId: null,
           description: null,
           budgetCategory: null,
+          budgetCategoryId: null,
           amount: null,
-          startDate: this.$moment().format('YYYY-MM-DD'),
+          startDate: new Date(),
           endDate: null,
           frequency: 0,
           periodStep: null
         },
-        ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
-      },
-      budget: this.dataBudget,
+        ...Object.assign({}, this.value ? this.value : {})
+      };
+      this.editor.budgetCategory = this.getCategoryById(this.editor.budgetCategoryId)
+      if (this.$refs.editor) {
+        (this.$refs.editor as Vue & { resetValidation: () => void }).resetValidation();
+      }
+    } else {
+      this.$wait.end("dialog");
+    }
+  }
 
-      mdiClose
+  @Watch("categoryType")
+  OnCategoryTypeChange() {
+    this.editor.budgetCategory = null;
+    (this.$refs.editor as Vue & { resetValidation: () => void }).resetValidation();
+  }
+
+  @Watch("frequencyCombo")
+  OnFrequencyComboChange(frequencyCombo) {
+    if (frequencyCombo == "once") {
+      this.editor.frequency = 0;
+      this.editor.periodStep = null;
+    } else {
+      this.editor.frequency = this.editor.frequency || 3;
+      this.editor.periodStep = this.editor.periodStep || 1;
     }
-  },
-  computed: {
-    mobile () {
-      return !this.$vuetify.breakpoint.smAndUp
-    },
-    categories () {
-      return this.budget
-    },
-    totalAmount () {
-      var amount = this.editor.amount * 1
-      if (amount == 0 || this.editor.frequency == 0) {
-        return amount
-      }
-      if (!this.editor.endDate) {
-        if (this.editor.frequency == 1) {
-          return Math.ceil(365 / this.editor.periodStep) * amount
-        }
-        if (this.editor.frequency == 2) {
-          return Math.ceil(52 / this.editor.periodStep) * amount
-        }
-        if (this.editor.frequency == 3) {
-          return Math.ceil(12 / this.editor.periodStep) * amount
-        }
-      } else {
-        if (this.editor.frequency == 1) {
-          return (
-            Math.ceil(
-              Math.max(
-                this.$moment(this.editor.endDate).diff(
-                  this.editor.startDate,
-                  'days'
-                ) + 1,
-                1
-              ) / this.editor.periodStep
-            ) * amount
-          )
-        }
-        if (this.editor.frequency == 2) {
-          return (
-            Math.ceil(
-              Math.max(
-                this.$moment(this.editor.endDate).diff(
-                  this.editor.startDate,
-                  'weeks'
-                ) + 1,
-                1
-              ) / this.editor.periodStep
-            ) * amount
-          )
-        }
-        if (this.editor.frequency == 3) {
-          return (
-            Math.ceil(
-              Math.max(
-                this.$moment(this.editor.endDate).diff(
-                  this.editor.startDate,
-                  'months'
-                ) + 1,
-                1
-              ) / this.editor.periodStep
-            ) * amount
-          )
-        }
-      }
-      return null
-    }
-  },
-  watch: {
-    dialog (open) {
-      if (open) {
-        this.$wait.start('dialog')
-        this.editor = {
-          ...{
-            transactionScheduleId: null,
-            description: null,
-            budgetCategory: null,
-            amount: null,
-            startDate: this.$moment().format('YYYY-MM-DD'),
-            endDate: null,
-            frequency: 0,
-            periodStep: null
-          },
-          ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
-        }
-        if (this.$refs.editor) {
-          this.$refs.editor.resetValidation()
-        }
-      } else {
-        this.$wait.end('dialog')
-      }
-    },
-    categoryType: function () {
-      this.editor.budgetCategory = null
-    },
-    frequencyCombo: function (frequencyCombo) {
-      if (frequencyCombo == 'once') {
-        this.editor.frequency = 0
-        this.editor.periodStep = null
-      } else {
-        this.editor.frequency = this.editor.frequency || 3
-        this.editor.periodStep = this.editor.periodStep || 1
-      }
-    }
-  },
-  mounted: function () {
-    this.$root.$on('closeDialogs', () => {
-      this.dialog = false
-    })
-    this.requiredRule = [v => !!v || this.$t('forms.requiredField')]
+  }
+
+  mounted() {
+    this.$root.$on("closeDialogs", () => {
+      this.dialog = false;
+    });
+    this.editor.budgetCategory = this.getCategoryById(this.editor.budgetCategoryId)
+
+    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
     if (this.value && this.value.frequency > 0) {
-      this.frequencyCombo = 'periodic'
-      this.editor.frequency = this.value.frequency
-      this.editor.periodStep = this.value.periodStep
+      this.frequencyCombo = eFrequencyCombo.Periodic;
+      this.editor.frequency = this.value.frequency;
+      this.editor.periodStep = this.value.periodStep;
     }
-  },
-  beforeDestroy: function () {
-    this.$wait.end('dialog')
-  },
-  methods: {
-    save () {
-      if (this.$refs.editor.validate()) {
-        this.dialog = false
-        this.$emit('save', this.editor)
-      }
-    },
-    cancel () {
-      this.dialog = false
+  }
+
+  beforeDestroy() {
+    this.$wait.end("dialog");
+  }
+
+  getCategoryById(budgetCategoryId: number): BudgetCategory {
+    return this.budget.budgetCategories.find(v=>v.budgetCategoryId == budgetCategoryId);
+  }
+
+  save() {
+    if ((this.$refs.editor as Vue & { validate: () => boolean }).validate()) {
+      this.dialog = false;
+      this.$emit("save", this.editor);
     }
+  }
+
+  cancel() {
+    this.dialog = false;
   }
 }
 </script>

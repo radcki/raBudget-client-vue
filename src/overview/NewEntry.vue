@@ -261,6 +261,23 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import { Action, namespace } from 'vuex-class'
 import { format } from 'date-fns'
 import { Transaction } from '../typings/Transaction'
+import { BudgetCategory } from '../typings/BudgetCategory'
+import { TransactionSchedule } from '../typings/TransactionSchedule'
+import { eFrequency } from '../typings/enums/eFrequency'
+import { Allocation } from '../typings/Allocation'
+import { ErrorMessage } from '@/typings/TypedResponse'
+
+interface EntryEditor {
+  category: BudgetCategory,
+  sourceCategory?: BudgetCategory,
+  date: Date,
+  description: string | null,
+  amount: number | null,
+  endDate: Date | null,
+  frequency: eFrequency,
+  periodStep: number,
+  transactionScheduleId?: number | null,
+}
 
 const transactionsModule = namespace('transactions')
 const alertModule = namespace('alert')
@@ -293,7 +310,7 @@ export default class NewEntry extends Vue {
   //requiredRule: any[] = [v => !!v || this.$t('forms.requiredField')]
   requiredRule: any[] = []
 
-  editor: any = {
+  editor: EntryEditor = {
         category: null,
         sourceCategory: null,
         date: this.getDate(),
@@ -312,6 +329,7 @@ export default class NewEntry extends Vue {
         : eCategoryType.Saving
   }
 
+
   @Watch('tab')
   OnTabChange() {
     (this.$refs.editorForm as Vue & { resetValidation: () => any }).resetValidation()
@@ -320,11 +338,11 @@ export default class NewEntry extends Vue {
   @Watch('selectedType')
   OnSelectedTypeChange() {
     if (
-      this.editor.budgetCategory &&
-      this.editor.budgetCategory.budgetCategoryType != this.tab &&
-      (this.tab == 3 && this.editor.budgetCategory.budgetCategoryType != 0)
+      this.editor.category &&
+      this.editor.category.type != this.tab &&
+      (this.tab == 3 && this.editor.category.type != 0)
     ) {
-      this.editor.budgetCategory = null
+      this.editor.category = null
     }
   }
 
@@ -343,10 +361,14 @@ export default class NewEntry extends Vue {
     if (!data) {
       return
     }
-    this.tab = data.category.type
-    this.editor = JSON.parse(JSON.stringify(data))
-    this.editor.date = format(new Date(this.editor.date), 'yyyy-MM-dd')
-    this.editor.category = data.category
+    this.editor = {...Object.assign({}, data)}
+    this.editor.date = new Date(this.editor.date || data.transactionDate)
+    if (data.budgetCategoryId) {
+      this.editor.category = this.dataBudget.budgetCategories.find(v=>v.budgetCategoryId == data.budgetCategoryId)
+    } else {
+      this.editor.category = data.category
+    }
+    this.tab = this.editor.category.type
     this.createSchedule = false
     this.addScheduleDisabled = true
   }
@@ -380,32 +402,35 @@ export default class NewEntry extends Vue {
         transactionDate: this.editor.date
       };
 
-      if (this.createSchedule && !this.editor.transactionSchedule) {
+      if (this.createSchedule && !this.editor.transactionScheduleId) {
         this.createTransactionSchedule(this.editor)
       }
-      this.editor.budget = this.dataBudget;
       var response = await transactionsService.createTransaction(this.dataBudget.budgetId, transaction);
 
       if (response.ok) {
         this.$emit('saved')
         this.editorDialog = false;
-        this.editor.budget = { ...this.dataBudget }
         this.loadTransactionToStore(transaction);
         this.resetForm()
       } else {
-        var error = await response.json();
+        var error = await response.json<ErrorMessage>();
         this.dispatchError(error.message);
       }
     }
   }
 
-  createTransactionSchedule(scheduleData) {
+  createTransactionSchedule(data: EntryEditor) {
     this.$wait.start('saving.transactionSchedules')
-
-    scheduleData.budgetCategory = scheduleData.category
-    scheduleData.startDate = scheduleData.date
+    var schedule: TransactionSchedule = {
+      amount: data.amount,
+      description: data.description,
+      budgetCategoryId: data.category.budgetCategoryId,
+      frequency: data.frequency,
+      startDate: data.date,
+      periodStep: data.periodStep,
+    }
     transactionSchedulesService
-      .createTransactionSchedule(scheduleData)
+      .createTransactionSchedule(this.dataBudget.budgetId, schedule)
       .then(response => {
         if (response.ok) {
           this.$wait.end('saving.transactionSchedules')
@@ -419,15 +444,21 @@ export default class NewEntry extends Vue {
   }
 
   createAllocation() {
-    console.log('reset');
+    var allocation: Allocation = {
+      amount: this.editor.amount,
+      description: this.editor.description,
+      targetBudgetCategoryId: this.editor.category.budgetCategoryId,
+      sourceBudgetCategoryId: this.editor.sourceCategory.budgetCategoryId,
+      allocationDate: this.editor.date,
+    }
     if ((this.$refs.editorForm as Vue & { validate: () => boolean }).validate()) {
-      allocationsService.createAllocation(this.editor).then(response => {
+      allocationsService.createAllocation(this.dataBudget.budgetId, allocation).then(response => {
         if (response.ok) {
           this.$emit('saved')
           this.editorDialog = false
           this.resetForm()
         } else {
-          response.json().then(data => {
+          response.json<ErrorMessage>().then(data => {
             this.dispatchError(data.message)
           })
         }

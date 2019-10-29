@@ -146,8 +146,6 @@
           color="amber darken-1"
           :title="$t('transactions.recentSpending')"
           :data-budget="budget"
-          v-on:edit="editTransaction"
-          v-on:delete="deleteTransaction"
         ></v-mini-transactions-list>
       </v-flex>
 
@@ -157,8 +155,6 @@
           color="green darken-1"
           :title="$t('transactions.recentIncome')"
           :data-budget="budget"
-          v-on:edit="editTransaction"
-          v-on:delete="deleteTransaction"
         ></v-mini-transactions-list>
       </v-flex>
 
@@ -168,8 +164,6 @@
           color="blue darken-1"
           :title="$t('transactions.recentSaving')"
           :data-budget="budget"
-          v-on:edit="editTransaction"
-          v-on:delete="deleteTransaction"
         ></v-mini-transactions-list>
       </v-flex>
     </v-layout>
@@ -229,10 +223,10 @@ export default {
   computed: {
     account() {return this.$store.state.account},
     budgets() {return this.$store.state.budgets.budgets},
+    budget() {return this.$store.getters['budgets/budget']},
     closestScheduledTransactions() {return this.$store.state.transactions.closestScheduledTransactions},
     spendingCategoriesBalance() {return this.$store.state.budgets.activeBudget.spendingCategoriesBalance},
     spendingCategoriesBalance() {return this.$store.state.budgets.activeBudget.savingCategoriesBalance},
-    budget() {return this.$store.getters['budgets/budget']},
     spendingCategoriesBalance() {return this.$store.getters['budgets/spendingCategoriesBalance']},
     savingCategoriesBalance() {return this.$store.getters['budgets/savingCategoriesBalance']},
     transactions() {return this.$store.getters['transactions/getTransactions']},
@@ -297,36 +291,7 @@ export default {
         this.$currencyConfig(this.budget)
       )
     },
-    editTransaction (id) {
-      this.$refs.transactionEditor.open(id).then(response => {
-        if (response && response.ok) {
-        } else if (response) {
-          response.json().then(data => {
-            this.dispatchError(data.message)
-          })
-        }
-      })
-    },
-    deleteTransaction (id) {
-      this.$root
-        .$confirm('general.remove', 'transactions.deleteConfirm', {
-          color: 'red',
-          buttons: { yes: true, no: true, cancel: false, ok: false }
-        })
-        .then(confirm => {
-          if (confirm) {
-            transactionsService.deleteTransaction(id).then(response => {
-              if (response.ok) {
-                this.unloadTransactionFromStore(id)
-              } else {
-                response.json().then(data => {
-                  this.dispatchError(data.message)
-                })
-              }
-            })
-          }
-        })
-    },
+
     passScheduledToEditor (transaction) {
       this.newEntryInputData = null
       this.$nextTick(function () { this.newEntryInputData = transaction })

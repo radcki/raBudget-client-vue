@@ -6,21 +6,21 @@
       </v-list-item>
       <div class="white" :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
         <v-list-item
-          :key="'tr_' + transaction.transactionSchedule.transactionScheduleId  + transaction.date"
+          :key="'tr_' + transaction.transactionScheduleId  + transaction.transactionDate"
           v-for="(transaction) in items"
           class="pb-1"
         >
           <v-list-item-avatar size="30">
             <v-icon
-              :color="typeColors[transaction.category.type]"
-            >{{ $categoryIcons[transaction.category.icon] }}</v-icon>
+              :color="$categoryColor[getCategoryById(transaction.budgetCategoryId).type]"
+            >{{ $categoryIcons[getCategoryById(transaction.budgetCategoryId).icon] }}</v-icon>
           </v-list-item-avatar>
 
           <v-list-item-content>
             <v-list-item-title class="font-weight-medium">{{ transaction.description}}</v-list-item-title>
             <v-list-item-subtitle
               class="text--primary"
-            >{{transaction.date | dateDormat}} - {{transaction.amount | currency($currencyConfig(dataBudget))}}</v-list-item-subtitle>
+            >{{transaction.transactionDate | dateFormat('yyyy-MM-dd', $dateLocales[$locale])}} - {{transaction.amount | currency($currencyConfig(dataBudget))}}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
             <v-tooltip top>
@@ -40,21 +40,21 @@
       </template>
       <div class="white" :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
         <v-list-item
-          :key="'tr_' + transaction.transactionSchedule.transactionScheduleId  + transaction.date"
+          :key="'tr_' + transaction.transactionScheduleId  + transaction.date"
           v-for="(transaction) in items"
           class="pb-1"
         >
           <v-list-item-avatar size="24">
             <v-icon
-              :color="typeColors[transaction.category.type]"
-            >{{ $categoryIcons[transaction.category.icon] }}</v-icon>
+              :color="$categoryColor[getCategoryById(transaction.budgetCategoryId).type]"
+            >{{ $categoryIcons[getCategoryById(transaction.budgetCategoryId).icon] }}</v-icon>
           </v-list-item-avatar>
 
           <v-list-item-content>
             <v-list-item-title class="font-weight-medium">{{ transaction.description}}</v-list-item-title>
             <v-list-item-subtitle
               class="text--primary"
-            >{{transaction.date | dateDormat}} - {{transaction.amount | currency($currencyConfig(dataBudget))}}</v-list-item-subtitle>
+            >{{transaction.date | dateFormat('yyyy-MM-dd', $dateLocales[$locale])}} - {{transaction.amount | currency($currencyConfig(dataBudget))}}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
             <v-tooltip top>
@@ -104,6 +104,11 @@ export default {
   watch: {
     '$vuetify.breakpoint.lgAndUp': function (desktop) {
       this.expanded = desktop
+    }
+  },
+  methods: {
+    getCategoryById(budgetCategoryId) {
+      return this.dataBudget.budgetCategories.find(v=>v.budgetCategoryId == budgetCategoryId);
     }
   }
 }

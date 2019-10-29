@@ -4,8 +4,10 @@ import VueWait from 'vue-wait';
 declare module 'vue/types/vue' {
   interface Vue {
     $wait: VueWait;
+    $locale: any;
     $keycloak: any;
     $currencyConfig: any;
+    $categoryIcons: object;
   }
 }
 

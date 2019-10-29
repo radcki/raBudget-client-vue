@@ -147,14 +147,14 @@
         <template v-slot:activator="{ on }">
           <v-btn v-on="on" text>
             <v-icon class="mr-2">{{mdiWeb}}</v-icon>
-            {{locale}}
+            {{$locale}}
           </v-btn>
         </template>
 
         <v-list light dense subheader>
           <v-list-item @click="switchLocale('pl')">
             <v-list-item-avatar>
-              <v-icon size="24" v-if="locale=='pl'">{{mdiCheckCircle}}</v-icon>
+              <v-icon size="24" v-if="$locale=='pl'">{{mdiCheckCircle}}</v-icon>
               <v-icon size="24" v-else>{{mdiCircleOutline}}</v-icon>
             </v-list-item-avatar>
             <v-list-item-title>PL</v-list-item-title>
@@ -162,7 +162,7 @@
 
           <v-list-item @click="switchLocale('en')">
             <v-list-item-avatar>
-              <v-icon size="24" v-if="locale=='en'">{{mdiCheckCircle}}</v-icon>
+              <v-icon size="24" v-if="$locale=='en'">{{mdiCheckCircle}}</v-icon>
               <v-icon size="24" v-else>{{mdiCircleOutline}}</v-icon>
             </v-list-item-avatar>
             <v-list-item-title>EN</v-list-item-title>
@@ -276,7 +276,6 @@ const accountStore = namespace("account");
 
 @Component
 export default class App extends Vue {
-  locale: string = "pl";
   drawer: boolean = true;
   loadingOverlay: boolean = false;
 
@@ -322,15 +321,14 @@ export default class App extends Vue {
   }
 
   mounted() {
-    var savedLocale = localStorage.getItem("locale");
+    var savedLocale =  this.$locale;
     if (savedLocale) {
       this.switchLocale(savedLocale);
     } else {
-      this.switchLocale(navigator.language);
+      this.switchLocale((navigator.language != 'pl' ? 'en' : 'pl'));
     }
 
     this.drawer = this.$vuetify.breakpoint.lgAndUp;
-    //this.$root.$confirm = this.$refs.confirm.open;
 
     if (this.$keycloak.authenticated) {
       this.initializeBudgets().then(() => {
@@ -338,25 +336,21 @@ export default class App extends Vue {
       });
     }
   }
-  /*
-  created() {
-    this.$root.$on("reloadBudgets", this.fetchBudgets);
-  },*/
+
   @alertStore.Action("clear") clearAlert;
-  @alertStore.Action("logout") logout;
+  @accountStore.Action("logout") logout;
   @budgetsStore.Action("initializeBudgets") initializeBudgets;
   @budgetsStore.Action("fetchBudgets") fetchBudgets;
 
   signOut() {
-    /*
       this.logout().then(() => {
         this.$router.push("/");
-      });*/
+      });
   }
 
   switchLocale(locale): void {
     locale = locale.substring(0, 2);
-    this.locale = locale;
+    this.$locale = locale;
     localStorage.setItem("locale", locale);
     document.getElementsByTagName("html")[0].setAttribute("lang", locale);
     this.$i18n.locale = locale;

@@ -111,7 +111,7 @@
                   <v-icon class="px-2" size="40">{{ $categoryIcons[getCategoryById(item.budgetCategoryId).icon] }}</v-icon>
                   {{ getCategoryById(item.budgetCategoryId).name }}
                 </td>
-                <td>{{ new Date(item.transactionDate) | dateDormat("EEEE, d.MM.yyyy") }}</td>
+                <td>{{ new Date(item.transactionDate) | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale]) }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
                 <td>
@@ -147,7 +147,7 @@
                   {{ transaction.description}}
                   <span
                     class="grey--text text--lighten-1 caption"
-                  >- {{ transaction.transactionDate | dateDormat("EEEE, d.MM.yyyy") }}</span>
+                  >- {{ transaction.transactionDate | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale]) }}</span>
                 </v-list-item-title>
 
                 <v-list-item-subtitle
@@ -187,6 +187,7 @@ import { mdiMagnify, mdiPencil, mdiTrashCan } from "@mdi/js";
 import { eCategoryType } from "../typings/enums/eCategoryType";
 import { BudgetCategory } from "../typings/BudgetCategory";
 import { Budget } from "../typings/Budget";
+import { ErrorMessage } from '@/typings/TypedResponse';
 
 const alertModule = namespace("alert");
 const budgetsModule = namespace("budgets");
@@ -338,7 +339,7 @@ export default class Transactions extends Vue {
           this.$wait.end("saving.transaction");
           this.reloadInitialized();
         } else {
-          response.json().then(data => {
+          response.json<ErrorMessage>().then(data => {
             this.$wait.end("saving.transaction");
             this.dispatchError(data.message);
           });
@@ -371,7 +372,7 @@ export default class Transactions extends Vue {
         this.reloadInitialized();
         this.fetchTransactions();
       } else {
-        let error = await response.json();
+        let error = await response.json<ErrorMessage>();
         this.dispatchError(error.message);
       }
     }

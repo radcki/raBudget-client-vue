@@ -54,6 +54,7 @@
 
                     <v-date-field
                       :rules="requiredRule"
+                      type="month"
                       v-model="budget.startingDate"
                       :label="$t('budgets.startDate')"
                     ></v-date-field>
@@ -69,84 +70,13 @@
             </v-stepper-content>
 
             <v-stepper-content step="2">
-              <v-list two-line subheader>
-                <v-subheader class="headline">{{ $t('categories.incomeCategories') }}</v-subheader>
-                <v-form ref="formIncomeCategory" v-model="validStep2">
-                  <v-container grid-list-md>
-                    <v-layout row wrap>
-                      <v-flex xs3 md1 d-flex>
-                        <v-select
-                          v-model="newIncomeCategory.icon"
-                          :items="icons"
-                          :label="$t('general.icon')"
-                        >
-                          >
-                          <template slot="selection" slot-scope="data">
-                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
-                          </template>
-                          <template slot="item" slot-scope="data">
-                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
-                          </template>
-                        </v-select>
-                      </v-flex>
-                      <v-flex xs9 md5>
-                        <v-text-field
-                          :rules="requiredRule"
-                          v-model="newIncomeCategory.name"
-                          :label="$t('categories.name')"
-                        ></v-text-field>
-                      </v-flex>
-                      <v-flex xs12 md4>
-                        <v-text-field
-                          :prepend-icon="mdiCash"
-                          type="number"
-                          step="0.01"
-                          :rules="requiredRule"
-                          min="0"
-                          v-model="newIncomeCategory.amount"
-                          :label="$t('categories.monthlyAmount')"
-                        ></v-text-field>
-                      </v-flex>
-                      <v-flex xs12 md2>
-                        <v-btn color="primary" class="white--text" @click="addIncome">
-                          {{$t('general.add')}}
-                          <v-icon right dark>{{mdiPlus}}</v-icon>
-                        </v-btn>
-                      </v-flex>
-                    </v-layout>
-                  </v-container>
-                </v-form>
+              <v-subheader class="headline">{{ $t('categories.incomeCategories') }}</v-subheader>
 
-                <v-list-item
-                  v-for="(category, i) in categories.income"
-                  v-bind:data="category"
-                  v-bind:key="i"
-                >
-                  <v-list-item-avatar color="light-green darken-3">
-                    <v-icon dark>{{ $categoryIcons[category.icon] }}</v-icon>
-                  </v-list-item-avatar>
-
-                  <v-list-item-content>
-                    <v-list-item-title>{{ category.name }}</v-list-item-title>
-
-                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencyConfig(budget)) }}</v-list-item-subtitle>
-                  </v-list-item-content>
-
-                  <v-list-item-action>
-                    <v-btn text icon ripple dark color="primary" @click="editIncome(i)">
-                      <v-icon>{{ mdiPencil }}</v-icon>
-                    </v-btn>
-                  </v-list-item-action>
-                  <v-list-item-action>
-                    <v-btn text icon ripple dark color="red" @click="removeIncome(i)">
-                      <v-icon>{{ mdiCancel }}</v-icon>
-                    </v-btn>
-                  </v-list-item-action>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ incomeCategoriesSum | currency($currencyConfig(budget)) }}</v-list-item-content>
-                </v-list-item>
-              </v-list>
+              <v-new-budget-category-editor
+                :budget="budget"
+                v-model="categories.income"
+                :category-type="eCategoryType.Income"
+              ></v-new-budget-category-editor>
 
               <v-btn
                 :disabled="!(categories.income.length>0)"
@@ -158,84 +88,12 @@
             </v-stepper-content>
 
             <v-stepper-content step="3">
-              <v-list two-line subheader>
-                <v-subheader class="headline">{{ $t('categories.spendingCategories') }}</v-subheader>
-                <v-form ref="formSpendingCategory" v-model="validStep3">
-                  <v-container grid-list-md>
-                    <v-layout row wrap>
-                      <v-flex xs3 md1 d-flex>
-                        <v-select
-                          v-model="newSpendingCategory.icon"
-                          :items="icons"
-                          :label="$t('general.icon')"
-                        >
-                          >
-                          <template slot="selection" slot-scope="data">
-                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
-                          </template>
-                          <template slot="item" slot-scope="data">
-                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
-                          </template>
-                        </v-select>
-                      </v-flex>
-                      <v-flex xs9 md5>
-                        <v-text-field
-                          :rules="requiredRule"
-                          v-model="newSpendingCategory.name"
-                          :label="$t('categories.name')"
-                        ></v-text-field>
-                      </v-flex>
-                      <v-flex xs12 md4>
-                        <v-text-field
-                          :prepend-icon="mdiCash"
-                          type="number"
-                          step="0.01"
-                          :rules="requiredRule"
-                          min="0"
-                          v-model="newSpendingCategory.amount"
-                          :label="$t('categories.monthlyAmount')"
-                        ></v-text-field>
-                      </v-flex>
-                      <v-flex xs12 md2>
-                        <v-btn color="primary" class="white--text" @click="addSpending">
-                          {{$t('general.add')}}
-                          <v-icon right dark>{{mdiPlus}}</v-icon>
-                        </v-btn>
-                      </v-flex>
-                    </v-layout>
-                  </v-container>
-                </v-form>
-
-                <v-list-item
-                  v-for="(category, i) in categories.spending"
-                  v-bind:data="category"
-                  v-bind:key="i"
-                >
-                  <v-list-item-avatar color="amber">
-                    <v-icon dark>{{ $categoryIcons[category.icon] }}</v-icon>
-                  </v-list-item-avatar>
-
-                  <v-list-item-content>
-                    <v-list-item-title>{{ category.name }}</v-list-item-title>
-
-                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencyConfig(budget)) }}</v-list-item-subtitle>
-                  </v-list-item-content>
-
-                  <v-list-item-action>
-                    <v-btn text icon ripple dark color="primary" @click="editSpending(i)">
-                      <v-icon>{{mdiPencil}}</v-icon>
-                    </v-btn>
-                  </v-list-item-action>
-                  <v-list-item-action>
-                    <v-btn text icon ripple dark color="red" @click="removeSpending(i)">
-                      <v-icon>{{mdiCancel}}</v-icon>
-                    </v-btn>
-                  </v-list-item-action>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ spendingCategoriesSum | currency($currencyConfig(budget)) }}</v-list-item-content>
-                </v-list-item>
-              </v-list>
+              <v-subheader class="headline">{{ $t('categories.spendingCategories') }}</v-subheader>
+              <v-new-budget-category-editor
+                :budget="budget"
+                v-model="categories.spending"
+                :category-type="eCategoryType.Spending"
+              ></v-new-budget-category-editor>
 
               <v-btn
                 :disabled="!(categories.spending.length>0)"
@@ -247,86 +105,15 @@
             </v-stepper-content>
 
             <v-stepper-content step="4">
-              <v-list two-line subheader>
-                <v-subheader class="headline">{{ $t('categories.savingCategories') }}</v-subheader>
-                <v-form ref="formSavingCategory" v-model="validStep4">
-                  <v-container grid-list-md>
-                    <v-layout row wrap>
-                      <v-flex xs3 md1 d-flex>
-                        <v-select
-                          v-model="newSavingCategory.icon"
-                          :items="icons"
-                          :label="$t('general.icon')"
-                        >
-                          <template slot="selection" slot-scope="data">
-                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
-                          </template>
-                          <template slot="item" slot-scope="data">
-                            <v-icon>{{ $categoryIcons[data.item] }}</v-icon>
-                          </template>
-                        </v-select>
-                      </v-flex>
-                      <v-flex xs9 md5>
-                        <v-text-field
-                          :rules="requiredRule"
-                          v-model="newSavingCategory.name"
-                          :label="$t('categories.name')"
-                        ></v-text-field>
-                      </v-flex>
-                      <v-flex xs12 md4>
-                        <v-text-field
-                          :prepend-icon="mdiCash"
-                          type="number"
-                          step="0.01"
-                          :rules="requiredRule"
-                          min="0"
-                          v-model="newSavingCategory.amount"
-                          :label="$t('categories.monthlyAmount')"
-                        ></v-text-field>
-                      </v-flex>
-                      <v-flex xs12 md2>
-                        <v-btn color="primary" class="white--text" @click="addSaving">
-                          {{$t('general.add')}}
-                          <v-icon right dark>{{mdiPlus}}</v-icon>
-                        </v-btn>
-                      </v-flex>
-                    </v-layout>
-                  </v-container>
-                </v-form>
-
-                <v-list-item
-                  v-for="(category, i) in categories.savings"
-                  v-bind:data="category"
-                  v-bind:key="i"
-                >
-                  <v-list-item-avatar color="indigo">
-                    <v-icon dark>{{ $categoryIcons[category.icon] }}</v-icon>
-                  </v-list-item-avatar>
-
-                  <v-list-item-content>
-                    <v-list-item-title>{{ category.name }}</v-list-item-title>
-
-                    <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amount | currency($currencyConfig(budget)) }}</v-list-item-subtitle>
-                  </v-list-item-content>
-
-                  <v-list-item-action>
-                    <v-btn text icon ripple dark color="primary" @click="editSaving(i)">
-                      <v-icon>{{mdiPencil}}</v-icon>
-                    </v-btn>
-                  </v-list-item-action>
-                  <v-list-item-action>
-                    <v-btn text icon ripple dark color="red" @click="removeSaving(i)">
-                      <v-icon>{{mdiCancel}}</v-icon>
-                    </v-btn>
-                  </v-list-item-action>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ savingsCategoriesSum | currency($currencyConfig(budget)) }}</v-list-item-content>
-                </v-list-item>
-              </v-list>
+              <v-subheader class="headline">{{ $t('categories.savingCategories') }}</v-subheader>
+              <v-new-budget-category-editor
+                :budget="budget"
+                v-model="categories.saving"
+                :category-type="eCategoryType.Saving"
+              ></v-new-budget-category-editor>
 
               <v-btn
-                :disabled="!(categories.savings.length>0)"
+                :disabled="!(categories.saving.length>0)"
                 color="primary"
                 @click="step = 5"
               >{{ $t("general.stepForward") }}</v-btn>
@@ -340,7 +127,7 @@
                 <v-list-item-content>
                   <v-list-item-title>{{ $t('budgets.budgetName') }}: {{ budget.name }}</v-list-item-title>
 
-                  <v-list-item-subtitle>{{ $t('budgets.startDate') }}: {{ budget.startingDate }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>{{ $t('budgets.startDate') }}: {{ budget.startingDate | dateFormat("LLLL yyyy", $dateLocales[$locale]) }}</v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
               <v-container grid-list-md>
@@ -371,7 +158,7 @@
                     <categories-list
                       color="indigo"
                       color-secondary="indigo darken-2"
-                      :items="categories.savings"
+                      :items="categories.saving"
                       :data-budget="budget"
                       hide-actions
                       :title="$t('categories.savingCategories')"
@@ -391,34 +178,37 @@
   </v-container>
 </template>
 
-<script>
-import { budgetService } from '../_services/budget.service'
-import { mapActions } from 'vuex'
+<script lang="ts">
+import { budgetService } from "../_services/budget.service";
+import { mapActions } from "vuex";
 import {
   mdiFormatTitle,
   mdiCash,
   mdiPlus,
   mdiPencil,
   mdiCancel
-} from '@mdi/js'
+} from "@mdi/js";
+import { eCategoryType } from "@/typings/enums/eCategoryType";
 
 export default {
   components: {
-    'categories-list': () => import('../components/CategoriesList'),
-    'v-date-field': () => import('../components/DateField.vue')
+    "categories-list": () => import("../components/CategoriesList.vue"),
+    "v-date-field": () => import("../components/DateField.vue"),
+    "v-new-budget-category-editor": () =>
+      import("./NewBudgetCategoryEditor.vue")
   },
-  data () {
+  data() {
     return {
       step: 1,
       budget: {
         name: null,
         startingDate: null,
-        currency: 'pln'
+        currency: null
       },
       categories: {
         income: [],
         spending: [],
-        savings: []
+        saving: []
       },
       newIncomeCategory: {
         name: null,
@@ -442,144 +232,56 @@ export default {
       validStep3: true,
       validStep4: true,
       currencies: [],
-      requiredRule: [v => !!v || this.$t('forms.requiredField')],
+      requiredRule: [v => !!v || this.$t("forms.requiredField")],
       mdiFormatTitle,
       mdiCash,
       mdiPlus,
       mdiPencil,
-      mdiCancel
-    }
-  },
-  computed: {
-    incomeCategoriesSum: function () {
-      var sum = 0
-      for (var i = 0; i < this.categories.income.length; i++) {
-        sum += this.categories.income[i].amount * 1
-      }
-      return sum
-    },
-    spendingCategoriesSum: function () {
-      var sum = 0
-      for (var i = 0; i < this.categories.spending.length; i++) {
-        sum += this.categories.spending[i].amount * 1
-      }
-      return sum
-    },
-    savingsCategoriesSum: function () {
-      var sum = 0
-      for (var i = 0; i < this.categories.savings.length; i++) {
-        sum += this.categories.savings[i].amount * 1
-      }
-      return sum
-    }
+      mdiCancel,
+      eCategoryType: eCategoryType
+    };
   },
   methods: {
     ...mapActions({
-      budgetsFetch: 'budgets/fetchBudgets'
+      budgetsFetch: "budgets/fetchBudgets"
     }),
-    addIncome () {
-      if (this.$refs.formIncomeCategory.validate()) {
-        // unbind
-        const data = JSON.parse(JSON.stringify(this.newIncomeCategory))
-        data.amountConfigs = [
-          {
-            validFrom: this.budget.startingDate,
-            amount: data.amount
-          }
-        ]
-        this.categories.income.push(data)
-        this.$refs.formIncomeCategory.reset()
-      }
-    },
-    removeIncome (index) {
-      this.categories.income.splice(index, 1)
-    },
-    editIncome (index) {
-      this.newIncomeCategory = this.categories.income[index]
-      this.categories.income.splice(index, 1)
-    },
 
-    addSpending () {
-      if (this.$refs.formSpendingCategory.validate()) {
-        // unbind
-        var data = JSON.parse(JSON.stringify(this.newSpendingCategory))
-        data.amountConfigs = [
-          {
-            validFrom: this.budget.startingDate,
-            amount: data.amount
-          }
-        ]
-        this.categories.spending.push(data)
-        this.$refs.formSpendingCategory.reset()
-      }
-    },
-    removeSpending (index) {
-      this.categories.spending.splice(index, 1)
-    },
-    editSpending (index) {
-      this.newSpendingCategory = this.categories.spending[index]
-      this.categories.spending.splice(index, 1)
-    },
-
-    addSaving () {
-      if (this.$refs.formSavingCategory.validate()) {
-        // unbind
-        const data = JSON.parse(JSON.stringify(this.newSavingCategory))
-        data.amountConfigs = [
-          {
-            validFrom: this.budget.startingDate,
-            amount: data.amount
-          }
-        ]
-        this.categories.savings.push(data)
-        this.$refs.formSavingCategory.reset()
-      }
-    },
-    removeSaving (index) {
-      this.categories.savings.splice(index, 1)
-    },
-    editSaving (index) {
-      this.newSavingCategory = this.categories.savings[index]
-      this.categories.savings.splice(index, 1)
-    },
-    createBudget () {
-      this.budget.budgetCategories = {
-        0: this.categories.spending.map(v => {
-          v.type = 0
-          return v
+    createBudget() {
+      this.budget.budgetCategories = [
+        ...this.categories.spending.map(v => {
+          v.type = eCategoryType.Spending;
+          return v;
         }),
-        1: this.categories.income.map(v => {
-          v.type = 1
-          return v
+        ...this.categories.income.map(v => {
+          v.type = eCategoryType.Income;
+          return v;
         }),
-        2: this.categories.savings.map(v => {
-          v.type = 2
-          return v
+        ...this.categories.saving.map(v => {
+          v.type = eCategoryType.Saving;
+          return v;
         })
-      }
+      ];
       budgetService.createBudget(this.budget).then(response => {
         if (response.ok) {
-          response.json().then(data => {
-            this.budgetsFetch().then(() => {
-              this.$router.push('/')
-            })
-          })
+          this.budgetsFetch().then(() => {
+            this.$router.push("/");
+          });
         } else {
           response.json().then(data => {
-            this.dispatchError(data.message)
-          })
+            this.dispatchError(data.message);
+          });
         }
-      })
+      });
     },
-    async getCurrencies () {
-      var response = await budgetService.supportedCurrencies()
+    async getCurrencies() {
+      var response = await budgetService.supportedCurrencies();
       if (response.ok) {
-        this.currencies = await response.json()
+        this.currencies = await response.json();
       }
     }
   },
-  mounted () {
-    this.getCurrencies()
+  mounted() {
+    this.getCurrencies();
   }
-}
+};
 </script>

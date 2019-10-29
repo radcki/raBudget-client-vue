@@ -143,7 +143,7 @@ export default class TransactionEditor extends Vue {
     return !this.$vuetify.breakpoint.smAndUp;
   }
   get categoryType(): eCategoryType {
-    return this.editor.type;
+    return this.editor.budgetCategory ? this.editor.budgetCategory.type : null;
   }
   get categories(): BudgetCategory[] {
     return this.budget ? this.budget.budgetCategories : [];
@@ -152,6 +152,14 @@ export default class TransactionEditor extends Vue {
     return 1 * this.editor.modifyAmount + 1 * this.editor.amount;
   }
   get budget(): Budget {return this.dataBudget};
+
+  @Watch('editor.budgetCategory')
+  OnCategoryChange(newCategory: BudgetCategory){
+    if (!newCategory){
+      return;
+    }
+    this.editor.budgetCategoryId = newCategory.budgetCategoryId
+  }
 
   @Watch("dialog")
   OnDialog(open) {

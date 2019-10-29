@@ -166,7 +166,7 @@ export default class EditBudget extends Vue {
       })
       .then(confirm => {
         if (confirm) {
-          budgetService.deleteBudget(this.$route.params.id).then(response => {
+          budgetService.deleteBudget(this.$route.params.id as unknown as number).then(response => {
             if (response.ok) {
               this.$router.push("/");
               this.budgetsFetch();

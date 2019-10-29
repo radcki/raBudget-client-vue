@@ -9,7 +9,7 @@
         <v-card class="px-3" v-if="budget && budget.startingDate">
           <v-card-text>
             <v-date-range-slider
-              :min="$moment(budget.startingDate).format('YYYY-MM')"
+              :min="format(budget.startingDate, 'yyyy-MM')"
               :max="thisMonth"
               chips
               v-model="selectedRange"
@@ -26,15 +26,15 @@
       <v-flex xs12>
         <v-chip
           color="primary"
-          :text-color="mode == 'period' ? 'white':''"
-          :outlined="mode != 'period'"
-          @click="mode = 'period'"
+          :text-color="mode == eReportMode.Period ? 'white':''"
+          :outlined="mode != eReportMode.Period"
+          @click="mode = eReportMode.Period"
         >{{ $t("reports.periodSummary") }}</v-chip>
         <v-chip
           color="primary"
-          :text-color="mode == 'monthly' ? 'white':''"
-          :outlined="mode != 'monthly'"
-          @click="mode = 'monthly'"
+          :text-color="mode == eReportMode.Monthly ? 'white':''"
+          :outlined="mode != eReportMode.Monthly"
+          @click="mode = eReportMode.Monthly"
         >{{ $t("reports.monthByMonth") }}</v-chip>
       </v-flex>
       <v-flex xs12 d-flex style="min-height: 500px;">
@@ -57,101 +57,100 @@
                   </v-select>
                 </v-flex>
                 <v-slide-x-transition>
-                  <v-flex xs12 v-if="mode == 'period'">
+                  <v-flex xs12 v-if="mode == eReportMode.Period">
                     <v-data-table
                       v-if="periodReport && $vuetify.breakpoint.smAndUp"
                       class
                       :headers="headers"
-
                       hide-default-footer
                       disable-pagination
-                      item-key="category.categoryId"
+                      item-key="budgetCategoryId"
                       :items="periodReport"
                     >
                       <template v-slot:body="{ items }">
                         <tbody>
-                          <tr v-for="item in items" :key="item.category.categoryId">
+                          <tr v-for="item in items" :key="item.budgetCategoryId">
                             <td class="py-1">
                               <v-avatar
                                 size="28px"
-                                :color="categoryType == 'spendingCategories' ? 'amber' : categoryType == 'incomeCategories' ? 'indigo' : ''"
+                                :color="categoryType == eCategoryType.Spending ? 'amber' : categoryType == eCategoryType.Income ? 'indigo' : ''"
                               >
-                                <v-icon color="white" small>{{$categoryIcons[item.category.icon]}}</v-icon>
+                                <v-icon color="white" small>{{$categoryIcons[findCategoryById(item.budgetCategoryId).icon]}}</v-icon>
                               </v-avatar>
-                              <span class="px-2 caption">{{item.category.name}}</span>
+                              <span class="px-2 caption">{{findCategoryById(item.budgetCategoryId).name}}</span>
                             </td>
                             <td class="py-1">
-                              {{item.budgetAmount | currency($currencyConfig(budget))}}
+                              {{item.reportData.budgetAmount | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
                                     class="ma-0"
                                     :height="10"
-                                    v-if="item.budgetAmount != 0"
-                                    :value="100*item.budgetAmount/periodTotals.budgetAmount"
+                                    v-if="item.reportData.budgetAmount != 0"
+                                    :value="100*item.reportData.budgetAmount/periodTotals.budgetAmount"
                                   ></v-progress-linear>
                                 </template>
-                                <span>{{ item.budgetAmount/periodTotals.budgetAmount | percentage }}</span>
+                                <span>{{ item.reportData.budgetAmount/periodTotals.budgetAmount | percentage }}</span>
                               </v-tooltip>
                             </td>
                             <td class="py-1">
-                              {{item.transactionsSum | currency($currencyConfig(budget))}}
+                              {{item.reportData.transactionsSum | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
                                     class="ma-0"
                                     color="amber"
                                     :height="10"
-                                    v-if="item.transactionsSum != 0"
-                                    :value="100*item.transactionsSum/periodTotals.transactionsSum"
+                                    v-if="item.reportData.transactionsSum != 0"
+                                    :value="100*item.reportData.transactionsSum/periodTotals.transactionsSum"
                                   ></v-progress-linear>
                                 </template>
-                                <span>{{ item.transactionsSum/periodTotals.transactionsSum | percentage }}</span>
+                                <span>{{ item.reportData.transactionsSum/periodTotals.transactionsSum | percentage }}</span>
                               </v-tooltip>
                             </td>
-                            <td class="py-1" v-if="categoryType=='spendingCategories'">
-                              {{item.allocationsSum | currency($currencyConfig(budget))}}
+                            <td class="py-1" v-if="categoryType==eCategoryType.Spending">
+                              {{item.reportData.allocationsSum | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
                                     class="ma-0"
                                     color="purple"
                                     :height="10"
-                                    v-if="item.allocationsSum != 0"
-                                    :value="100*item.allocationsSum/periodTotals.allocationsSum"
+                                    v-if="item.reportData.allocationsSum != 0"
+                                    :value="100*item.reportData.allocationsSum/periodTotals.allocationsSum"
                                   ></v-progress-linear>
                                 </template>
-                                <span>{{ item.allocationsSum/periodTotals.allocationsSum | percentage }}</span>
+                                <span>{{ item.reportData.allocationsSum/periodTotals.allocationsSum | percentage }}</span>
                               </v-tooltip>
                             </td>
                             <td class="py-1">
-                              {{item.averagePerDay | currency($currencyConfig(budget))}}
+                              {{item.reportData.averagePerDay | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
                                     class="ma-0"
                                     color="green"
                                     :height="10"
-                                    v-if="item.averagePerDay != 0"
-                                    :value="100*item.averagePerDay/periodTotals.averagePerDay"
+                                    v-if="item.reportData.averagePerDay != 0"
+                                    :value="100*item.reportData.averagePerDay/periodTotals.averagePerDay"
                                   ></v-progress-linear>
                                 </template>
-                                <span>{{ item.averagePerDay/periodTotals.averagePerDay | percentage }}</span>
+                                <span>{{ item.reportData.averagePerDay/periodTotals.averagePerDay | percentage }}</span>
                               </v-tooltip>
                             </td>
                             <td class="py-1">
-                              {{item.averagePerMonth | currency($currencyConfig(budget))}}
+                              {{item.reportData.averagePerMonth | currency($currencyConfig(budget))}}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{ on }">
                                   <v-progress-linear
                                     class="ma-0"
                                     color="blue"
                                     :height="10"
-                                    v-if="item.averagePerMonth != 0"
-                                    :value="100*item.averagePerMonth/periodTotals.averagePerMonth"
+                                    v-if="item.reportData.averagePerMonth != 0"
+                                    :value="100*item.reportData.averagePerMonth/periodTotals.averagePerMonth"
                                   ></v-progress-linear>
                                 </template>
-                                <span>{{ item.averagePerMonth/periodTotals.averagePerMonth | percentage }}</span>
+                                <span>{{ item.reportData.averagePerMonth/periodTotals.averagePerMonth | percentage }}</span>
                               </v-tooltip>
                             </td>
                           </tr>
@@ -169,7 +168,7 @@
                             >{{periodTotals.transactionsSum | currency($currencyConfig(budget))}}</td>
                             <td
                               class="py-1"
-                              v-if="categoryType=='spendingCategories'"
+                              v-if="categoryType==eCategoryType.Spending"
                             >{{periodTotals.allocationsSum | currency($currencyConfig(budget))}}</td>
                             <td
                               class="py-1"
@@ -308,15 +307,15 @@
                 </v-slide-x-transition>
 
                 <v-slide-x-transition>
-                  <v-flex xs12 v-if="mode == 'monthly'">
+                  <v-flex xs12 v-if="mode == eReportMode.Monthly">
                     <v-container class="pa-0">
                       <v-layout row wrap justify-center class="pa-0">
                         <v-flex xs12 md3>
                           <v-list dense>
                             <v-subheader>Rodzaj danych</v-subheader>
                             <v-list-item
-                              @click="chartDataType = 'transactionsSum'"
-                              :class="chartDataType == 'transactionsSum' ? 'primary--text':''"
+                              @click="chartDataType = eChartType.transactionsSum"
+                              :class="chartDataType == eChartType.transactionsSum ? 'primary--text':''"
                             >
                               <v-list-item-title>{{ $t("reports.transactionsSum") }}</v-list-item-title>
                               <v-list-item-action>
@@ -324,9 +323,9 @@
                               </v-list-item-action>
                             </v-list-item>
                             <v-list-item
-                              v-if="categoryType=='spendingCategories'"
-                              @click="chartDataType = 'allocationsSum'"
-                              :class="chartDataType == 'allocationsSum' ? 'primary--text':''"
+                              v-if="categoryType==eCategoryType.Spending"
+                              @click="chartDataType = eChartType.allocationsSum"
+                              :class="chartDataType == eChartType.allocationsSum ? 'primary--text':''"
                             >
                               <v-list-item-title>{{ $t("reports.allocationsSum") }}</v-list-item-title>
                               <v-list-item-action>
@@ -334,8 +333,8 @@
                               </v-list-item-action>
                             </v-list-item>
                             <v-list-item
-                              @click="chartDataType = 'averagePerDay'"
-                              :class="chartDataType == 'averagePerDay' ? 'primary--text':''"
+                              @click="chartDataType = eChartType.averagePerDay"
+                              :class="chartDataType == eChartType.averagePerDay ? 'primary--text':''"
                             >
                               <v-list-item-title>{{ $t("reports.averagePerDay") }}</v-list-item-title>
                               <v-list-item-action>
@@ -347,7 +346,7 @@
                         <v-flex xs12 md9 class="py-3">
                           <v-category-select
                             multiple
-                            :items="budget[categoryType]"
+                            :items="budget.budgetCategories.filter(v=>v.type == categoryType)"
                             v-if="budget"
                             v-model="selectedCategories"
                             :label="$t('categories.budgetCategories')"
@@ -386,289 +385,332 @@ table.v-table tbody th {
   height: 20px;
 }
 </style>
-<script  lang="js">
-import { budgetService } from '../_services/budget.service'
-import { mapState, mapActions } from 'vuex'
-import { debounce } from 'debounce'
-import { GChart } from 'vue-google-charts'
-import { mdiChevronRight } from '@mdi/js'
+<script  lang="ts">
+import { budgetService } from "../_services/budget.service";
+import { debounce } from "debounce";
+import { GChart } from "vue-google-charts";
+import { mdiChevronRight } from "@mdi/js";
 
-export default {
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { Action, State, namespace } from "vuex-class";
+import { subMonths, format, endOfMonth } from "date-fns";
+import { eCategoryType } from "../typings/enums/eCategoryType";
+import { BudgetCategory } from "../typings/BudgetCategory";
+import { Budget } from "../typings/Budget";
+import { ErrorMessage } from '../typings/TypedResponse';
+import { MonthlyBudgetReport, BudgetCategoryMonthlyReport } from '../typings/MonthlyBudgetReport';
+import { BudgetCategoryPeriodReport } from '../typings/PeriodBudgetReport';
+
+const alertModule = namespace("alert");
+const budgetsModule = namespace("budgets");
+const transactionsModule = namespace("transactions");
+
+enum eChartType {
+  averagePerDay,
+  transactionsSum,
+  allocationsSum
+}
+
+enum eReportMode {
+  Period,
+  Monthly
+}
+
+@Component({
   components: {
     GChart,
-    'v-date-range-slider': () => import('../components/DateRangeSlider'),
-    'v-category-select': () => import('../components/CategorySelect')
-  },
-  data () {
-    return {
-      budgetLoading: false,
-      periodLoading: false,
-      monthlyLoading: false,
+    "v-date-range-slider": () => import("../components/DateRangeSlider.vue"),
+    "v-category-select": () => import("../components/CategorySelect.vue")
+  }
+})
+export default class Reports extends Vue {
+  selectedCategories: BudgetCategory[] = [];
+  selectedRange: any[] = [null, null];
 
-      periodData: {
-        spendingCategories: null,
-        savingCategories: null,
-        incomeCategories: null
-      },
+  periodData: {
+    [eCategoryType.Spending]: BudgetCategoryPeriodReport[],
+    [eCategoryType.Saving]: BudgetCategoryPeriodReport[],
+    [eCategoryType.Income]: BudgetCategoryPeriodReport[]
+  } = {
+    [eCategoryType.Spending]: null,
+    [eCategoryType.Saving]: null,
+    [eCategoryType.Income]: null
+  };
 
-      monthlyData: {
-        spendingCategories: null,
-        savingCategories: null,
-        incomeCategories: null
-      },
+  monthlyData: {
+    [eCategoryType.Spending]: BudgetCategoryMonthlyReport[],
+    [eCategoryType.Saving]: BudgetCategoryMonthlyReport[],
+    [eCategoryType.Income]: BudgetCategoryMonthlyReport[]
+  } = {
+    [eCategoryType.Spending]: null,
+    [eCategoryType.Saving]: null,
+    [eCategoryType.Income]: null
+  };
 
-      selectedCategories: [],
-      selectedRange: [null, null],
+  mode: eReportMode = eReportMode.Period;
+  chartDataType: eChartType = eChartType.averagePerDay;
+  chartOptions = {
+    legend: { position: "none" }
+  };
 
-      mode: 'period',
-      chartDataType: 'averagePerDay',
-      chartOptions: {
-        legend: { position: 'none' }
-      },
+  categoryTypes = [
+    { text: "general.spendings", value: eCategoryType.Spending },
+    { text: "general.incomes", value: eCategoryType.Income },
+    { text: "general.savings", value: eCategoryType.Saving }
+  ];
 
-      categoryTypes: [
-        { text: 'general.spendings', value: 'spendingCategories' },
-        { text: 'general.incomes', value: 'incomeCategories' },
-        { text: 'general.savings', value: 'savingCategories' }
-      ],
-      categoryType: 'spendingCategories',
-      mdiChevronRight
+  categoryType: eCategoryType = eCategoryType.Spending;
+  eReportMode = eReportMode;
+  eCategoryType = eCategoryType;
+  eChartType = eChartType;
+
+  mdiChevronRight = mdiChevronRight;
+  format = format;
+  debouncedLoadPeriodReport: () => void | null = null;
+  debouncedLoadMonthlyReport: () => void | null = null;
+
+  @budgetsModule.Getter("budget") budget: Budget;
+  @budgetsModule.Action("activeBudgetChange") activeBudgetChange;
+  @alertModule.Action("error") dispatchError;
+  @alertModule.Action("success") dispatchSuccess;
+
+  get periodReport() {
+    return this.periodData[this.categoryType];
+  }
+
+  get thisMonth() {
+      return format(new Date(), 'yyyy-MM')
     }
-  },
-  computed: {
-    ...mapState({
-      budgets: state => state.budgets.budgets
-    }),
-    budget () {
-      return this.budgets.filter(v => v.id == this.$route.params.id)[0]
-    },
-    loading: function () {
-      return this.budgetLoading || this.periodLoading || this.monthlyLoading
-    },
-    currencies: function () {
-      return Object.keys(this.$currencies)
-    },
-    thisMonth: function () {
-      return this.$moment().format('YYYY-MM')
-    },
-    locale: function () {
-      return this.$i18n.locale
-    },
-    periodReport: function () {
-      return this.periodData[this.categoryType]
-    },
-    monthlyReport: function () {
-      var type = this.categoryType
-      return this.monthlyData[type]
-    },
-    headers: function () {
-      // eslint-disable-next-line no-unused-vars
-      var locale = this.$i18n.locale /* reload binding */
-      var categoryName = this.$t('categories.name')
-      var budgetSum = this.$t('reports.budgetSum')
-      var transactionsSum = this.$t('reports.transactionsSum')
-      var allocationsSum = this.$t('reports.allocationsSum')
-      var averagePerDay = this.$t('reports.averagePerDay')
-      var averagePerMonth = this.$t('reports.averagePerMonth')
-      var headers = [
-        {
-          text: categoryName,
-          align: 'left',
-          sortable: true,
-          value: 'category.name'
-        },
-        {
-          text: budgetSum,
-          align: 'left',
-          sortable: true,
-          value: 'budgetAmount'
-        },
-        {
-          text: transactionsSum,
-          align: 'left',
-          sortable: true,
-          value: 'transactionsSum'
-        },
-        {
-          text: allocationsSum,
-          align: 'left',
-          sortable: true,
-          value: 'allocationsSum'
-        },
-        {
-          text: averagePerDay,
-          align: 'left',
-          sortable: true,
-          value: 'averagePerDay'
-        },
-        {
-          text: averagePerMonth,
-          align: 'left',
-          sortable: true,
-          value: 'averagePerMonth'
-        }
-      ]
-      if (this.categoryType != 'spendingCategories') {
-        headers = headers.filter(v => v.value != 'allocationsSum')
+
+  get monthlyReport() {
+    var type = this.categoryType;
+    return this.monthlyData[type];
+  }
+
+  get headers() {
+    // eslint-disable-next-line no-unused-vars
+    var locale = this.$i18n.locale; /* reload binding */
+    var categoryName = this.$t("categories.name");
+    var budgetSum = this.$t("reports.budgetSum");
+    var transactionsSum = this.$t("reports.transactionsSum");
+    var allocationsSum = this.$t("reports.allocationsSum");
+    var averagePerDay = this.$t("reports.averagePerDay");
+    var averagePerMonth = this.$t("reports.averagePerMonth");
+    var headers = [
+      {
+        text: categoryName,
+        align: "left",
+        sortable: true,
+        value: "category.name"
+      },
+      {
+        text: budgetSum,
+        align: "left",
+        sortable: true,
+        value: "budgetAmount"
+      },
+      {
+        text: transactionsSum,
+        align: "left",
+        sortable: true,
+        value: "transactionsSum"
+      },
+      {
+        text: allocationsSum,
+        align: "left",
+        sortable: true,
+        value: "allocationsSum"
+      },
+      {
+        text: averagePerDay,
+        align: "left",
+        sortable: true,
+        value: "averagePerDay"
+      },
+      {
+        text: averagePerMonth,
+        align: "left",
+        sortable: true,
+        value: "averagePerMonth"
       }
-      return headers
-    },
-    periodTotals: function () {
-      var data = {
-        budgetAmount: 0,
-        transactionsSum: 0,
-        allocationsSum: 0,
-        averagePerDay: 0,
-        averagePerMonth: 0
-      }
-      for (
-        var i = 0, n = this.periodData[this.categoryType].length;
-        i < n;
-        i++
+    ];
+    if (this.categoryType != eCategoryType.Spending) {
+      headers = headers.filter(v => v.value != "allocationsSum");
+    }
+    return headers;
+  }
+
+  get periodTotals() {
+    var data = {
+      budgetAmount: 0,
+      transactionsSum: 0,
+      allocationsSum: 0,
+      averagePerDay: 0,
+      averagePerMonth: 0
+    };
+    for (var i = 0, n = this.periodData[this.categoryType].length; i < n; i++) {
+      var cat = this.periodData[this.categoryType][i].reportData;
+      data.budgetAmount += cat.budgetedSum;
+      data.transactionsSum += cat.transactionsSum;
+      data.allocationsSum += cat.allocationsSum;
+      data.averagePerDay += cat.averagePerDay;
+      data.averagePerMonth += cat.averagePerMonth;
+    }
+    return data;
+  }
+  get chartData() {
+    if (!this.monthlyReport) {
+      return null;
+    }
+    var categoryCount = this.monthlyReport.length;
+    var monthCount = this.monthlyReport[0].monthlyReports.length;
+    var header = [""];
+    for (let i = 0; i < categoryCount; i++) {
+      if (
+        this.selectedCategories.filter(function(v) {
+          return (
+            v.budgetCategoryId == this.monthlyReport[i].budgetCategoryId
+          );
+        }, this).length > 0
       ) {
-        var cat = this.periodData[this.categoryType][i]
-        data.budgetAmount += cat.budgetAmount
-        data.transactionsSum += cat.transactionsSum
-        data.allocationsSum += cat.allocationsSum
-        data.averagePerDay += cat.averagePerDay
-        data.averagePerMonth += cat.averagePerMonth
+        header.push(this.findCategoryById(this.monthlyReport[i].budgetCategoryId).name);
       }
-      return data
-    },
-    chartData: function () {
-      if (!this.monthlyReport) {
-        return null
-      }
-      var categoryCount = this.monthlyReport.length
-      var monthCount = this.monthlyReport[0].data.length
-      var header = ['']
-      for (let i = 0; i < categoryCount; i++) {
+    }
+    var data = [header];
+    for (let i = 0; i < monthCount; i++) {
+      var month =
+        this.monthlyReport[0].monthlyReports[i].month.year +
+        "-" +
+        this.monthlyReport[0].monthlyReports[i].month.monthNumber;
+      var row = [month];
+      for (let n = 0; n < categoryCount; n++) {
         if (
-          this.selectedCategories.filter(function (v) {
-            return v.categoryId == this.monthlyReport[i].category.categoryId
+          this.selectedCategories.filter(function(v) {
+            return (
+              v.budgetCategoryId == this.monthlyReport[n].budgetCategoryId
+            );
           }, this).length > 0
         ) {
-          header.push(this.monthlyReport[i].category.name)
+          row.push(this.monthlyReport[n].monthlyReports[i].reportData[eChartType[this.chartDataType]]);
         }
       }
-      var data = [header]
-      for (let i = 0; i < monthCount; i++) {
-        var month =
-          this.monthlyReport[0].data[i].year +
-          '-' +
-          this.monthlyReport[0].data[i].month
-        var row = [month]
-        for (let n = 0; n < categoryCount; n++) {
-          if (
-            this.selectedCategories.filter(function (v) {
-              return v.categoryId == this.monthlyReport[n].category.categoryId
-            }, this).length > 0
-          ) {
-            row.push(this.monthlyReport[n].data[i][this.chartDataType])
-          }
-        }
-        data.push(row)
-      }
-      return data
+      data.push(row);
     }
-  },
-  created: function () {
-    this.debouncedLoadPeriodReport = debounce(this.loadPeriodReport, 800)
-    this.debouncedLoadMonthlyReport = debounce(this.loadMonthlyReport, 800)
+    return data;
+  }
+
+  get loading() {
+    return (
+      this.$wait.is("loading.budget") ||
+      this.$wait.is("loading.periodReport") ||
+      this.$wait.is("loading.monthlyReport")
+    );
+  }
+
+  created() {
+    this.debouncedLoadPeriodReport = debounce(this.loadPeriodReport, 800);
+    this.debouncedLoadMonthlyReport = debounce(this.loadMonthlyReport, 800);
+    this.activeBudgetChange(this.$route.params.id);
     if (this.budget) {
       this.selectedRange = [
-        this.$moment(this.budget.startingDate).format('YYYY-MM'),
-        this.$moment().format('YYYY-MM')
-      ]
+        format(this.budget.startingDate, "yyyy-MM"),
+        format(new Date(), "yyyy-MM")
+      ];
     }
-  },
-  watch: {
-    categoryType: function (type) {
-      this.selectedCategories = []
+  }
 
-      if (
-        this.chartDataType == 'allocationsSum' &&
-        type != 'spendingCategories'
-      ) {
-        this.chartDataType = 'transactionsSum'
-      }
-    },
-    budget: function (budget) {
-      if (!budget) {
-        return
-      }
-      this.selectedRange = [
-        this.$moment(budget.startingDate).format('YYYY-MM'),
-        this.$moment().format('YYYY-MM')
-      ]
-      if ((this.mode == 'period')) {
-        this.loadPeriodReport()
-      } else {
-        this.loadMonthlyReport()
-      }
-    },
-    selectedRange () {
-      this.debouncedLoadPeriodReport()
-      this.debouncedLoadMonthlyReport()
+  findCategoryById(budgetCategoryId: number) : BudgetCategory {
+    return this.budget.budgetCategories.find(
+      v => v.budgetCategoryId == budgetCategoryId
+    );
+  }
+
+  @Watch("selectedRange")
+  OnSelectedRangeChange() {
+    this.debouncedLoadPeriodReport();
+    this.debouncedLoadMonthlyReport();
+  }
+
+  @Watch("budget")
+  OnBudgetChange(budget) {
+    if (!budget) {
+      return;
     }
-  },
-  methods: {
-    ...mapActions({
-      dispatchError: 'alert/error',
-      dispatchSuccess: 'alert/success'
-    }),
-    loadPeriodReport: function () {
-      this.periodLoading = true
-      var startingDate = this.selectedRange[0] + '-01'
-      var endDate = this.$moment(this.selectedRange[1] + '-01').endOf('month')
-      budgetService
-        .getPeriodReport(
-          this.budget.id,
-          startingDate,
-          endDate.format('YYYY-MM-DD')
-        )
-        .then(response => {
-          if (response.ok) {
-            response.json().then(data => {
-              this.periodLoading = false
-              this.periodData.spendingCategories = data.spending
-              this.periodData.savingCategories = data.saving
-              this.periodData.incomeCategories = data.income
-            })
-          } else {
-            response.json().then(data => {
-              this.periodLoading = false
-              this.dispatchError(data.message)
-            })
-          }
-        })
-    },
-    loadMonthlyReport: function () {
-      this.monthlyLoading = true
-      var startingDate = this.selectedRange[0] + '-01'
-      var endDate = this.$moment(this.selectedRange[1] + '-01').endOf('month')
-      budgetService
-        .getMonthlyReport(
-          this.budget.id,
-          startingDate,
-          endDate.format('YYYY-MM-DD')
-        )
-        .then(response => {
-          if (response.ok) {
-            response.json().then(data => {
-              this.monthlyLoading = false
-              this.monthlyData.spendingCategories = data.spending
-              this.monthlyData.savingCategories = data.saving
-              this.monthlyData.incomeCategories = data.income
-            })
-          } else {
-            response.json().then(data => {
-              this.monthlyLoading = false
-              this.dispatchError(data.message)
-            })
-          }
-        })
+    this.selectedRange = [
+      format(budget.startingDate, "yyyy-MM"),
+      format(new Date(), "yyyy-MM")
+    ];
+    if (this.mode == eReportMode.Period) {
+      this.loadPeriodReport();
+    } else {
+      this.loadMonthlyReport();
     }
+  }
+
+  @Watch("categoryType")
+  OnCategoryTypeChange(type) {
+    this.selectedCategories = [];
+
+    if (
+      this.chartDataType == eChartType.allocationsSum &&
+      type != eCategoryType.Spending
+    ) {
+      this.chartDataType = eChartType.transactionsSum;
+    }
+  }
+
+  loadPeriodReport() {
+    this.$wait.start("loading.periodReport");
+    var startingDate = this.selectedRange[0] + "-01";
+    var endDate = endOfMonth(new Date(this.selectedRange[1]));
+    budgetService
+      .getPeriodReport(
+        this.budget.budgetId,
+        startingDate,
+        format(endDate, "yyyy-MM-dd")
+      )
+      .then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.$wait.end("loading.periodReport");
+            this.periodData[eCategoryType.Spending] = data.budgetCategoryReports.filter(v=>this.findCategoryById(v.budgetCategoryId).type == eCategoryType.Spending);
+            this.periodData[eCategoryType.Saving] = data.budgetCategoryReports.filter(v=>this.findCategoryById(v.budgetCategoryId).type == eCategoryType.Saving);
+            this.periodData[eCategoryType.Income] = data.budgetCategoryReports.filter(v=>this.findCategoryById(v.budgetCategoryId).type == eCategoryType.Income);
+          });
+        } else {
+          response.json<ErrorMessage>().then(data => {
+            this.$wait.end("loading.periodReport");
+            this.dispatchError(data.message);
+          });
+        }
+      });
+  }
+
+  loadMonthlyReport() {
+    this.$wait.start("loading.monthlyReport");
+    var startingDate = this.selectedRange[0] + "-01";
+    var endDate = endOfMonth(new Date(this.selectedRange[1]));
+    budgetService
+      .getMonthlyReport(
+        this.budget.budgetId,
+        startingDate,
+        format(endDate, "yyyy-MM-dd")
+      )
+      .then(response => {
+        if (response.ok) {
+          response.json().then(data => {
+            this.$wait.end("loading.monthlyReport");
+            this.monthlyData[eCategoryType.Spending] = data.budgetCategoryReports.filter(v=>this.findCategoryById(v.budgetCategoryId).type == eCategoryType.Spending);
+            this.monthlyData[eCategoryType.Saving] = data.budgetCategoryReports.filter(v=>this.findCategoryById(v.budgetCategoryId).type == eCategoryType.Saving);
+            this.monthlyData[eCategoryType.Income] = data.budgetCategoryReports.filter(v=>this.findCategoryById(v.budgetCategoryId).type == eCategoryType.Income);
+          });
+        } else {
+          response.json<ErrorMessage>().then(data => {
+            this.$wait.end("loading.monthlyReport");
+            this.dispatchError(data.message);
+          });
+        }
+      });
   }
 }
 </script>

@@ -7,7 +7,11 @@ export interface UserState {}
 
 const userState: UserState = {};
 
-const actions: ActionTree<UserState, RootState> = {};
+const actions: ActionTree<UserState, RootState> = {
+  logout() {
+    Vue.prototype.$keycloak.logoutFn();
+  }
+};
 
 const getters: GetterTree<UserState, RootState> = {
   currentUser(): User | null {

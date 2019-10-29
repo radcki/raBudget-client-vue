@@ -1,11 +1,11 @@
 <template>
   <v-dialog
-    :fullscreen="!$vuetify.breakpoint.smAndUp"
+    :fullscreen="mobile"
     v-model="dialog"
     persistent
     :max-width="800"
     @keydown.esc="cancel"
-    :transition="!$vuetify.breakpoint.smAndUp ? 'dialog-bottom-transition' : 'dialog-transition'"
+    :transition="mobile ? 'dialog-bottom-transition' : 'dialog-transition'"
     v-bind="$attrs"
     v-on="$listeners"
   >
@@ -14,17 +14,17 @@
     </template>
 
     <v-card>
-      <v-toolbar color="primary" dark dense flat :fixed="!$vuetify.breakpoint.smAndUp">
-        <v-btn v-if="!$vuetify.breakpoint.smAndUp" icon dark @click="cancel">
+      <v-toolbar color="primary" dark dense flat :fixed="mobile">
+        <v-btn v-if="mobile" icon dark @click="cancel">
           <v-icon>{{mdiClose}}</v-icon>
         </v-btn>
         <v-toolbar-title class="white--text">{{ $t("allocations.editing") }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="$vuetify.breakpoint.smAndUp" text icon @click="cancel">
+        <v-btn v-if="mobile" text icon @click="cancel">
           <v-icon light>{{mdiClose}}</v-icon>
         </v-btn>
         <v-btn
-          v-if="!$vuetify.breakpoint.smAndUp"
+          v-if="mobile"
           text
           @click.native="save"
         >{{ $t('general.save') }}</v-btn>
@@ -86,13 +86,13 @@
         <v-spacer></v-spacer>
 
         <v-btn
-          v-if="$vuetify.breakpoint.smAndUp"
+          v-if="!mobile"
           color="red"
           text
           @click.native="cancel"
         >{{ $t('general.cancel') }}</v-btn>
         <v-btn
-          v-if="$vuetify.breakpoint.smAndUp"
+          v-if="!mobile"
           color="primary darken-1"
           text
           @click.native="save"
@@ -146,8 +146,8 @@ export default {
     }
   },
   computed: {
-    mobile () {
-      return !this.$vuetify.breakpoint.smAndUp
+    mobile() {
+      return !this.$vuetify.breakpoint.smAndUp;
     },
     allocationType () { return this.editor.destinationCategory ? this.categoryTypes[this.editor.destinationCategory.type].value : 'spendingCategories' },
     categories () {
