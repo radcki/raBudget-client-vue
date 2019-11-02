@@ -27,9 +27,12 @@
 
         <v-flex :key="index+'_cat'" class="text-xs-left" xs12 sm3>
           <v-avatar slot="activator" size="28px" color="amber">
-            <v-icon color="white" small>{{$categoryIcons[category.budgetCategory.icon]}}</v-icon>
+            <v-icon
+              color="white"
+              small
+            >{{$categoryIcons[findCategoryById(category.budgetCategoryId).icon]}}</v-icon>
           </v-avatar>
-          <span class="px-2 caption">{{category.budgetCategory.name}}</span>
+          <span class="px-2 caption">{{findCategoryById(category.budgetCategoryId).name}}</span>
         </v-flex>
 
         <v-flex
@@ -180,42 +183,49 @@
     </v-layout>
   </v-container>
 </template>
-<script>
-export default {
-  name: 'VLargeCategoriesSummary',
-  props: {
-    loading: Boolean,
-    dataBalance: Array,
-    dataBudget: {
-      type: Object,
-      default: () => {
-        return { currency: 'PLN' }
-      }
-    }
-  },
+<script lang="ts">
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { BudgetCategory } from "../typings/BudgetCategory";
+import { BudgetCategoryBalance } from "../typings/BudgetCategoryBalance";
+import { Budget } from "../typings/Budget";
+
+@Component({
   components: {
-    'v-animated-number': () => import('../components/AnimatedNumber')
-  },
-  methods: {
-    conditionalColor (percentValue) {
-      if (percentValue > 90) {
-        return 'green darken-3'
-      } else if (percentValue > 60) {
-        return 'light-green darken-1'
-      } else if (percentValue > 30) {
-        return 'yellow darken-1'
-      } else if (percentValue >= -1) {
-        return 'orange lighten-1'
-      } else if (percentValue < -1) {
-        return 'deep-orange darken-4'
-      }
-    },
-    formatAmount (value) {
-      return this.$options.filters.currency(
-        value,
-        this.$currencies[this.dataBudget.currency]
-      )
+    "v-animated-number": () => import("../components/AnimatedNumber.vue")
+  }
+})
+export default class LargeCategoriesSummary extends Vue {
+  @Prop(Boolean) readonly loading: boolean;
+  @Prop(Array) readonly dataBalance: BudgetCategoryBalance[];
+  @Prop(Object) readonly dataBudget: Budget;
+
+  get budgetCategories() { return this.dataBudget.budgetCategories}
+
+  conditionalColor(percentValue: number): string {
+    if (percentValue > 90) {
+      return "green darken-3";
+    } else if (percentValue > 60) {
+      return "light-green darken-1";
+    } else if (percentValue > 30) {
+      return "yellow darken-1";
+    } else if (percentValue >= -1) {
+      return "orange lighten-1";
+    } else if (percentValue < -1) {
+      return "deep-orange darken-4";
     }
+  }
+
+  formatAmount(value) {
+    return this.$options.filters.currency(
+      value,
+      this.$currencyConfig(this.dataBudget)
+    )
+  }
+
+  findCategoryById(budgetCategoryId: number) {
+    return this.budgetCategories.find(
+      v => v.budgetCategoryId == budgetCategoryId
+    );
   }
 }
 </script>

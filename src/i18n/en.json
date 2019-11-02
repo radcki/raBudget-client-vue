@@ -99,7 +99,8 @@
         "refresh": "Refresh",
         "selectAll": "Select all",
         "every": "Every",
-        "reset": "Reset"
+        "reset": "Reset",
+        "from": "From"
     },
     "forms": {
         "requiredField": "Field is required.",

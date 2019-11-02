@@ -82,7 +82,7 @@
                   {{item.username}}
                 </td>
                 <td>{{item.email}}</td>
-                <td>{{item.creationDate | moment("YYYY-MM-DD HH:mm:ss") }}</td>
+                <td>{{item.creationDate | dateFormat("yyyy-MM-dd HH:mm:ss", $dateLocales[$locale]) }}</td>
                 <td>
                   <v-btn
                     text

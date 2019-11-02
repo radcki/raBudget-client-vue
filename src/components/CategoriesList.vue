@@ -17,7 +17,7 @@
       <v-chip
         :color="colorSecondary"
         text-color="white"
-      >{{ itemsSum | currency($currencies[dataBudget.currency]) }}</v-chip>
+      >{{ itemsSum | currency($currencyConfig(dataBudget)) }}</v-chip>
     </v-subheader>
 
     <v-list-item v-for="(category, i) in items" v-bind:data="category" v-bind:key="i">
@@ -27,7 +27,7 @@
 
       <v-list-item-content>
         <v-list-item-title>{{ category.name }}</v-list-item-title>
-        <v-list-item-subtitle>{{ readCurrentAmount(category) | currency($currencies[dataBudget.currency]) }}</v-list-item-subtitle>
+        <v-list-item-subtitle>{{ readCurrentAmount(category) | currency($currencyConfig(dataBudget)) }}</v-list-item-subtitle>
       </v-list-item-content>
 
       <v-list-item-action v-if="!hideActions">
@@ -76,19 +76,21 @@ import {
   mdiPencil,
   mdiTrashCan,
   mdiReplyAll
-} from '@mdi/js'
+} from "@mdi/js";
+
+import { startOfMonth, format } from "date-fns";
 
 export default {
-  name: 'VCategoriesList',
+  name: "VCategoriesList",
   components: {
-    'v-category-editor': () => import('../components/CategoryEditor')
+    "v-category-editor": () => import("../components/CategoryEditor.vue")
   },
   props: {
     items: Array,
     dataBudget: {
       type: Object,
       default: () => {
-        return { currency: 'PLN' }
+        return { currency: "PLN" };
       }
     },
     title: {
@@ -99,7 +101,7 @@ export default {
     colorSecondary: String,
     hideActions: Boolean
   },
-  data: function () {
+  data: function() {
     return {
       menu: false,
 
@@ -108,43 +110,40 @@ export default {
       mdiPencil,
       mdiTrashCan,
       mdiReplyAll
-    }
+    };
   },
   computed: {
-    itemsSum: function () {
+    itemsSum: function() {
       if (this.items && this.items.length > 0) {
         return this.items
           .map(v => this.readCurrentAmount(v))
-          .reduce(function (a, b) {
-            return 1 * a + 1 * b
-          })
+          .reduce(function(a, b) {
+            return 1 * a + 1 * b;
+          });
       }
-      return 0
+      return 0;
     }
   },
 
   methods: {
-    emitSave: function (payload) {
-      this.$emit('edit', payload)
+    emitSave: function(payload) {
+      this.$emit("edit", payload);
     },
-    emitCreate: function (payload) {
-      this.$emit('create', payload)
+    emitCreate: function(payload) {
+      this.$emit("create", payload);
     },
-    readCurrentAmount (category) {
+    readCurrentAmount(category) {
       var matching = category.amountConfigs.filter(v => {
         return (
-          this.$moment().startOf('month') >=
-            this.$moment(v.validFrom, 'YYYY-MM') &&
-          (!v.validTo ||
-            this.$moment(v.validTo, 'YYYY-MM') >=
-              this.$moment().startOf('month'))
-        )
-      })
-      return matching && matching.length > 0 ? matching[0].amount : null
+          startOfMonth(new Date()) >= v.validFrom &&
+          (!v.validTo || v.validTo >= startOfMonth(new Date()))
+        );
+      });
+      return matching && matching.length > 0 ? matching[0].amount : null;
     },
-    start: function (method) {
-      setTimeout(() => method())
+    start: function(method) {
+      setTimeout(() => method());
     }
   }
-}
+};
 </script>

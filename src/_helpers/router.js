@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import { store } from '../_store'
+import store from '../_store'
 
 const HomePage = () => import('../home/HomePage.vue')
 const LoginPage = () => import('../login/LoginPage.vue')
@@ -137,15 +137,10 @@ router.beforeEach((to, from, next) => {
   if (!authRequired) {
     return next(true)
   }
-  store.dispatch('account/checkLogin').then(() => {
-    if (!store.state.account.status.loggedIn) {
-      return next('/login')
-    }
-
-    if (!store.state.account.user.emailVerified && to.name != 'email-verification') {
-      return next('/email-verification')
-    }
-
-    return next(true)
-  })
+  if (router.app.$keycloak.authenticated) {
+    next()
+  } else {
+    const loginUrl = router.app.$keycloak.createLoginUrl()
+    window.location.replace(loginUrl)
+  }
 })

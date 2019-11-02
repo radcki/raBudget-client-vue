@@ -55,7 +55,7 @@
 
     </v-select>
 </template>
-<script>
+<script  lang="js">
 
 import { mdiCheckboxBlank, mdiCheckboxMarked, mdiCheckboxIntermediate } from '@mdi/js'
 
