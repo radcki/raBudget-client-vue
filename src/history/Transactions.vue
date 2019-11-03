@@ -338,6 +338,7 @@ export default class Transactions extends Vue {
         if (response.ok) {
           this.$wait.end("saving.transaction");
           this.reloadInitialized();
+          this.fetchTransactions();
         } else {
           response.json<ErrorMessage>().then(data => {
             this.$wait.end("saving.transaction");

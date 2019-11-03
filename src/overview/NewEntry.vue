@@ -448,7 +448,7 @@ export default class NewEntry extends Vue {
       amount: this.editor.amount,
       description: this.editor.description,
       targetBudgetCategoryId: this.editor.category.budgetCategoryId,
-      sourceBudgetCategoryId: this.editor.sourceCategory.budgetCategoryId,
+      sourceBudgetCategoryId: this.editor.sourceCategory ? this.editor.sourceCategory.budgetCategoryId : null,
       allocationDate: this.editor.date,
     }
     if ((this.$refs.editorForm as Vue & { validate: () => boolean }).validate()) {
