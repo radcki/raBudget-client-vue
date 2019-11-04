@@ -33,7 +33,7 @@ function deleteAllocation(budgetId, id) {
 
 function updateAllocation(budgetId, allocationData: Allocation) {
   const requestOptions = {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
     },
@@ -58,7 +58,7 @@ function listAllocations(budgetId: number, limitCount: number, startDate: Date, 
       limitResults: limitCount,
       allocationDateStartFilter: startDate,
       allocationDateEndFilter: endDate,
-      allocationIdFilter: categories ? categories.map(v=>v.budgetCategoryId) : null
+      categoryIdFilter: categories ? categories.map(v=>v.budgetCategoryId) : null
     })
   }
   return apiHandler.fetchAuthorized<Allocation[]>(`${process.env.VUE_APP_APIURL}/budgets/${budgetId}/allocations/filter`, requestOptions)

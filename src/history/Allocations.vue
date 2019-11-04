@@ -140,8 +140,8 @@
 
               <v-list-item-action>
                 <v-allocation-editor
-                  v-on:save="updateAllocations"
-                  :value="transaction"
+                  v-on:save="updateAllocation"
+                  :value="allocation"
                   :data-budget="budget"
                 >
                   <template v-slot:activator="{on}">
@@ -264,8 +264,10 @@ export default class Allocations extends Vue {
     if (this.budget) {
       this.selectedCategories = this.budget.budgetCategories.filter(v=>v.type == this.categoryType);
       this.selectedRange = [format(this.monthAgoOrStart, 'yyyy-MM-dd'), format(this.today, 'yyyy-MM-dd')];
+      this.fetchAllocations();
     }
-  }
+  };
+
 
   @Watch("$route")
   OnRouteChange(to, from) {
@@ -292,6 +294,7 @@ export default class Allocations extends Vue {
       this.selectedCategories = this.budget.budgetCategories.filter(
         v => v.type == this.categoryType
       );
+      this.fetchAllocations();
     }
   }
 
@@ -318,7 +321,7 @@ export default class Allocations extends Vue {
       if (response.ok) {
         let data = await response.json();
         this.$wait.end("loading.allocations");
-        this.allocations = data;
+        this.allocations = data.map(v=>{v.allocationDate = new Date(v.allocationDate); return v});
       } else {
         this.$wait.end("loading.allocations");
         this.allocations = null;

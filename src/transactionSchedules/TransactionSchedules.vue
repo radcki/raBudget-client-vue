@@ -136,7 +136,7 @@
                   {{ transaction.description}} -
                   <span
                     class="grey--text text--darken-1 caption"
-                  >{{$t('transactionSchedules.start')}}: {{transaction.startDate | moment("D.MM.YYYY")}}</span>
+                  >{{$t('transactionSchedules.start')}}: {{new Date(transaction.startDate) | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale])}}</span>
                 </v-list-item-title>
 
                 <v-list-item-subtitle class="text--primary">
