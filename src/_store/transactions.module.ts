@@ -1,12 +1,12 @@
 import { transactionsService } from '../_services/transactions.service';
 import { transactionSchedulesService } from '../_services/transactionSchedules.service';
-import moment from 'moment';
 import { Transaction } from '@/typings/Transaction';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 import { MutationTree, GetterTree, ActionTree } from 'vuex';
 import { RootState } from '.';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { ErrorMessage } from '@/typings/TypedResponse';
+import { addMonths, format } from 'date-fns';
 
 export interface TranscationFilters {
   budgetId: number | null;
@@ -85,7 +85,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
     if (
       !state.dataLoadFilters.startDate ||
       (state.dataLoadFilters.startDate && !startDate) ||
-      moment(state.dataLoadFilters.startDate) > moment(startDate)
+      new Date(state.dataLoadFilters.startDate) > new Date(startDate)
     ) {
       requireReload = true;
       commit('setStartDateLoadFilter', startDate);
@@ -95,7 +95,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
     if (
       !state.dataLoadFilters.endDate ||
       (state.dataLoadFilters.endDate && !endDate) ||
-      moment(state.dataLoadFilters.endDate) < moment(endDate)
+      new Date(state.dataLoadFilters.endDate) < new Date(endDate)
     ) {
       requireReload = true;
       commit('setEndDateLoadFilter', endDate);
@@ -161,9 +161,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
     transactionSchedulesService
       .listClosestOccurrences(
         state.mainFilters.budgetId,
-        moment()
-          .add(1, 'M')
-          .format('YYYY-MM-DD')
+        format(addMonths(new Date(), 1), 'yyyy-MM-dd')
       )
       .then(response => {
         if (response.ok) {
@@ -239,11 +237,11 @@ const actions: ActionTree<TransactionsState, RootState> = {
 const getters: GetterTree<TransactionsState, RootState> = {
   startDateMoment: state => {
     return state.mainFilters.startDate
-      ? moment(state.mainFilters.startDate)
+      ? new Date(state.mainFilters.startDate)
       : null;
   },
   endDateMoment: state => {
-    return state.mainFilters.endDate ? moment(state.mainFilters.endDate) : null;
+    return state.mainFilters.endDate ? new Date(state.mainFilters.endDate) : null;
   },
   getTransactions: (state, getter) => {
     let transactionsClone = {};
@@ -257,12 +255,12 @@ const getters: GetterTree<TransactionsState, RootState> = {
       if (getter.startDateMoment) {
         transactionsClone[transactionType] = state.transactions[
           transactionType
-        ].filter(v => moment(v.date) >= getter.startDateMoment);
+        ].filter(v => new Date(v.date) >= getter.startDateMoment);
       }
       if (getter.endDateMoment) {
         transactionsClone[transactionType] = state.transactions[
           transactionType
-        ].filter(v => moment(v.date) <= getter.endDateMoment);
+        ].filter(v => new Date(v.date) <= getter.endDateMoment);
       }
       if (state.mainFilters.categories) {
         transactionsClone[transactionType] = state.transactions[

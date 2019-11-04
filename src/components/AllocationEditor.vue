@@ -20,7 +20,7 @@
         </v-btn>
         <v-toolbar-title class="white--text">{{ $t("allocations.editing") }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="mobile" text icon @click="cancel">
+        <v-btn v-if="!mobile" text icon @click="cancel">
           <v-icon light>{{mdiClose}}</v-icon>
         </v-btn>
         <v-btn
@@ -33,20 +33,30 @@
         <v-form ref="editorForm" v-model="valid" lazy-validation>
           <v-container grid-list-md>
             <v-layout row wrap align-center justify-center>
-              <v-flex xs12>
+              <v-flex xs12 md6>
                 <v-date-field
                   :rules="requiredRule"
-                  v-model="editor.date"
-                  :label="$t('transactions.date')"
+                  v-model="editor.allocationDate"
+                  :label="$t('allocations.date')"
                 ></v-date-field>
+              </v-flex>
+
+              <v-flex xs12 md6>
+                <v-category-select
+                    :items="categories.filter(v=>v.type == categoryType)"
+                    :label="$t('categories.sourceCategory')"
+                    clearable
+                    v-model="editor.sourceBudgetCategory"
+                  ></v-category-select>
+
               </v-flex>
 
               <v-flex xs12 md5>
                 <v-category-select
-                    :items="categories[allocationType]"
+                    :items="categories.filter(v=>v.type == categoryType)"
                     :label="$t('general.category')"
                     :rules="requiredRule"
-                    v-model="editor.destinationCategory"
+                    v-model="editor.targetBudgetCategory"
                   ></v-category-select>
 
               </v-flex>
@@ -102,91 +112,112 @@
   </v-dialog>
 </template>
 
-<script>
+<script lang="ts">
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import { mdiClose } from '@mdi/js'
+import { eCategoryType } from '@/typings/enums/eCategoryType';
+import { Budget } from '@/typings/Budget';
+import { Allocation } from '@/typings/Allocation';
+import { BudgetCategory } from '@/typings/BudgetCategory';
 
-export default {
+@Component({
   components: {
-    'v-category-select': () => import('../components/CategorySelect'),
-    'v-date-field': () => import('../components/DateField.vue')
-  },
-  props: {
-    value: Object,
-    dataBudget: {
-      type: Object,
-      default: () => {
-        return { currency: 'PLN' }
-      }
-    }
-  },
-  data: function () {
-    return {
-      budget: this.dataBudget,
-      dateMenu: false,
-      requiredRule: [v => !!v],
-      categoryTypes: [
-        { value: 'spendingCategories', text: 'general.spendings' },
-        { value: 'incomeCategories', text: 'general.incomes' },
-        { value: 'savingCategories', text: 'general.savings' }
-      ],
-      dialog: false,
-      valid: true,
-      editor: {
+    "v-category-select": () => import("../components/CategorySelect.vue"),
+    "v-date-field": () => import("../components/DateField.vue")
+  }
+})
+export default class TransactionEditor extends Vue {
+  @Prop(Object) value!: Allocation;
+  @Prop(Object) dataBudget!: Budget;
+
+  requiredRule: any[] = [v => !!v];
+  dialog: boolean = false;
+  valid: boolean = true;
+  eCategoryType = eCategoryType;
+
+  editor: any = {
         ...{
-          destinationCategory: null,
-          date: null,
+          targetBudgetCategory: null,
+          targetBudgetCategoryId: null,
+          sourceBudgetCategory: null,
+          sourceBudgetCategoryId: null,
+          allocationDate: null,
           description: null,
           amount: null,
           modifyAmount: 0.0
         },
-        ...JSON.parse(JSON.stringify(this.value ? this.value : {}))
-      },
+        ...Object.assign({},(this.value ? this.value : {}))
+      };
+  mdiClose = mdiClose;
 
-      mdiClose
-    }
-  },
-  computed: {
-    mobile() {
-      return !this.$vuetify.breakpoint.smAndUp;
-    },
-    allocationType () { return this.editor.destinationCategory ? this.categoryTypes[this.editor.destinationCategory.type].value : 'spendingCategories' },
-    categories () {
-      return this.budget
-    },
-    finalAmount: function () {
-      return 1 * this.editor.modifyAmount + 1 * this.editor.amount
-    }
-  },
-  mounted: function () {
+  get mobile(): boolean {
+    return !this.$vuetify.breakpoint.smAndUp;
+  };
+  get categoryType(): eCategoryType {
+    return this.editor.targetBudgetCategory ? this.editor.targetBudgetCategory.type : null;
+  };
+  get categories(): BudgetCategory[] {
+    return this.budget ? this.budget.budgetCategories : [];
+  };
+  get finalAmount(): number {
+    return 1 * this.editor.modifyAmount + 1 * this.editor.amount;
+  };
+  get budget(): Budget {return this.dataBudget};
+
+  mounted() {
     this.$root.$on('closeDialogs', () => {
       this.dialog = false
     })
     this.requiredRule = [v => !!v || this.$t('forms.requiredField')]
-  },
-  beforeDestroy: function () {
+    this.editor.targetBudgetCategory = this.categories.find(v=>v.budgetCategoryId == this.value.targetBudgetCategoryId)
+    if (this.value.sourceBudgetCategoryId) {
+      this.editor.sourceBudgetCategory = this.categories.find(v=>v.budgetCategoryId == this.value.sourceBudgetCategoryId)
+    }
+  };
+
+  beforeDestroy() {
     this.$wait.end('dialog')
-  },
-  watch: {
-    dialog (open) {
-      if (open) {
-        this.$wait.start('dialog')
-      } else {
-        this.$wait.end('dialog')
-      }
+  };
+
+  @Watch("dialog")
+  OnDialog(open) {
+    if (open) {
+      this.$wait.start("dialog");
+    } else {
+      this.$wait.end("dialog");
     }
-  },
-  methods: {
-    save () {
-      if (this.$refs.editorForm.validate()) {
-        this.dialog = false
-        this.editor.amount = this.finalAmount
-        this.editor.modifyAmount = 0
-        this.$emit('save', this.editor)
-      }
-    },
-    cancel () {
-      this.dialog = false
+  };
+
+  @Watch('editor.targetBudgetCategory')
+  OnTargetCategoryChange(newCategory: BudgetCategory){
+    if (!newCategory){
+      return;
     }
-  }
+    this.editor.targetBudgetCategoryId = newCategory.budgetCategoryId
+  };
+
+  @Watch('editor.sourceBudgetCategory')
+  OnSourceCategoryChange(newCategory: BudgetCategory){
+    if (!newCategory){
+      return;
+    }
+    this.editor.sourceBudgetCategoryId = newCategory ? newCategory.budgetCategoryId : null
+  };
+
+  save(): void {
+    if (
+      (this.$refs.editorForm as Vue & { validate: () => boolean }).validate()
+    ) {
+      this.dialog = false;
+      this.editor.amount = this.finalAmount;
+      this.editor.modifyAmount = 0;
+      this.$emit("save", this.editor);
+    }
+  };
+
+  cancel(): void {
+    this.dialog = false;
+  };
+
 }
 </script>
