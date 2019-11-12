@@ -40,7 +40,7 @@
       </template>
       <div class="white" :style="maxHeight ? 'overflow-y: auto; max-height: '+maxHeight+'px' : ''">
         <v-list-item
-          :key="'tr_' + transaction.transactionScheduleId  + transaction.date"
+          :key="'tr_' + transaction.transactionScheduleId  + transaction.transactionDate"
           v-for="(transaction) in items"
           class="pb-1"
         >

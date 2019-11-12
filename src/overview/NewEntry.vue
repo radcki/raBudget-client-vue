@@ -167,23 +167,21 @@
               </v-flex>
               <v-flex xs12 v-if="dataBudget">
                 <v-category-select
-                  :items="dataBudget[selectedType+'Categories']"
-                  v-if="dataBudget[selectedType+'Categories']"
-                  :label="$t('general.category')"
-                  :rules="requiredRule"
-                  v-model="editor.category"
-                ></v-category-select>
+                    :items="dataBudget.budgetCategories.filter(v=>v.type == selectedType)"
+                    :label="$t('general.category')"
+                    :rules="requiredRule"
+                    v-model="editor.category"
+                  ></v-category-select>
               </v-flex>
 
               <v-flex xs12 v-if="tab == 3 && dataBudget">
                 <v-category-select
-                  :items="dataBudget[selectedType+'Categories']"
-                  v-if="dataBudget[selectedType+'Categories']"
-                  :label="$t('categories.sourceCategory')"
-                  clearable
-                  v-model="editor.sourceCategory"
-                ></v-category-select>
-              </v-flex>
+                    :items="dataBudget.budgetCategories.filter(v=>v.type == selectedType)"
+                    :label="$t('general.category')"
+                    clearable
+                    v-model="editor.sourceCategory"
+                  ></v-category-select>
+                </v-flex>
 
               <v-flex xs12>
                 <v-text-field
@@ -266,6 +264,7 @@ import { TransactionSchedule } from '../typings/TransactionSchedule'
 import { eFrequency } from '../typings/enums/eFrequency'
 import { Allocation } from '../typings/Allocation'
 import { ErrorMessage } from '@/typings/TypedResponse'
+import { mdiClose } from '@mdi/js'
 
 interface EntryEditor {
   category: BudgetCategory,
@@ -288,7 +287,7 @@ const alertModule = namespace('alert')
   }
 })
 export default class NewEntry extends Vue {
-  @Prop(Boolean) readonly dialog: boolean = false
+  @Prop(Boolean) readonly dialog: boolean
   @Prop(Object) readonly dataBudget: any
   @Prop(Object) readonly inputData: any
 
@@ -309,6 +308,7 @@ export default class NewEntry extends Vue {
       ]
   //requiredRule: any[] = [v => !!v || this.$t('forms.requiredField')]
   requiredRule: any[] = []
+  mdiClose = mdiClose;
 
   editor: EntryEditor = {
         category: null,
