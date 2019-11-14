@@ -9,11 +9,11 @@
         <v-card class="px-3" v-if="budget && budget.startingDate">
           <v-card-text>
             <v-date-range-slider
-              :min="format(budget.startingDate, 'yyyy-MM')"
+              :min="budget.startingDate"
               :max="thisMonth"
               chips
               v-model="selectedRange"
-              step="months"
+              step="month"
             ></v-date-range-slider>
           </v-card-text>
           <v-card-actions>
@@ -393,7 +393,7 @@ import { mdiChevronRight } from "@mdi/js";
 
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import { Action, State, namespace } from "vuex-class";
-import { subMonths, format, endOfMonth } from "date-fns";
+import { subMonths, format, endOfMonth, startOfMonth } from "date-fns";
 import { eCategoryType } from "../typings/enums/eCategoryType";
 import { BudgetCategory } from "../typings/BudgetCategory";
 import { Budget } from "../typings/Budget";
@@ -425,7 +425,7 @@ enum eReportMode {
 })
 export default class Reports extends Vue {
   selectedCategories: BudgetCategory[] = [];
-  selectedRange: any[] = [null, null];
+  selectedRange: Date[] = [null, null];
 
   periodData: {
     [eCategoryType.Spending]: BudgetCategoryPeriodReport[],
@@ -479,7 +479,7 @@ export default class Reports extends Vue {
   }
 
   get thisMonth() {
-      return format(new Date(), 'yyyy-MM')
+      return startOfMonth(new Date())
     }
 
   get monthlyReport() {
@@ -613,8 +613,8 @@ export default class Reports extends Vue {
     this.activeBudgetChange(this.$route.params.id);
     if (this.budget) {
       this.selectedRange = [
-        format(this.budget.startingDate, "yyyy-MM"),
-        format(new Date(), "yyyy-MM")
+        startOfMonth(this.budget.startingDate),
+        startOfMonth(new Date())
       ];
     }
   }
@@ -637,8 +637,8 @@ export default class Reports extends Vue {
       return;
     }
     this.selectedRange = [
-      format(budget.startingDate, "yyyy-MM"),
-      format(new Date(), "yyyy-MM")
+      startOfMonth(budget.startingDate),
+      startOfMonth(new Date())
     ];
     if (this.mode == eReportMode.Period) {
       this.loadPeriodReport();
@@ -661,7 +661,7 @@ export default class Reports extends Vue {
 
   loadPeriodReport() {
     this.$wait.start("loading.periodReport");
-    var startingDate = this.selectedRange[0] + "-01";
+    var startingDate = this.selectedRange[0];
     var endDate = endOfMonth(new Date(this.selectedRange[1]));
     budgetService
       .getPeriodReport(
@@ -688,7 +688,7 @@ export default class Reports extends Vue {
 
   loadMonthlyReport() {
     this.$wait.start("loading.monthlyReport");
-    var startingDate = this.selectedRange[0] + "-01";
+    var startingDate = this.selectedRange[0];
     var endDate = endOfMonth(new Date(this.selectedRange[1]));
     budgetService
       .getMonthlyReport(

@@ -1,12 +1,12 @@
 <template>
-  <v-container fluid grid-list-sm class="pa-0">
+<v-container fluid grid-list-sm class="pa-0">
     <v-layout row wrap>
       <v-flex xs4 md2 class="text-xs-center" v-if="chips">
         <v-chip
           small
           class="my-1"
           :color="period == 'full'? 'primary' : 'grey'"
-          @click="period = 'full'"
+          @click="setFullPeriod()"
           text-color="white"
         >{{ $t("reports.periodFull") }}</v-chip>
         <br />
@@ -15,7 +15,7 @@
           class="my-1"
 
           :color="period == '6m'? 'primary' : 'grey'"
-          @click="period = '6m'"
+          @click="set6mPeriod()"
           text-color="white"
         >{{ $t("reports.period6m") }}</v-chip>
         <br />
@@ -24,7 +24,7 @@
           class="my-1"
 
           :color="period == '1m'? 'primary' : 'grey'"
-          @click="period = '1m'"
+          @click="set1mPeriod()"
           text-color="white"
         >{{ $t("reports.period1m") }}</v-chip>
         <br />
@@ -33,68 +33,20 @@
         <v-container fluid grid-list-sm class="pa-0">
           <v-layout row wrap>
             <v-flex xs6 style="width: 120px">
-              <v-menu
-                ref="minMenu"
-                :close-on-content-click="false"
-                v-model="minMenu"
-                :nudge-right="40"
-                :return-value.sync="selectedMin"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="selectedMin"
-                    :label="$t('general.fromDate')"
-                    :rules="requiredRule"
-                    readonly
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  :min="min"
-                  :max="max"
-                  :locale="locale"
-                  :type="pickerType"
-                  v-model="selectedMin"
-                  @input="$refs.minMenu.save(selectedMin)"
-                ></v-date-picker>
-              </v-menu>
+              <v-date-field
+                v-model="selectedMin"
+                :type="step === 'month' ? 'month' : 'day'"
+                :label="$t('general.toDate')"></v-date-field>
             </v-flex>
 
             <v-flex xs6 style="width: 120px">
-              <v-menu
-                ref="maxMenu"
-                :close-on-content-click="false"
-                v-model="maxMenu"
-                :nudge-right="40"
-                :return-value.sync="selectedMax"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="selectedMax"
-                    :label="$t('general.toDate')"
-                    :rules="requiredRule"
-                    readonly
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  :min="min"
-                  :max="max"
-                  :locale="locale"
-                  :type="pickerType"
-                  v-model="selectedMax"
-                  @input="$refs.maxMenu.save(selectedMax)"
-                ></v-date-picker>
-              </v-menu>
+              <v-date-field
+                v-model="selectedMax"
+                :type="step === 'month' ? 'month' : 'day'"
+                :label="$t('general.toDate')"></v-date-field>
             </v-flex>
             <v-flex xs12>
-              <v-range-slider v-model="sliderValue" :max="rangeDiff" :min="0" :step="1"></v-range-slider>
+              <v-range-slider v-model="sliderValue" :max="sliderSteps" :min="0" :step="1"></v-range-slider>
             </v-flex>
           </v-layout>
         </v-container>
@@ -102,177 +54,130 @@
     </v-layout>
   </v-container>
 </template>
-<script  lang="js">
-import moment from 'moment';
 
-export default {
-  name: 'VDateRangeSlider',
-  props: {
-    min: String,
-    max: String,
-    value: Array,
-    step: String,
-    chips: Boolean,
-  },
-  data () {
-    return {
-      period: null,
-      sliderValue: [null, null],
-      selectedMin: this.value[0],
-      selectedMax: this.value[1],
-      minMenu: false,
-      maxMenu: false,
-      requiredRule: [v => !!v || this.$t('forms.requiredField')]
-    }
-  },
-  computed: {
-    format () {
-      if (this.step == 'months') {
-        return 'YYYY-MM'
-      }
-      return 'YYYY-MM-DD'
-    },
-    pickerType () {
-      return this.step == 'months' ? 'month' : 'date'
-    },
-    addSign () {
-      return this.step == 'months' ? 'M' : 'd'
-    },
-    minMoment () {
-      return this.$moment(this.min, this.format)
-    },
-    maxMoment () {
-      return this.$moment(this.max, this.format)
-    },
-    rangeDiff () {
-      return this.maxMoment.diff(this.minMoment, this.step)
-    },
-    selectedMinMoment () {
-      return this.$moment(this.selectedMin, this.format)
-    },
-    selectedMaxMoment () {
-      return this.$moment(this.selectedMax, this.format)
-    },
-    selectedMinInt () {
-      return this.selectedMinMoment.diff(this.minMoment, this.step)
-    },
-    selectedMaxInt () {
-      return this.selectedMaxMoment.diff(this.minMoment, this.step)
-    },
+<script lang="ts">
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import { format, differenceInDays, differenceInMonths, addDays, addMonths, subMonths, startOfMonth, isSameMonth, isSameDay } from 'date-fns'
 
-    result () {
-      return [this.selectedMin, this.selectedMax]
-    },
-    locale: function () {
-      return this.$i18n.locale
+@Component({
+  components: {
+    "v-date-field": () => import("../components/DateField.vue")
+  }
+})
+export default class DateRangeSlider extends Vue {
+  @Prop({type: Boolean, default: false}) chips!: boolean;
+  @Prop(Date) min!: Date;
+  @Prop(Date) max!: Date;
+  @Prop(Array) value!: Date[];
+  @Prop(String) step!: string;
+
+  selectedMin: Date = this.value[0];
+  selectedMax: Date = this.value[1];
+  sliderValue: number[] = [null,null];
+
+  @Watch('value')
+  OnValueChange(newValue){
+    this.selectedMin = newValue[0];
+    this.selectedMax = newValue[1];
+    this.sliderValue = [this.stepsFromMin(this.selectedMin), this.stepsFromMax(this.selectedMax)]
+  }
+
+  @Watch('selectedMin')
+  onSelectedMinChange(date){
+    if (date < this.min) {
+      this.selectedMin = this.min;
     }
-  },
-  mounted () {
-    this.sliderValue = [this.selectedMinInt, this.selectedMaxInt]
-    if (this.chips) {
-      this.checkChips(this.result)
+    if (date > this.max) {
+      this.selectedMin = this.max;
     }
-  },
-  watch: {
-    'value.0': function (value) {
-      if (this.$moment(value, this.format) < this.minMoment) {
-        this.selectedMin = this.minMoment.format(this.format)
-      } else {
-        this.selectedMin = value
-      }
-    },
-    'value.1': function (value) {
-      if (this.$moment(value, this.format) > this.maxMoment) {
-        this.selectedMax = this.maxMoment.format(this.format)
-      } else {
-        this.selectedMax = value
-      }
-    },
-    'sliderValue.0': function (min) {
-      if (this.intToDate(min) != this.selectedMin) {
-        this.selectedMin = this.intToDate(min)
-      }
-    },
-    'sliderValue.1': function (max) {
-      if (this.intToDate(max) != this.selectedMax) {
-        this.selectedMax = this.intToDate(max)
-      }
-    },
-    selectedMin: function (value) {
-      if (this.dateToInt(value) != this.sliderValue[0]) {
-        this.sliderValue = [this.selectedMinInt, this.sliderValue[1]]
-      }
-    },
-    selectedMax: function (value) {
-      if (this.dateToInt(value) != this.sliderValue[1]) {
-        this.sliderValue = [this.sliderValue[0], this.selectedMaxInt]
-      }
-    },
-    result: function (range) {
-      this.$emit('input', range)
-      if (this.chips) {
-        this.checkChips(range)
-      }
-    },
-    period: function (value) {
-      if (value == 'full') {
-        this.selectedMin = this.min
-        this.selectedMax = this.max
-      }
-      if (value == '6m') {
-        this.selectedMin = this.$moment()
-          .subtract(6, 'month')
-          .format('YYYY-MM')
-        this.selectedMax = this.max
-      }
-      if (value == '1m') {
-        this.selectedMin = this.$moment()
-          .subtract(1, 'month')
-          .format('YYYY-MM')
-        this.selectedMax = this.max
-      }
-    }
-  },
-  methods: {
-    intToDate (value) {
-      return this.minMoment
-        .clone()
-        .add(value, this.addSign)
-        .format(this.format)
-    },
-    $moment: moment,
-    dateToInt (value) {
-      return this.$moment(value, this.format).diff(this.minMoment, this.step)
-    },
-    checkChips (range) {
-      if (range[1] != this.max) {
-        this.period = null
-        return
-      }
-      if (range[0] == this.min) {
-        this.period = 'full'
-        return
-      }
-      if (
-        range[0] ==
-        this.$moment()
-          .subtract(6, 'month')
-          .format('YYYY-MM')
-      ) {
-        this.period = '6m'
-        return
-      }
-      if (
-        range[0] ==
-        this.$moment()
-          .subtract(1, 'month')
-          .format('YYYY-MM')
-      ) {
-        this.period = '1m'
-        return
-      }
-      this.period = null
+    if (this.value[0] != date){
+      this.sliderValue = [this.stepsFromMin(this.selectedMin), this.sliderValue[1]]
+      this.$emit('input', [this.selectedMin, this.selectedMax]);
     }
   }
+
+  @Watch('selectedMax')
+  onSelectedMaxChange(date){
+    if (date < this.min) {
+      this.selectedMax = this.min;
+    }
+    if (date > this.max) {
+      this.selectedMax = this.max;
+    }
+    if (this.value[1] != date){
+      this.sliderValue = [this.sliderValue[0], this.stepsFromMax(this.selectedMax)]
+      this.$emit('input', [this.selectedMin, this.selectedMax]);
+    }
+  }
+
+  @Watch('sliderValue.0')
+  OnSliderMinChange(value) {
+    if (value){
+      this.selectedMin = this.dateAdd(this.min, value);
+    }
+  }
+
+  @Watch('sliderValue.1')
+  OnSliderMaxChange(value) {
+    if (value) {
+      this.selectedMax = this.dateAdd(this.max, value);
+    }
+  }
+
+  get dateDiff() {
+    return this.step == 'month' ? differenceInMonths : differenceInDays;
+  }
+
+  get dateAdd() {
+    return this.step == 'month' ?  addMonths : addDays;
+  }
+
+  get sliderSteps() {
+    return Math.abs(this.dateDiff(this.min, this.max));
+  }
+
+  get period() : string | null {
+      console.log(1);
+    if (!this.compareDate(this.selectedMax, this.max)) {
+      return null;
+    }
+      console.log(2);
+    if (this.compareDate(this.selectedMin, subMonths(this.selectedMax, 1))) {
+      return '1m';
+    }
+      console.log(3);
+    if (this.compareDate(this.selectedMin,subMonths(this.selectedMax, 6))) {
+      return '6m';
+    }
+      console.log(4);
+    if (this.compareDate(this.selectedMin, this.min)) {
+      return 'full';
+    }
+      console.log(5);
+  }
+
+  get compareDate() { return this.step == 'month' ? isSameMonth : isSameDay}
+
+  stepsFromMin(value: Date) {
+    return Math.abs(this.dateDiff(value, this.min));
+  }
+
+  stepsFromMax(value: Date) {
+    return Math.abs(this.dateDiff(value, this.min));
+  }
+
+  setFullPeriod(){
+    this.selectedMax = this.max;
+    this.selectedMin = this.min;
+  }
+  set6mPeriod(){
+    this.selectedMax = this.step == 'month' ? startOfMonth(new Date()) : new Date();
+    this.selectedMin = subMonths(this.selectedMax, 6);
+  }
+  set1mPeriod(){
+    this.selectedMax = this.step == 'month' ? startOfMonth(new Date()) : new Date();
+    this.selectedMin = subMonths(this.selectedMax, 1);
+  }
+
 }
 </script>

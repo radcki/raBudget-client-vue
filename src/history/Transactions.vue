@@ -49,8 +49,8 @@
 
                 <v-flex xs12 md6 v-if="budget">
                   <v-date-range-slider
-                    :min="format(budget.startingDate, 'yyyy-MM-dd')"
-                    :max="format(today, 'yyyy-MM-dd')"
+                    :min="budget.startingDate"
+                    :max="today"
                     v-model="selectedRange"
                     step="days"
                   ></v-date-range-slider>
@@ -263,14 +263,14 @@ export default class Transactions extends Vue {
       this.fetchTransactions();
     }
     if (this.budget) {
-      this.selectedRange = [format(this.monthAgoOrStart, 'yyyy-MM-dd'), format(this.today, 'yyyy-MM-dd')];
+      this.selectedRange = [this.monthAgoOrStart, this.today];
     }
   }
 
   @Watch("budget")
   OnBudgetChange(budget) {
     if (this.budget) {
-      this.selectedRange = [format(this.monthAgoOrStart, 'yyyy-MM-dd'), format(this.today, 'yyyy-MM-dd')];
+      this.selectedRange = [this.monthAgoOrStart, this.today];
       this.selectedCategories = this.budget.budgetCategories.filter(v=>v.type == this.categoryType);
     }
     this.setFilters();
@@ -315,7 +315,7 @@ export default class Transactions extends Vue {
     this.activeBudgetChange(this.$route.params.id);
     if (this.budget) {
       this.selectedCategories = this.budget.budgetCategories.filter(v=>v.type == this.categoryType);
-      this.selectedRange = [format(this.monthAgoOrStart, 'yyyy-MM-dd'), format(this.today, 'yyyy-MM-dd')];
+      this.selectedRange = [this.monthAgoOrStart, this.today];
       this.setFilters();
     }
   }

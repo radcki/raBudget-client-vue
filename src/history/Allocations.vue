@@ -24,8 +24,8 @@
 
                 <v-flex xs12 md6 v-if="budget">
                   <v-date-range-slider
-                    :min="format(budget.startingDate, 'yyyy-MM-dd')"
-                    :max="format(today, 'yyyy-MM-dd')"
+                    :min="budget.startingDate"
+                    :max="new Date()"
                     v-model="selectedRange"
                     step="days"
                   ></v-date-range-slider>
@@ -193,7 +193,7 @@ const transactionsModule = namespace("transactions");
 export default class Allocations extends Vue {
   allocations: Allocation[] = [];
   categoryType: eCategoryType = eCategoryType.Spending;
-  selectedRange: any[] = [null, null];
+  selectedRange: any[] = [new Date(), new Date()];
   selectedCategories: BudgetCategory[] | null = null;
   headers: any[] = [];
   requiredRule: any[] = [];
@@ -263,7 +263,7 @@ export default class Allocations extends Vue {
     this.activeBudgetChange(this.$route.params.id);
     if (this.budget) {
       this.selectedCategories = this.budget.budgetCategories.filter(v=>v.type == this.categoryType);
-      this.selectedRange = [format(this.monthAgoOrStart, 'yyyy-MM-dd'), format(this.today, 'yyyy-MM-dd')];
+      this.selectedRange = [this.monthAgoOrStart, new Date()];
       this.fetchAllocations();
     }
   };
@@ -277,20 +277,14 @@ export default class Allocations extends Vue {
       this.fetchAllocations();
     }
     if (this.budget) {
-      this.selectedRange = [
-        format(this.monthAgoOrStart, "yyyy-MM-dd"),
-        format(this.today, "yyyy-MM-dd")
-      ];
+      this.selectedRange = [this.monthAgoOrStart, new Date()];
     }
   }
 
   @Watch("budget")
   OnBudgetChange(budget) {
-    if (this.budget) {
-      this.selectedRange = [
-        format(this.monthAgoOrStart, "yyyy-MM-dd"),
-        format(this.today, "yyyy-MM-dd")
-      ];
+    if (budget) {
+      this.selectedRange = [this.monthAgoOrStart, new Date()];
       this.selectedCategories = this.budget.budgetCategories.filter(
         v => v.type == this.categoryType
       );
