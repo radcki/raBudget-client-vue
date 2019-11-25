@@ -9,5 +9,5 @@ export interface BudgetCategory {
   budget?: Budget;
   budgetId: number;
   icon: string;
-  amountConfigs: AmountConfig[]
+  amountConfigs: AmountConfig[];
 }

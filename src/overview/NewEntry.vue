@@ -1,13 +1,7 @@
 <template>
   <div>
     <template v-if="!dialog">
-      <v-tabs
-        show-arrows
-        slot="extension"
-        v-model="tab"
-        :background-color="color[tab]"
-        grow
-      >
+      <v-tabs slot="extension" v-model="tab" show-arrows :background-color="color[tab]" grow>
         <v-tabs-slider></v-tabs-slider>
         <v-tab class="subheading white--text" ripple>{{ $t('general.spending') }}</v-tab>
         <v-tab class="subheading white--text" ripple>{{ $t('general.income') }}</v-tab>
@@ -22,18 +16,17 @@
               <v-layout row wrap align-center justify-center>
                 <v-flex xs5>
                   <v-date-field
-                    :rules="requiredRule"
                     v-model="editor.date"
+                    :rules="requiredRule"
                     :label="$t('transactions.date')"
                   ></v-date-field>
-
                 </v-flex>
-                <v-flex xs7 v-if="dataBudget">
+                <v-flex v-if="dataBudget" xs7>
                   <v-category-select
-                    :items="dataBudget.budgetCategories.filter(v=>v.type == selectedType)"
+                    v-model="editor.category"
+                    :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
                     :label="$t('general.category')"
                     :rules="requiredRule"
-                    v-model="editor.category"
                   ></v-category-select>
                 </v-flex>
 
@@ -45,11 +38,11 @@
                   ></v-text-field>
                 </v-flex>
 
-                <v-flex xs7 v-if="tab == 3">
+                <v-flex v-if="tab == 3" xs7>
                   <v-category-select
-                    :items="dataBudget.budgetCategories.filter(v=>v.type == selectedType)"
-                    :label="$t('categories.sourceCategory')"
                     v-model="editor.sourceCategory"
+                    :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
+                    :label="$t('categories.sourceCategory')"
                   ></v-category-select>
                 </v-flex>
 
@@ -62,41 +55,41 @@
                     step="0.01"
                   ></v-text-field>
                 </v-flex>
-                <v-flex xs12 v-if="tab!=3">
+                <v-flex v-if="tab != 3" xs12>
                   <v-checkbox
+                    v-model="createSchedule"
                     hide-details
                     :disabled="addScheduleDisabled"
-                    v-model="createSchedule"
                     :label="$t('transactionSchedules.create')"
                   ></v-checkbox>
                 </v-flex>
-                <v-flex xs12 align-self-end v-if="createSchedule == true && tab!=3">
+                <v-flex v-if="createSchedule == true && tab != 3" xs12 align-self-end>
                   <v-layout row align-end>
-                    <v-flex>{{$t("general.every")}}</v-flex>
+                    <v-flex>{{ $t('general.every') }}</v-flex>
                     <v-flex>
                       <v-text-field
+                        v-model="editor.periodStep"
                         hide-details
                         type="number"
                         :rules="createSchedule == true ? requiredRule : []"
                         min="1"
                         step="1"
-                        v-model="editor.periodStep"
                       ></v-text-field>
                     </v-flex>
                     <v-flex>
                       <v-select
+                        v-model="editor.frequency"
                         hide-details
                         :rules="createSchedule == true ? requiredRule : []"
-                        v-model="editor.frequency"
                         :items="occurrenceFrequencies"
                       >
-                        <template v-slot:selection="{item}">{{ $t(item.text) }}</template>
-                        <template v-slot:item="{item}">{{ $t(item.text) }}</template>
+                        <template v-slot:selection="{ item }">{{ $t(item.text) }}</template>
+                        <template v-slot:item="{ item }">{{ $t(item.text) }}</template>
                       </v-select>
                     </v-flex>
                   </v-layout>
                 </v-flex>
-                <v-flex xs12 v-if="createSchedule == true && tab!=3">
+                <v-flex v-if="createSchedule == true && tab != 3" xs12>
                   <v-date-field
                     v-model="editor.endDate"
                     :label="$t('transactionSchedules.endDate')"
@@ -111,26 +104,20 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn :color="color[tab]" text dark @click="resetForm">{{ $t('general.reset') }}</v-btn>
-          <v-btn
-            :color="color[tab]"
-            dark
-            v-if="tab!=3"
-            @click="createTransaction"
-          >{{ $t('general.add') }}</v-btn>
-          <v-btn
-            :color="color[tab]"
-            dark
-            v-if="tab==3"
-            @click="createAllocation"
-          >{{ $t('general.add') }}</v-btn>
+          <v-btn v-if="tab != 3" :color="color[tab]" dark @click="createTransaction">{{
+            $t('general.add')
+          }}</v-btn>
+          <v-btn v-if="tab == 3" :color="color[tab]" dark @click="createAllocation">{{
+            $t('general.add')
+          }}</v-btn>
         </v-card-actions>
       </v-card>
     </template>
 
     <v-dialog
       v-if="dialog"
-      fullscreen
       v-model="editorDialog"
+      fullscreen
       hide-overlay
       transition="dialog-bottom-transition"
       v-bind="$attrs"
@@ -143,13 +130,15 @@
       <v-card>
         <v-toolbar :color="color[tab]" fixed dark tabs>
           <v-btn icon dark @click="editorDialog = false">
-            <v-icon>{{mdiClose}}</v-icon>
+            <v-icon>{{ mdiClose }}</v-icon>
           </v-btn>
-          <v-toolbar-title>{{$t('transactions.newtransaction')}}</v-toolbar-title>
+          <v-toolbar-title>{{ $t('transactions.newtransaction') }}</v-toolbar-title>
           <v-spacer></v-spacer>
 
-          <v-btn dark text v-if="tab!=3" @click="createTransaction">{{ $t('general.add') }}</v-btn>
-          <v-btn dark text v-if="tab==3" @click="createAllocation">{{ $t('general.add') }}</v-btn>
+          <v-btn v-if="tab != 3" dark text @click="createTransaction">{{
+            $t('general.add')
+          }}</v-btn>
+          <v-btn v-if="tab == 3" dark text @click="createAllocation">{{ $t('general.add') }}</v-btn>
           <v-tabs slot="extension" v-model="tab" :background-color="color[tab]" grow>
             <v-tabs-slider></v-tabs-slider>
             <v-tab class="white--text" ripple>Wydatki</v-tab>
@@ -158,30 +147,30 @@
             <v-tab class="white--text" ripple>Alokacje</v-tab>
           </v-tabs>
         </v-toolbar>
-        <v-form ref="editorForm" class="px-2" v-model="valid" lazy-validation>
+        <v-form ref="editorForm" v-model="valid" class="px-2" lazy-validation>
           <v-container>
             <v-layout row wrap align-center justify-center>
               <v-flex xs12 class="mt-5"></v-flex>
               <v-flex xs12 class="mt-5">
                 <v-date-field v-model="editor.date" :label="$t('transactions.date')"></v-date-field>
               </v-flex>
-              <v-flex xs12 v-if="dataBudget">
+              <v-flex v-if="dataBudget" xs12>
                 <v-category-select
-                    :items="dataBudget.budgetCategories.filter(v=>v.type == selectedType)"
-                    :label="$t('general.category')"
-                    :rules="requiredRule"
-                    v-model="editor.category"
-                  ></v-category-select>
+                  v-model="editor.category"
+                  :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
+                  :label="$t('general.category')"
+                  :rules="requiredRule"
+                ></v-category-select>
               </v-flex>
 
-              <v-flex xs12 v-if="tab == 3 && dataBudget">
+              <v-flex v-if="tab == 3 && dataBudget" xs12>
                 <v-category-select
-                    :items="dataBudget.budgetCategories.filter(v=>v.type == selectedType)"
-                    :label="$t('general.category')"
-                    clearable
-                    v-model="editor.sourceCategory"
-                  ></v-category-select>
-                </v-flex>
+                  v-model="editor.sourceCategory"
+                  :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
+                  :label="$t('general.category')"
+                  clearable
+                ></v-category-select>
+              </v-flex>
 
               <v-flex xs12>
                 <v-text-field
@@ -199,41 +188,43 @@
                   step="0.01"
                 ></v-text-field>
               </v-flex>
-              <v-flex xs12 v-if="tab!=3">
+              <v-flex v-if="tab != 3" xs12>
                 <v-checkbox
+                  v-model="createSchedule"
                   hide-details
                   :disabled="addScheduleDisabled"
-                  v-model="createSchedule"
                   :label="$t('transactionSchedules.create')"
                 ></v-checkbox>
               </v-flex>
-              <v-flex xs12 align-self-end v-if="createSchedule == true && tab!=3">
+              <v-flex v-if="createSchedule == true && tab != 3" xs12 align-self-end>
                 <v-layout row align-end>
-                  <v-flex>{{$t("general.every")}}</v-flex>
+                  <v-flex>{{ $t('general.every') }}</v-flex>
                   <v-flex>
                     <v-text-field
+                      v-model="editor.periodStep"
                       hide-details
                       type="number"
                       :rules="createSchedule == true ? requiredRule : []"
                       min="1"
                       step="1"
-                      v-model="editor.periodStep"
                     ></v-text-field>
                   </v-flex>
                   <v-flex>
                     <v-select
+                      v-model="editor.frequency"
                       hide-details
                       :rules="createSchedule == true ? requiredRule : []"
-                      v-model="editor.frequency"
                       :items="occurrenceFrequencies"
                     >
-                      <template slot="selection" slot-scope="{item}">{{ $t(item.text) }}</template>
+                      <template slot="selection" slot-scope="{ item }">{{
+                        $t(item.text)
+                      }}</template>
                       <template slot="item" slot-scope="data">{{ $t(data.item.text) }}</template>
                     </v-select>
                   </v-flex>
                 </v-layout>
               </v-flex>
-              <v-flex xs12 v-if="createSchedule == true && tab!=3">
+              <v-flex v-if="createSchedule == true && tab != 3" xs12>
                 <v-date-field
                   v-model="editor.endDate"
                   :label="$t('transactionSchedules.endDate')"
@@ -250,89 +241,86 @@
 </template>
 
 <script lang="ts">
-import { transactionsService } from '../_services/transactions.service'
-import { allocationsService } from '../_services/allocations.service'
-import { transactionSchedulesService } from '../_services/transactionSchedules.service'
+import { transactionsService } from '../_services/transactions.service';
+import { allocationsService } from '../_services/allocations.service';
+import { transactionSchedulesService } from '../_services/transactionSchedules.service';
 
-import { eCategoryType } from '../typings/enums/eCategoryType'
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
-import { Action, namespace } from 'vuex-class'
-import { format } from 'date-fns'
-import { Transaction } from '../typings/Transaction'
-import { BudgetCategory } from '../typings/BudgetCategory'
-import { TransactionSchedule } from '../typings/TransactionSchedule'
-import { eFrequency } from '../typings/enums/eFrequency'
-import { Allocation } from '../typings/Allocation'
-import { ErrorMessage } from '@/typings/TypedResponse'
-import { mdiClose } from '@mdi/js'
+import { eCategoryType } from '../typings/enums/eCategoryType';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
+import { namespace } from 'vuex-class';
+import { Transaction } from '../typings/Transaction';
+import { BudgetCategory } from '../typings/BudgetCategory';
+import { TransactionSchedule } from '../typings/TransactionSchedule';
+import { eFrequency } from '../typings/enums/eFrequency';
+import { Allocation } from '../typings/Allocation';
+import { ErrorMessage } from '@/typings/TypedResponse';
+import { mdiClose } from '@mdi/js';
+import { Budget } from '@/typings/Budget';
 
 interface EntryEditor {
-  category: BudgetCategory,
-  sourceCategory?: BudgetCategory,
-  date: Date,
-  description: string | null,
-  amount: number | null,
-  endDate: Date | null,
-  frequency: eFrequency,
-  periodStep: number,
-  transactionScheduleId?: number | null,
+  category: BudgetCategory | null;
+  sourceCategory?: BudgetCategory | null;
+  date: Date;
+  description: string;
+  amount: number | null;
+  endDate: Date | null;
+  frequency: eFrequency;
+  periodStep: number;
+  transactionScheduleId?: number | null;
 }
 
-const transactionsModule = namespace('transactions')
-const alertModule = namespace('alert')
+const transactionsModule = namespace('transactions');
+const alertModule = namespace('alert');
 @Component({
   components: {
     'v-category-select': () => import('../components/CategorySelect.vue'),
-    'v-date-field': () => import('../components/DateField.vue')
-  }
+    'v-date-field': () => import('../components/DateField.vue'),
+  },
 })
 export default class NewEntry extends Vue {
-  @Prop(Boolean) readonly dialog: boolean
-  @Prop(Object) readonly dataBudget: any
-  @Prop(Object) readonly inputData: any
+  @Prop(Boolean) readonly dialog!: boolean;
+  @Prop(Object) readonly dataBudget!: Budget;
+  @Prop(Object) readonly inputData!: any;
 
-  editorDialog: boolean = false;
-  valid: boolean = false;
-  createSchedule: boolean = false;
-  addScheduleDisabled: boolean = false;
-  tab: number = 0;
-  color: string[] = ['amber darken-1',
-                     'green darken-1',
-                     'blue darken-1',
-                     'purple darken-1']
+  editorDialog = false;
+  valid = false;
+  createSchedule = false;
+  addScheduleDisabled = false;
+  tab = 0;
+  color: string[] = ['amber darken-1', 'green darken-1', 'blue darken-1', 'purple darken-1'];
 
   occurrenceFrequencies: any[] = [
-        { value: 1, text: 'transactionSchedules.day' },
-        { value: 2, text: 'transactionSchedules.week' },
-        { value: 3, text: 'transactionSchedules.month' }
-      ]
-  //requiredRule: any[] = [v => !!v || this.$t('forms.requiredField')]
-  requiredRule: any[] = []
+    { value: 1, text: 'transactionSchedules.day' },
+    { value: 2, text: 'transactionSchedules.week' },
+    { value: 3, text: 'transactionSchedules.month' },
+  ];
+
+  requiredRule: ((v) => boolean | string)[] = [];
+
   mdiClose = mdiClose;
 
   editor: EntryEditor = {
-        category: null,
-        sourceCategory: null,
-        date: this.getDate(),
-        description: null,
-        amount: null,
-        endDate: null,
-        frequency: 3,
-        periodStep: 1
-      };
+    category: null,
+    sourceCategory: null,
+    date: this.getDate(),
+    description: '',
+    amount: null,
+    endDate: null,
+    frequency: 3,
+    periodStep: 1,
+  };
 
   get selectedType() {
     return this.tab == 0 || this.tab == 3
       ? eCategoryType.Spending
       : this.tab == 1
-        ? eCategoryType.Income
-        : eCategoryType.Saving
+      ? eCategoryType.Income
+      : eCategoryType.Saving;
   }
-
 
   @Watch('tab')
   OnTabChange() {
-    (this.$refs.editorForm as Vue & { resetValidation: () => any }).resetValidation()
+    (this.$refs.editorForm as Vue & { resetValidation: () => any }).resetValidation();
   }
 
   @Watch('selectedType')
@@ -340,129 +328,150 @@ export default class NewEntry extends Vue {
     if (
       this.editor.category &&
       this.editor.category.type != this.tab &&
-      (this.tab == 3 && this.editor.category.type != 0)
+      this.tab == 3 &&
+      this.editor.category.type != 0
     ) {
-      this.editor.category = null
+      this.editor.category = null;
     }
   }
 
   @Watch('editorDialog')
   OnEditorDialog(open) {
     if (open) {
-      this.$wait.start('dialog')
-      this.resetForm()
+      this.$wait.start('dialog');
+      this.resetForm();
     } else {
-      this.$wait.end('dialog')
+      this.$wait.end('dialog');
     }
   }
 
   @Watch('inputData')
   OnInputDataChange(data) {
     if (!data) {
-      return
+      return;
     }
-    this.editor = {...Object.assign({}, data)}
-    this.editor.date = new Date(this.editor.date || data.transactionDate)
+    this.editor = { ...Object.assign({}, data) };
+    this.editor.date = new Date(this.editor.date || data.transactionDate);
     if (data.budgetCategoryId) {
-      this.editor.category = this.dataBudget.budgetCategories.find(v=>v.budgetCategoryId == data.budgetCategoryId)
+      this.editor.category =
+        this.dataBudget.budgetCategories.find(v => v.budgetCategoryId == data.budgetCategoryId) ||
+        null;
     } else {
-      this.editor.category = data.category
+      this.editor.category = data.category;
     }
-    this.tab = this.editor.category.type
-    this.createSchedule = false
-    this.addScheduleDisabled = true
+    this.tab = this.editor.category ? this.editor.category.type : this.tab;
+    this.createSchedule = false;
+    this.addScheduleDisabled = true;
   }
 
-
   beforeDestroy() {
-    this.$wait.end('dialog')
+    this.$wait.end('dialog');
   }
 
   mounted() {
     this.$root.$on('closeDialogs', () => {
-      this.editorDialog = false
-    })
+      this.editorDialog = false;
+    });
+    this.requiredRule.push(v => !!v || this.$t('forms.requiredField').toString());
   }
 
+  @transactionsModule.Action('loadTransactionToStore') loadTransactionToStore;
+  @alertModule.Action('error') dispatchError;
 
-  @transactionsModule.Action('loadTransactionToStore') loadTransactionToStore
-  @alertModule.Action('error') dispatchError
+  get editorForm() {
+    return this.$refs.editorForm as Vue & { validate: () => boolean };
+  }
 
   getDate() {
-    return new Date()
+    return new Date();
   }
 
   async createTransaction() {
-    if ((this.$refs.editorForm as Vue & { validate: () => boolean } ).validate()) {
-      let transaction: Transaction = {
+    if (
+      this.editorForm.validate() &&
+      this.editor.category &&
+      this.editor.category.budgetCategoryId
+    ) {
+      const transaction: Transaction = {
         transactionId: undefined,
-        amount: this.editor.amount,
+        amount: this.editor.amount || 0,
         description: this.editor.description,
         budgetCategoryId: this.editor.category.budgetCategoryId,
-        transactionDate: this.editor.date
+        transactionDate: this.editor.date,
       };
 
       if (this.createSchedule && !this.editor.transactionScheduleId) {
-        this.createTransactionSchedule(this.editor)
+        this.createTransactionSchedule(this.editor);
       }
-      var response = await transactionsService.createTransaction(this.dataBudget.budgetId, transaction);
+      const response = await transactionsService.createTransaction(
+        this.dataBudget.budgetId,
+        transaction,
+      );
 
       if (response.ok) {
-        this.$emit('saved')
+        this.$emit('saved');
         this.editorDialog = false;
         this.loadTransactionToStore(transaction);
-        this.resetForm()
+        this.resetForm();
       } else {
-        var error = await response.json<ErrorMessage>();
+        const error = await response.json<ErrorMessage>();
         this.dispatchError(error.message);
       }
     }
   }
 
   createTransactionSchedule(data: EntryEditor) {
-    this.$wait.start('saving.transactionSchedules')
-    var schedule: TransactionSchedule = {
-      amount: data.amount,
-      description: data.description,
-      budgetCategoryId: data.category.budgetCategoryId,
-      frequency: data.frequency,
-      startDate: data.date,
-      periodStep: data.periodStep,
+    this.$wait.start('saving.transactionSchedules');
+    if (this.editorForm.validate() && data.category && data.category.budgetCategoryId) {
+      const schedule: TransactionSchedule = {
+        amount: data.amount || 0,
+        description: data.description,
+        budgetCategoryId: data.category.budgetCategoryId,
+        frequency: data.frequency,
+        startDate: data.date,
+        periodStep: data.periodStep,
+      };
+      transactionSchedulesService
+        .createTransactionSchedule(this.dataBudget.budgetId, schedule)
+        .then(response => {
+          if (response.ok) {
+            this.$wait.end('saving.transactionSchedules');
+          } else {
+            response.json().then(data => {
+              this.$wait.end('saving.transactionSchedules');
+              this.dispatchError(data.message);
+            });
+          }
+        });
     }
-    transactionSchedulesService
-      .createTransactionSchedule(this.dataBudget.budgetId, schedule)
-      .then(response => {
-        if (response.ok) {
-          this.$wait.end('saving.transactionSchedules')
-        } else {
-          response.json().then(data => {
-            this.$wait.end('saving.transactionSchedules')
-            this.dispatchError(data.message)
-          })
-        }
-      })
   }
 
   createAllocation() {
-    var allocation: Allocation = {
-      amount: this.editor.amount,
-      description: this.editor.description,
-      targetBudgetCategoryId: this.editor.category.budgetCategoryId,
-      sourceBudgetCategoryId: this.editor.sourceCategory ? this.editor.sourceCategory.budgetCategoryId : null,
-      allocationDate: this.editor.date,
-    }
-    if ((this.$refs.editorForm as Vue & { validate: () => boolean }).validate()) {
+    if (
+      this.editorForm.validate() &&
+      this.editor.category &&
+      this.editor.category.budgetCategoryId
+    ) {
+      const allocation: Allocation = {
+        amount: this.editor.amount || 0,
+        description: this.editor.description,
+        targetBudgetCategoryId: this.editor.category.budgetCategoryId,
+        sourceBudgetCategoryId: this.editor.sourceCategory
+          ? this.editor.sourceCategory.budgetCategoryId
+          : null,
+        allocationDate: this.editor.date,
+      };
       allocationsService.createAllocation(this.dataBudget.budgetId, allocation).then(response => {
         if (response.ok) {
-          this.$emit('saved')
-          this.editorDialog = false
-          this.resetForm()
+          this.$emit('saved');
+          this.editorDialog = false;
+          this.resetForm();
         } else {
           response.json<ErrorMessage>().then(data => {
-            this.dispatchError(data.message)
-          })
+            this.dispatchError(data.message);
+          });
         }
-      })
+      });
     }
   }
 
@@ -471,18 +480,17 @@ export default class NewEntry extends Vue {
       category: null,
       sourceCategory: null,
       date: this.getDate(),
-      description: null,
+      description: '',
       amount: null,
       endDate: null,
       frequency: 3,
-      periodStep: 1
-    }
-    this.createSchedule = false
-    this.addScheduleDisabled = false
+      periodStep: 1,
+    };
+    this.createSchedule = false;
+    this.addScheduleDisabled = false;
     if (this.$refs.editorForm) {
-      (this.$refs.editorForm as Vue & { resetValidation: () => any }).resetValidation()
+      (this.$refs.editorForm as Vue & { resetValidation: () => any }).resetValidation();
     }
   }
-
 }
 </script>

@@ -14,7 +14,7 @@ export interface TranscationFilters {
   startDate: Date | null;
   endDate: Date | null;
   categories: BudgetCategory[];
-  categoryType?: eCategoryType;
+  categoryType?: eCategoryType | null;
 }
 
 export interface TransactionsState {
@@ -32,7 +32,7 @@ const transactionsState: TransactionsState = {
   transactions: {
     incomes: [],
     savings: [],
-    spendings: []
+    spendings: [],
   },
   closestScheduledTransactions: [],
   dataLoadFilters: {
@@ -40,15 +40,15 @@ const transactionsState: TransactionsState = {
     limitCount: null,
     startDate: null,
     endDate: null,
-    categories: []
+    categories: [],
   },
   mainFilters: {
     budgetId: null,
     limitCount: null,
     startDate: null,
     endDate: null,
-    categories: []
-  }
+    categories: [],
+  },
 };
 
 const actions: ActionTree<TransactionsState, RootState> = {
@@ -58,7 +58,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
   },
   setFilters(
     { state, commit, dispatch },
-    { budgetId, limitCount, startDate, endDate, categories }
+    { budgetId, limitCount, startDate, endDate, categories },
   ) {
     let requireReload = false;
     if (budgetId != state.dataLoadFilters.budgetId) {
@@ -75,7 +75,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
 
     if (
       (state.dataLoadFilters.limitCount && !limitCount) ||
-      limitCount > state.dataLoadFilters.limitCount
+      limitCount > (state.dataLoadFilters.limitCount || 0)
     ) {
       requireReload = true;
       commit('setCountLoadFilter', limitCount);
@@ -110,7 +110,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
         if (
           !state.dataLoadFilters.categories ||
           !state.dataLoadFilters.categories.find(
-            v => v.budgetCategoryId == category.budgetCategoryId
+            v => v.budgetCategoryId == category.budgetCategoryId,
           )
         ) {
           requireReload = true;
@@ -126,34 +126,49 @@ const actions: ActionTree<TransactionsState, RootState> = {
   },
 
   async fetchTransactions({ commit, dispatch, state, rootGetters }) {
+    if (!state.mainFilters.budgetId) {
+      return;
+    }
     dispatch('wait/start', 'loading.transactions', { root: true });
 
-    transactionsService
-      .listTransactions(
-        state.mainFilters.budgetId,
-        state.dataLoadFilters.limitCount,
-        state.dataLoadFilters.startDate,
-        state.dataLoadFilters.endDate,
-        state.dataLoadFilters.categories,
-        state.dataLoadFilters.categoryType
-      )
-      .then(response => {
-        if (response.ok) {
-          response.json().then(responseData => {
-            let getBudgetCategoryById: (categoryId: number) => BudgetCategory = rootGetters['budgets/budgetCategoryById'];
-            commit('setSpendingTransactions', responseData.filter(v=>getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Spending));
-            commit('setSavingTransactions', responseData.filter(v=>getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Saving));
-            commit('setIncomeTransactions', responseData.filter(v=>getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Income));
+    const response = await transactionsService.listTransactions(
+      state.mainFilters.budgetId,
+      state.dataLoadFilters.limitCount,
+      state.dataLoadFilters.startDate,
+      state.dataLoadFilters.endDate,
+      state.dataLoadFilters.categories,
+      state.dataLoadFilters.categoryType,
+    );
 
-            dispatch('wait/end', 'loading.transactions', { root: true });
-          });
-        } else {
-          response.json<ErrorMessage>().then(responseData => {
-            commit('alert/error', responseData.message, { root: true });
-            dispatch('wait/end', 'loading.transactions', { root: true });
-          });
-        }
-      });
+    if (response.ok) {
+      const responseData = await response.json();
+      const getBudgetCategoryById: (categoryId: number) => BudgetCategory =
+        rootGetters['budgets/budgetCategoryById'];
+      commit(
+        'setSpendingTransactions',
+        responseData.filter(
+          v => getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Spending,
+        ),
+      );
+      commit(
+        'setSavingTransactions',
+        responseData.filter(
+          v => getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Saving,
+        ),
+      );
+      commit(
+        'setIncomeTransactions',
+        responseData.filter(
+          v => getBudgetCategoryById(v.budgetCategoryId).type == eCategoryType.Income,
+        ),
+      );
+
+      dispatch('wait/end', 'loading.transactions', { root: true });
+    } else {
+      const responseData = await response.json<ErrorMessage>();
+      commit('alert/error', responseData.message, { root: true });
+      dispatch('wait/end', 'loading.transactions', { root: true });
+    }
   },
 
   fetchClosestScheduledTransactions({ commit, dispatch, state }) {
@@ -161,21 +176,21 @@ const actions: ActionTree<TransactionsState, RootState> = {
     transactionSchedulesService
       .listClosestOccurrences(
         state.mainFilters.budgetId,
-        format(addMonths(new Date(), 1), 'yyyy-MM-dd')
+        format(addMonths(new Date(), 1), 'yyyy-MM-dd'),
       )
       .then(response => {
         if (response.ok) {
           response.json().then(responseData => {
             commit('setClosestScheduledTransactions', responseData);
             dispatch('wait/end', 'loading.scheduledTransactions', {
-              root: true
+              root: true,
             });
           });
         } else {
           response.json().then(responseData => {
             commit('alert/error', responseData.message, { root: true });
             dispatch('wait/end', 'loading.scheduledTransactions', {
-              root: true
+              root: true,
             });
           });
         }
@@ -184,13 +199,13 @@ const actions: ActionTree<TransactionsState, RootState> = {
 
   unloadTransactionFromStore({ state, commit, dispatch }, transactionId) {
     const filteredSpendings = state.transactions.spendings.filter(
-      v => v.transactionId != transactionId
+      v => v.transactionId != transactionId,
     );
     const filteredSavings = state.transactions.savings.filter(
-      v => v.transactionId != transactionId
+      v => v.transactionId != transactionId,
     );
     const filteredIncomes = state.transactions.incomes.filter(
-      v => v.transactionId != transactionId
+      v => v.transactionId != transactionId,
     );
 
     const countChanged =
@@ -201,7 +216,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
     commit('setTransactions', {
       incomes: filteredIncomes,
       savings: filteredSavings,
-      spendings: filteredSpendings
+      spendings: filteredSpendings,
     });
 
     commit('setSpendingTransactions', filteredSpendings);
@@ -214,67 +229,58 @@ const actions: ActionTree<TransactionsState, RootState> = {
     dispatch('budgets/reloadInitialized', null, { root: true });
   },
 
-  loadTransactionToStore({ state, dispatch }, newTransaction: Transaction) {
+  loadTransactionToStore({ dispatch }, newTransaction: Transaction) {
     if (!newTransaction.budgetCategoryId) {
       dispatch('fetchTransactions');
     }
     dispatch('budgets/reloadInitialized', null, {
-      root: true
+      root: true,
     });
   },
 
-  updateTransactionInStore(
-    { state, commit, dispatch },
-    updatedTransaction: Transaction
-  ) {
+  updateTransactionInStore({ dispatch }) {
     dispatch('fetchTransactions');
     dispatch('budgets/reloadInitialized', null, {
-      root: true
+      root: true,
     });
-  }
+  },
 };
 
 const getters: GetterTree<TransactionsState, RootState> = {
   startDateMoment: state => {
-    return state.mainFilters.startDate
-      ? new Date(state.mainFilters.startDate)
-      : null;
+    return state.mainFilters.startDate ? new Date(state.mainFilters.startDate) : null;
   },
   endDateMoment: state => {
     return state.mainFilters.endDate ? new Date(state.mainFilters.endDate) : null;
   },
   getTransactions: (state, getter) => {
-    let transactionsClone = {};
+    const transactionsClone = {};
     // tslint:disable-next-line: forin
-    for (let transactionType in state.transactions) {
+    for (const transactionType in state.transactions) {
       if (state.mainFilters.limitCount) {
-        transactionsClone[transactionType] = state.transactions[
-          transactionType
-        ].slice(0, state.mainFilters.limitCount);
+        transactionsClone[transactionType] = state.transactions[transactionType].slice(
+          0,
+          state.mainFilters.limitCount,
+        );
       }
       if (getter.startDateMoment) {
-        transactionsClone[transactionType] = state.transactions[
-          transactionType
-        ].filter(v => new Date(v.date) >= getter.startDateMoment);
+        transactionsClone[transactionType] = state.transactions[transactionType].filter(
+          v => new Date(v.date) >= getter.startDateMoment,
+        );
       }
       if (getter.endDateMoment) {
-        transactionsClone[transactionType] = state.transactions[
-          transactionType
-        ].filter(v => new Date(v.date) <= getter.endDateMoment);
+        transactionsClone[transactionType] = state.transactions[transactionType].filter(
+          v => new Date(v.date) <= getter.endDateMoment,
+        );
       }
       if (state.mainFilters.categories) {
-        transactionsClone[transactionType] = state.transactions[
-          transactionType
-        ].filter(
-          v =>
-            !!state.mainFilters.categories.find(
-              c => c.budgetCategoryId == v.budgetCategoryId
-            )
+        transactionsClone[transactionType] = state.transactions[transactionType].filter(
+          v => !!state.mainFilters.categories.find(c => c.budgetCategoryId == v.budgetCategoryId),
         );
       }
     }
     return transactionsClone;
-  }
+  },
 };
 
 const mutations: MutationTree<TransactionsState> = {
@@ -301,7 +307,7 @@ const mutations: MutationTree<TransactionsState> = {
         categories: [],
         endDate: null,
         limitCount: null,
-        startDate: null
+        startDate: null,
       };
     }
     state.dataLoadFilters.limitCount = filter;
@@ -313,7 +319,7 @@ const mutations: MutationTree<TransactionsState> = {
         categories: [],
         endDate: null,
         limitCount: null,
-        startDate: null
+        startDate: null,
       };
     }
     state.dataLoadFilters.startDate = filter;
@@ -325,7 +331,7 @@ const mutations: MutationTree<TransactionsState> = {
         categories: [],
         endDate: null,
         limitCount: null,
-        startDate: null
+        startDate: null,
       };
     }
     state.dataLoadFilters.endDate = filter;
@@ -337,7 +343,7 @@ const mutations: MutationTree<TransactionsState> = {
         categories: [],
         endDate: null,
         limitCount: null,
-        startDate: null
+        startDate: null,
       };
     }
     state.dataLoadFilters.categories = filter;
@@ -346,7 +352,9 @@ const mutations: MutationTree<TransactionsState> = {
   setSpendingTransactions(state, payload: Transaction[]) {
     payload = payload.map(function(transaction) {
       transaction.transactionDate = new Date(transaction.transactionDate);
-      transaction.registeredDate = new Date(transaction.registeredDate);
+      if (transaction.registeredDate) {
+        transaction.registeredDate = new Date(transaction.registeredDate);
+      }
       return transaction;
     });
     state.transactions.spendings = payload;
@@ -354,7 +362,9 @@ const mutations: MutationTree<TransactionsState> = {
   setSavingTransactions(state, payload: Transaction[]) {
     payload = payload.map(function(transaction) {
       transaction.transactionDate = new Date(transaction.transactionDate);
-      transaction.registeredDate = new Date(transaction.registeredDate);
+      if (transaction.registeredDate) {
+        transaction.registeredDate = new Date(transaction.registeredDate);
+      }
       return transaction;
     });
     state.transactions.savings = payload;
@@ -362,7 +372,9 @@ const mutations: MutationTree<TransactionsState> = {
   setIncomeTransactions(state, payload: Transaction[]) {
     payload = payload.map(function(transaction) {
       transaction.transactionDate = new Date(transaction.transactionDate);
-      transaction.registeredDate = new Date(transaction.registeredDate);
+      if (transaction.registeredDate) {
+        transaction.registeredDate = new Date(transaction.registeredDate);
+      }
       return transaction;
     });
     state.transactions.incomes = payload;
@@ -373,7 +385,7 @@ const mutations: MutationTree<TransactionsState> = {
       v.registeredDate = new Date(v.registeredDate);
       return v;
     });
-  }
+  },
 };
 
 export const transactions = {
@@ -381,5 +393,5 @@ export const transactions = {
   getters,
   state: transactionsState,
   actions,
-  mutations
+  mutations,
 };

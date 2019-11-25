@@ -10,7 +10,7 @@ const userState: UserState = {};
 const actions: ActionTree<UserState, RootState> = {
   logout() {
     Vue.prototype.$keycloak.logoutFn();
-  }
+  },
 };
 
 const getters: GetterTree<UserState, RootState> = {
@@ -20,10 +20,10 @@ const getters: GetterTree<UserState, RootState> = {
           userName: Vue.prototype.$keycloak.userName,
           userEmail: Vue.prototype.$keycloak.tokenParsed.email,
           fullName: Vue.prototype.$keycloak.fullName,
-          userId: Vue.prototype.$keycloak.subject
+          userId: Vue.prototype.$keycloak.subject,
         }
       : null;
-  }
+  },
 };
 
 const mutations: MutationTree<UserState> = {};
@@ -33,5 +33,5 @@ export const account: Module<UserState, RootState> = {
   state: userState,
   actions,
   getters,
-  mutations
+  mutations,
 };

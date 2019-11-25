@@ -1,26 +1,30 @@
-import { apiHandler } from '../_services/apiHandler'
-import * as signalR from '@aspnet/signalr'
-import store from '../_store/index'
+import { apiHandler } from '../_services/apiHandler';
+import * as signalR from '@aspnet/signalr';
 
 new signalR.HubConnectionBuilder()
-  .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
-  .build()
+  .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, {
+    accessTokenFactory: () => apiHandler.getAccessToken(),
+  })
+  .build();
 
 const signalrPlugin = {
-  install (Vue) {
-
+  install() {
     const transactionsHubConnection = new signalR.HubConnectionBuilder()
       .configureLogging(signalR.LogLevel.Warning)
-      .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, { accessTokenFactory: () => apiHandler.getAccessToken() })
-      .build()
-    transactionsHubConnection.start()
+      .withUrl(`${process.env.VUE_APP_APIURL}/hubs/transactions`, {
+        accessTokenFactory: () => apiHandler.getAccessToken(),
+      })
+      .build();
+    transactionsHubConnection.start();
 
     const budgetsHubConnection = new signalR.HubConnectionBuilder()
       .configureLogging(signalR.LogLevel.Warning)
-      .withUrl(`${process.env.VUE_APP_APIURL}/hubs/budgets`, { accessTokenFactory: () => apiHandler.getAccessToken() })
-      .build()
-    budgetsHubConnection.start()
-/*
+      .withUrl(`${process.env.VUE_APP_APIURL}/hubs/budgets`, {
+        accessTokenFactory: () => apiHandler.getAccessToken(),
+      })
+      .build();
+    budgetsHubConnection.start();
+    /*
     transactionsHubConnection.on('TransactionAdded', (newTransaction) => {
       store.dispatch('transactions/loadTransactionToStore', newTransaction)
     })
@@ -57,7 +61,7 @@ const signalrPlugin = {
       store.dispatch('budgets/reloadInitialized', updatedCategory.budget.id)
     })
     */
-  }
-}
+  },
+};
 
-export default signalrPlugin
+export default signalrPlugin;

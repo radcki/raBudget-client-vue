@@ -1,6 +1,6 @@
 export enum eAlertType {
-    Success,
-    Info,
-    Warning,
-    Error
+  Success,
+  Info,
+  Warning,
+  Error,
 }

@@ -1,11 +1,11 @@
 export interface TypedResponse<T = any> extends Response {
-  json<P = T>(): Promise<P>
+  json<P = T>(): Promise<P>;
 }
 
 export interface Payload {
-  id: number
+  id: number;
 }
 
 export interface ErrorMessage {
-  message: string
+  message: string;
 }

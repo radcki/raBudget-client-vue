@@ -16,33 +16,33 @@
           </v-flex>
           <v-flex xs9 md5>
             <v-text-field
-              :rules="requiredRule"
               v-model="newBudgetCategory.name"
+              :rules="requiredRule"
               :label="$t('categories.name')"
             ></v-text-field>
           </v-flex>
           <v-flex xs12 md4>
             <v-text-field
+              v-model="newBudgetCategory.amountConfigs[0].amount"
               :prepend-icon="mdiCash"
               type="number"
               step="0.01"
               :rules="requiredRule"
               min="0"
-              v-model="newBudgetCategory.amountConfigs[0].amount"
               :label="$t('categories.monthlyAmount')"
             ></v-text-field>
           </v-flex>
           <v-flex xs12 md2>
             <v-btn color="primary" class="white--text" @click="addCategory">
-              {{$t('general.add')}}
-              <v-icon right dark>{{mdiPlus}}</v-icon>
+              {{ $t('general.add') }}
+              <v-icon right dark>{{ mdiPlus }}</v-icon>
             </v-btn>
           </v-flex>
         </v-layout>
       </v-container>
     </v-form>
 
-    <v-list-item v-for="(category, i) in categories" v-bind:data="category" v-bind:key="i">
+    <v-list-item v-for="(category, i) in categories" :key="i" :data="category">
       <v-list-item-avatar :color="color">
         <v-icon size="24" dark>{{ $categoryIcons[category.icon] }}</v-icon>
       </v-list-item-avatar>
@@ -50,50 +50,55 @@
       <v-list-item-content>
         <v-list-item-title>{{ category.name }}</v-list-item-title>
 
-        <v-list-item-subtitle>{{ $t("categories.monthlyAmount") }}: {{ category.amountConfigs[0].amount | currency($currencyConfig(budget)) }}</v-list-item-subtitle>
+        <v-list-item-subtitle>
+          {{ $t('categories.monthlyAmount') }}:
+          {{ category.amountConfigs[0].amount | currency($currencyConfig(budget)) }}
+        </v-list-item-subtitle>
       </v-list-item-content>
 
       <v-list-item-action>
         <v-btn text icon ripple dark color="primary" @click="editCategory(i)">
-          <v-icon>{{mdiPencil}}</v-icon>
+          <v-icon>{{ mdiPencil }}</v-icon>
         </v-btn>
       </v-list-item-action>
       <v-list-item-action>
         <v-btn text icon ripple dark color="red" @click="removeCategory(i)">
-          <v-icon>{{mdiCancel}}</v-icon>
+          <v-icon>{{ mdiCancel }}</v-icon>
         </v-btn>
       </v-list-item-action>
     </v-list-item>
     <v-list-item>
-      <v-list-item-content>{{ $t("categories.totalAmount") }}: {{ categoriesSum | currency($currencyConfig(budget)) }}</v-list-item-content>
+      <v-list-item-content>
+        {{ $t('categories.totalAmount') }}:
+        {{ categoriesSum | currency($currencyConfig(budget)) }}
+      </v-list-item-content>
     </v-list-item>
   </v-list>
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
-import { Budget } from "../typings/Budget";
-import { eCategoryType } from "../typings/enums/eCategoryType";
-import { mdiCash, mdiPlus, mdiPencil, mdiCancel } from "@mdi/js";
-import { BudgetCategory } from "../typings/BudgetCategory";
-import { AmountConfig } from '@/typings/AmountConfig';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
+import { Budget } from '../typings/Budget';
+import { eCategoryType } from '../typings/enums/eCategoryType';
+import { mdiCash, mdiPlus, mdiPencil, mdiCancel } from '@mdi/js';
+import { BudgetCategory } from '../typings/BudgetCategory';
 
 @Component
 export default class NewBudgetCategoryEditor extends Vue {
-  @Prop(Object) budget: Budget;
-  @Prop(Number) categoryType: eCategoryType;
-  @Prop(Array) value: BudgetCategory[];
+  @Prop(Object) budget?: Budget;
+  @Prop(Number) categoryType?: eCategoryType;
+  @Prop(Array) value?: BudgetCategory[];
 
-  valid: boolean = true;
+  valid = true;
   newBudgetCategory: BudgetCategory = {
-    type: this.categoryType,
-    budgetId: this.budget.budgetId,
-    name: "",
-    icon: "",
-    amountConfigs: [{ amount: 0, validFrom: this.budget.startingDate }]
+    type: this.categoryType ? this.categoryType : 0,
+    budgetId: this.budget ? this.budget.budgetId : -1,
+    name: '',
+    icon: '',
+    amountConfigs: [{ amount: 0, validFrom: this.budget ? this.budget.startingDate : new Date() }],
   };
   categories: BudgetCategory[] = this.value || [];
-  requiredRule: any[] = [];
+  requiredRule: ((v: string) => boolean | string)[] = [];
 
   mdiCash = mdiCash;
   mdiPlus = mdiPlus;
@@ -101,61 +106,63 @@ export default class NewBudgetCategoryEditor extends Vue {
   mdiCancel = mdiCancel;
 
   mounted() {
-    this.categories = this.value;
-    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
+    this.requiredRule = [v => !!v || this.$t('forms.requiredField').toString()];
   }
 
   icons: string[] = Object.keys(this.$categoryIcons);
   @Watch('budget.startingDate')
-  OnBudgetStartingDateChange(newDate){
-    for(let amountConfig of this.newBudgetCategory.amountConfigs){
+  OnBudgetStartingDateChange(newDate) {
+    for (const amountConfig of this.newBudgetCategory.amountConfigs) {
       amountConfig.validFrom = newDate;
     }
-    for(let category of this.categories){
-      for(let amountConfig of category.amountConfigs){
+    for (const category of this.categories) {
+      for (const amountConfig of category.amountConfigs) {
         amountConfig.validFrom = newDate;
       }
     }
   }
 
-  get color() {
+  get color(): string {
     switch (this.categoryType) {
       case eCategoryType.Income:
-        return "income";
+        return 'income';
       case eCategoryType.Spending:
-        return "spending";
+        return 'spending';
       case eCategoryType.Saving:
-        return "saving";
+        return 'saving';
     }
+    return '';
   }
 
-  get categoriesSum() {
-    var sum = 0;
-    if (!this.categories){
+  get categoriesSum(): number {
+    let sum = 0;
+    if (!this.categories) {
       return sum;
     }
-    for (let category of this.categories) {
-      for (let ammountconfig of category.amountConfigs) {
+    for (const category of this.categories) {
+      for (const ammountconfig of category.amountConfigs) {
         sum += ammountconfig.amount;
       }
     }
     return sum;
   }
 
-  @Watch("categories")
+  @Watch('categories')
   OnCategoriesChange() {
-    this.$emit("input", this.categories);
+    this.$emit('input', this.categories);
   }
 
   addCategory() {
     if ((this.$refs.formCategory as Vue & { validate: () => boolean }).validate()) {
       this.categories.push(Object.assign({}, this.newBudgetCategory));
       this.newBudgetCategory = {
-        type: this.categoryType,
-        budgetId: this.budget.budgetId,
-        icon: "",
-        name: "",
-        amountConfigs: [{ amount: 0, validFrom: this.budget.startingDate }]
+        type: this.categoryType ? this.categoryType : 0,
+        budgetId: this.budget ? this.budget.budgetId : -1,
+        icon: '',
+        name: '',
+        amountConfigs: [
+          { amount: 0, validFrom: this.budget ? this.budget.startingDate : new Date() },
+        ],
       };
       (this.$refs.formCategory as Vue & { reset: () => any }).reset();
     }

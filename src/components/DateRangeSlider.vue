@@ -1,32 +1,33 @@
 <template>
-<v-container fluid grid-list-sm class="pa-0">
+  <v-container fluid grid-list-sm class="pa-0">
     <v-layout row wrap>
-      <v-flex xs4 md2 class="text-xs-center" v-if="chips">
+      <v-flex v-if="chips" xs4 md2 class="text-xs-center">
         <v-chip
           small
           class="my-1"
-          :color="period == 'full'? 'primary' : 'grey'"
+          :color="period == 'full' ? 'primary' : 'grey'"
+          text-color="white"
           @click="setFullPeriod()"
-          text-color="white"
-        >{{ $t("reports.periodFull") }}</v-chip>
+          >{{ $t('reports.periodFull') }}</v-chip
+        >
         <br />
         <v-chip
           small
           class="my-1"
-
-          :color="period == '6m'? 'primary' : 'grey'"
+          :color="period == '6m' ? 'primary' : 'grey'"
+          text-color="white"
           @click="set6mPeriod()"
-          text-color="white"
-        >{{ $t("reports.period6m") }}</v-chip>
+          >{{ $t('reports.period6m') }}</v-chip
+        >
         <br />
         <v-chip
           small
           class="my-1"
-
-          :color="period == '1m'? 'primary' : 'grey'"
-          @click="set1mPeriod()"
+          :color="period == '1m' ? 'primary' : 'grey'"
           text-color="white"
-        >{{ $t("reports.period1m") }}</v-chip>
+          @click="set1mPeriod()"
+          >{{ $t('reports.period1m') }}</v-chip
+        >
         <br />
       </v-flex>
       <v-flex xs12 :md6="!!chips">
@@ -36,17 +37,24 @@
               <v-date-field
                 v-model="selectedMin"
                 :type="step === 'month' ? 'month' : 'day'"
-                :label="$t('general.toDate')"></v-date-field>
+                :label="$t('general.toDate')"
+              ></v-date-field>
             </v-flex>
 
             <v-flex xs6 style="width: 120px">
               <v-date-field
                 v-model="selectedMax"
                 :type="step === 'month' ? 'month' : 'day'"
-                :label="$t('general.toDate')"></v-date-field>
+                :label="$t('general.toDate')"
+              ></v-date-field>
             </v-flex>
             <v-flex xs12>
-              <v-range-slider v-model="sliderValue" :max="sliderSteps" :min="0" :step="1"></v-range-slider>
+              <v-range-slider
+                v-model="sliderValue"
+                :max="sliderSteps"
+                :min="0"
+                :step="1"
+              ></v-range-slider>
             </v-flex>
           </v-layout>
         </v-container>
@@ -56,16 +64,25 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
-import { format, differenceInDays, differenceInMonths, addDays, addMonths, subMonths, startOfMonth, isSameMonth, isSameDay } from 'date-fns'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
+import {
+  differenceInDays,
+  differenceInMonths,
+  addDays,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  isSameMonth,
+  isSameDay,
+} from 'date-fns';
 
 @Component({
   components: {
-    "v-date-field": () => import("../components/DateField.vue")
-  }
+    'v-date-field': () => import('../components/DateField.vue'),
+  },
 })
 export default class DateRangeSlider extends Vue {
-  @Prop({type: Boolean, default: false}) chips!: boolean;
+  @Prop({ type: Boolean, default: false }) chips!: boolean;
   @Prop(Date) min!: Date;
   @Prop(Date) max!: Date;
   @Prop(Array) value!: Date[];
@@ -73,46 +90,46 @@ export default class DateRangeSlider extends Vue {
 
   selectedMin: Date = this.value[0];
   selectedMax: Date = this.value[1];
-  sliderValue: number[] = [null,null];
+  sliderValue: (number | null)[] = [null, null];
 
   @Watch('value')
-  OnValueChange(newValue){
+  OnValueChange(newValue) {
     this.selectedMin = newValue[0];
     this.selectedMax = newValue[1];
-    this.sliderValue = [this.stepsFromMin(this.selectedMin), this.stepsFromMax(this.selectedMax)]
+    this.sliderValue = [this.stepsFromMin(this.selectedMin), this.stepsFromMax(this.selectedMax)];
   }
 
   @Watch('selectedMin')
-  onSelectedMinChange(date){
+  onSelectedMinChange(date) {
     if (date < this.min) {
       this.selectedMin = this.min;
     }
     if (date > this.max) {
       this.selectedMin = this.max;
     }
-    if (this.value[0] != date){
-      this.sliderValue = [this.stepsFromMin(this.selectedMin), this.sliderValue[1]]
+    if (this.value[0] != date) {
+      this.sliderValue = [this.stepsFromMin(this.selectedMin), this.sliderValue[1]];
       this.$emit('input', [this.selectedMin, this.selectedMax]);
     }
   }
 
   @Watch('selectedMax')
-  onSelectedMaxChange(date){
+  onSelectedMaxChange(date) {
     if (date < this.min) {
       this.selectedMax = this.min;
     }
     if (date > this.max) {
       this.selectedMax = this.max;
     }
-    if (this.value[1] != date){
-      this.sliderValue = [this.sliderValue[0], this.stepsFromMax(this.selectedMax)]
+    if (this.value[1] != date) {
+      this.sliderValue = [this.sliderValue[0], this.stepsFromMax(this.selectedMax)];
       this.$emit('input', [this.selectedMin, this.selectedMax]);
     }
   }
 
   @Watch('sliderValue.0')
   OnSliderMinChange(value) {
-    if (value){
+    if (value) {
       this.selectedMin = this.dateAdd(this.min, value);
     }
   }
@@ -129,34 +146,32 @@ export default class DateRangeSlider extends Vue {
   }
 
   get dateAdd() {
-    return this.step == 'month' ?  addMonths : addDays;
+    return this.step == 'month' ? addMonths : addDays;
   }
 
   get sliderSteps() {
     return Math.abs(this.dateDiff(this.min, this.max));
   }
 
-  get period() : string | null {
-      console.log(1);
+  get period(): string | null {
     if (!this.compareDate(this.selectedMax, this.max)) {
       return null;
     }
-      console.log(2);
     if (this.compareDate(this.selectedMin, subMonths(this.selectedMax, 1))) {
       return '1m';
     }
-      console.log(3);
-    if (this.compareDate(this.selectedMin,subMonths(this.selectedMax, 6))) {
+    if (this.compareDate(this.selectedMin, subMonths(this.selectedMax, 6))) {
       return '6m';
     }
-      console.log(4);
     if (this.compareDate(this.selectedMin, this.min)) {
       return 'full';
     }
-      console.log(5);
+    return null;
   }
 
-  get compareDate() { return this.step == 'month' ? isSameMonth : isSameDay}
+  get compareDate() {
+    return this.step == 'month' ? isSameMonth : isSameDay;
+  }
 
   stepsFromMin(value: Date) {
     return Math.abs(this.dateDiff(value, this.min));
@@ -166,18 +181,17 @@ export default class DateRangeSlider extends Vue {
     return Math.abs(this.dateDiff(value, this.min));
   }
 
-  setFullPeriod(){
+  setFullPeriod() {
     this.selectedMax = this.max;
     this.selectedMin = this.min;
   }
-  set6mPeriod(){
+  set6mPeriod() {
     this.selectedMax = this.step == 'month' ? startOfMonth(new Date()) : new Date();
     this.selectedMin = subMonths(this.selectedMax, 6);
   }
-  set1mPeriod(){
+  set1mPeriod() {
     this.selectedMax = this.step == 'month' ? startOfMonth(new Date()) : new Date();
     this.selectedMin = subMonths(this.selectedMax, 1);
   }
-
 }
 </script>

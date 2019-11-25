@@ -93,5 +93,5 @@ export enum eCurrency {
   VND = 704,
   XOF = 952,
   YER = 886,
-  ZAR = 710
+  ZAR = 710,
 }

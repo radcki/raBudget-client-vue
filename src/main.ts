@@ -53,26 +53,27 @@ import {
   mdiGlassCocktail,
   mdiFilmstrip,
   mdiMotorbike,
-  mdiWalletGiftcard
+  mdiWalletGiftcard,
 } from '@mdi/js';
 import { format } from 'date-fns';
 import { Budget } from './typings/Budget';
 
-import plDateLocale from "date-fns/locale/pl";
-import enDateLocale from "date-fns/locale/en-GB";
+import plDateLocale from 'date-fns/locale/pl';
+import enDateLocale from 'date-fns/locale/en-GB';
 import { eCategoryType } from './typings/enums/eCategoryType';
+import { NumberFormatInfo } from './typings/Currency';
 
 Vue.use(signalrPlugin);
 
 Vue.filter('dateFormat', (value, formatString, locale) => {
-  return !value ? '-' : format(value, formatString || 'yyyy-MM-dd', {locale: locale});
+  return !value ? '-' : format(value, formatString || 'yyyy-MM-dd', { locale: locale });
 });
 
 Vue.prototype.$dateLocales = {
   pl: plDateLocale,
   en: enDateLocale,
-}
-Vue.prototype.$locale =  localStorage.getItem("locale");
+};
+Vue.prototype.$locale = localStorage.getItem('locale');
 
 Vue.prototype.$currencies = {
   PLN: {
@@ -81,7 +82,7 @@ Vue.prototype.$currencies = {
     fractionCount: 2,
     fractionSeparator: ',',
     symbolPosition: 'back',
-    symbolSpacing: true
+    symbolSpacing: true,
   },
   EUR: {
     symbol: '€',
@@ -89,7 +90,7 @@ Vue.prototype.$currencies = {
     fractionCount: 2,
     fractionSeparator: ',',
     symbolPosition: 'front',
-    symbolSpacing: true
+    symbolSpacing: true,
   },
   USD: {
     symbol: '$',
@@ -97,10 +98,10 @@ Vue.prototype.$currencies = {
     fractionCount: 2,
     fractionSeparator: '.',
     symbolPosition: 'front',
-    symbolSpacing: true
-  }
+    symbolSpacing: true,
+  },
 };
-
+/* eslint-disable @typescript-eslint/camelcase */
 Vue.prototype.$categoryIcons = {
   directions_car: mdiCar,
   local_grocery_store: mdiCart,
@@ -143,19 +144,20 @@ Vue.prototype.$categoryIcons = {
   local_movies: mdiFilmstrip,
   directions_bike: mdiBike,
   motorbike: mdiMotorbike,
-  card_giftcard: mdiWalletGiftcard
+  card_giftcard: mdiWalletGiftcard,
 };
+/* eslint-enable @typescript-eslint/camelcase */
 
 Vue.prototype.$categoryColor = function(categoryType: eCategoryType) {
   switch (categoryType) {
     case eCategoryType.Income:
-      return "income";
+      return 'income';
     case eCategoryType.Spending:
-      return "spending";
+      return 'spending';
     case eCategoryType.Saving:
-      return "saving";
+      return 'saving';
   }
-}
+};
 
 Vue.use(VueCurrencyFilter);
 
@@ -168,36 +170,34 @@ Vue.filter('percentage', (value, decimals) => {
   }
 
   value = value * 100;
-  return (
-    Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals) + '%'
-  );
+  return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals) + '%';
 });
 
 Vue.prototype.$currencyConfig = function(budget: Budget) {
-  if (!budget.currency){
-    return null
+  if (!budget.currency) {
+    return null;
   }
-  let nf = budget.currency.numberFormat;
+  const nf = budget.currency.numberFormat as NumberFormatInfo;
   return {
     symbol: nf.currencySymbol,
     thousandsSeparator: nf.currencyGroupSeparator,
     fractionCount: nf.currencyDecimalDigits,
     fractionSeparator: nf.currencyDecimalSeparator,
-    symbolPosition: ([0, 2].includes(nf.currencyPositivePattern) ? 'front' : 'back'),
-    symbolSpacing: (nf.currencyPositivePattern == 0 ? false : true)
-  }
-}
+    symbolPosition: [0, 2].includes(nf.currencyPositivePattern || -1) ? 'front' : 'back',
+    symbolSpacing: nf.currencyPositivePattern == 0 ? false : true,
+  };
+};
 
 Vue.use(VueKeycloakJs, {
   init: {
-    onLoad: 'check-sso'
+    onLoad: 'check-sso',
   },
   config: {
     url: 'https://login.rabt.pl/auth',
     clientId: 'budget',
-    realm: 'rabt'
+    realm: 'rabt',
   },
-  onReady: keycloak => {
+  onReady: () => {
     Vue.use(VueWait);
 
     new Vue({
@@ -206,10 +206,10 @@ Vue.use(VueKeycloakJs, {
       vuetify,
       router,
       wait: new VueWait({
-        useVuex: true
+        useVuex: true,
       }),
       i18n,
-      render: h => h(App)
+      render: h => h(App),
     }).$mount('#app');
-  }
+  },
 });
