@@ -1,12 +1,31 @@
 <template>
   <v-list class="py-0 elevation-1" dense subheader>
     <v-list-item :class="color + 'py-1'">
-      <v-list-item-title class="subheading white--text">{{ title }}</v-list-item-title>
+      <v-list-item-title>
+        <v-row no-gutters>
+          <v-col class="pa-0 mt-2">
+            <span class="subheading white--text text-sm-left">{{ title }}</span>
+          </v-col>
+        </v-row>
+        <v-row no-gutters style="min-height: 5px;">
+          <v-progress-linear
+            v-show="loading"
+            top
+            class="pa-0 ma-0"
+            color="white"
+            height="5"
+            buffer-value="0"
+            query
+            stream
+          >
+          </v-progress-linear>
+        </v-row>
+      </v-list-item-title>
     </v-list-item>
     <template v-for="(transactions, date) in itemsByDate">
-      <v-list-item-title :key="date" class="my-1 px-3 text-xs-right grey--text caption">
-        {{ new Date(date) | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale]) }}
-      </v-list-item-title>
+      <v-list-item-title :key="date" class="my-1 px-3 text-xs-right grey--text caption">{{
+        new Date(date) | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
+      }}</v-list-item-title>
       <v-divider :key="date + '_divider'" inset></v-divider>
       <v-list-item
         v-for="transaction in transactions"
@@ -24,12 +43,12 @@
         </v-list-item-avatar>
 
         <v-list-item-content>
-          <v-list-item-title class="font-weight-medium">
-            {{ transaction.description }}
-          </v-list-item-title>
-          <v-list-item-subtitle class="text--primary">
-            {{ transaction.amount | currency($currencyConfig(dataBudget)) }}
-          </v-list-item-subtitle>
+          <v-list-item-title class="font-weight-medium">{{
+            transaction.description
+          }}</v-list-item-title>
+          <v-list-item-subtitle class="text--primary">{{
+            transaction.amount | currency($currencyConfig(dataBudget))
+          }}</v-list-item-subtitle>
         </v-list-item-content>
         <v-list-item-action>
           <v-transaction-editor
@@ -59,8 +78,6 @@ import { Budget } from '../typings/Budget';
 import { format } from 'date-fns';
 
 const alertStore = namespace('alert');
-const transactionsStore = namespace('transactions');
-const budgetsStore = namespace('budgets');
 
 @Component({
   name: 'VMiniTransactionsList',
@@ -73,6 +90,7 @@ export default class MiniTransactionsList extends Vue {
   @Prop(Object) dataBudget!: Budget;
   @Prop(String) title!: string;
   @Prop(String) color!: string;
+  @Prop(Boolean) loading!: boolean;
 
   public budget: Budget = this.dataBudget;
   mdiPencil = mdiPencil;
@@ -91,36 +109,32 @@ export default class MiniTransactionsList extends Vue {
 
   @alertStore.Action('error') dispatchError;
   @alertStore.Action('success') dispatcSuccess;
-  @transactionsStore.Action('fetchTransactions') fetchTransactions;
-  @budgetsStore.Action('reloadInitialized') reloadInitialized;
 
   categoryIcon(budgetCategoryId: number): string | null {
     const category = this.budget.budgetCategories.find(v => v.budgetCategoryId == budgetCategoryId);
     return category ? category.icon : null;
   }
 
-  updateTransaction(transaction: Transaction) {
+  async updateTransaction(transaction: Transaction) {
     this.$wait.start('saving.transaction');
-    transactionsService
-      .updateTransaction(this.budget.budgetId, transaction)
-      .then(response => {
-        if (response.ok) {
-          this.$wait.end('saving.transaction');
-          this.reloadInitialized();
-          this.fetchTransactions();
-        } else {
-          response.json().then(data => {
-            this.$wait.end('saving.transaction');
-            this.dispatchError(data.message);
-          });
-        }
-      })
-      .catch(error => {
+    try {
+      const response = await transactionsService.updateTransaction(
+        this.budget.budgetId,
+        transaction,
+      );
+      if (response.ok) {
         this.$wait.end('saving.transaction');
-        error.json().then(data => {
-          this.dispatchError(data.message);
-        });
-      });
+        this.$emit('updated');
+      } else {
+        this.$wait.end('saving.transaction');
+        const errorData = await response.json();
+        this.dispatchError(errorData.message);
+      }
+    } catch (error) {
+      this.$wait.end('saving.transaction');
+      const errorData = await error.json();
+      this.dispatchError(errorData.message);
+    }
   }
 
   async deleteTransaction(transactionId: number) {
@@ -140,8 +154,7 @@ export default class MiniTransactionsList extends Vue {
       );
 
       if (response.ok) {
-        this.fetchTransactions();
-        this.reloadInitialized();
+        this.$emit('deleted');
       } else {
         response.json().then(data => {
           this.dispatchError(data.message);

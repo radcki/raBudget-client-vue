@@ -446,7 +446,7 @@ export default class NewEntry extends Vue {
     }
   }
 
-  createAllocation() {
+  async createAllocation() {
     if (
       this.editorForm.validate() &&
       this.editor.category &&
@@ -461,17 +461,19 @@ export default class NewEntry extends Vue {
           : null,
         allocationDate: this.editor.date,
       };
-      allocationsService.createAllocation(this.dataBudget.budgetId, allocation).then(response => {
-        if (response.ok) {
-          this.$emit('saved');
-          this.editorDialog = false;
-          this.resetForm();
-        } else {
-          response.json<ErrorMessage>().then(data => {
-            this.dispatchError(data.message);
-          });
-        }
-      });
+      const response = await allocationsService.createAllocation(
+        this.dataBudget.budgetId,
+        allocation,
+      );
+      if (response.ok) {
+        this.$emit('saved');
+        this.editorDialog = false;
+        this.resetForm();
+      } else {
+        response.json<ErrorMessage>().then(data => {
+          this.dispatchError(data.message);
+        });
+      }
     }
   }
 

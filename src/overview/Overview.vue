@@ -42,7 +42,7 @@
               v-show="newEntryVisible == 'manual'"
               :data-budget="budget"
               :input-data="newEntryInputData"
-              @saved="fetchClosestScheduledTransactions()"
+              @saved="fetch()"
             ></v-new-entry>
 
             <v-scheduled-transactions-list
@@ -163,6 +163,9 @@
           color="amber darken-1"
           :title="$t('transactions.recentSpending')"
           :data-budget="budget"
+          :loading="$wait.is('*.transactions')"
+          @updated="fetch()"
+          @deleted="fetch()"
         ></v-mini-transactions-list>
       </v-flex>
 
@@ -172,6 +175,9 @@
           color="green darken-1"
           :title="$t('transactions.recentIncome')"
           :data-budget="budget"
+          :loading="$wait.is('*.transactions')"
+          @updated="fetch()"
+          @deleted="fetch()"
         ></v-mini-transactions-list>
       </v-flex>
 
@@ -181,6 +187,9 @@
           color="blue darken-1"
           :title="$t('transactions.recentSaving')"
           :data-budget="budget"
+          :loading="$wait.is('*.transactions')"
+          @updated="fetch()"
+          @deleted="fetch()"
         ></v-mini-transactions-list>
       </v-flex>
     </v-layout>
@@ -191,10 +200,7 @@
       dialog
       :data-budget="budget"
       :input-data="newEntryInputData"
-      @saved="
-        reloadInitialized();
-        fetchTransactions();
-      "
+      @saved="fetch()"
     >
       <template v-slot:activator="{ on }">
         <v-btn v-if="$vuetify.breakpoint.xs" fixed dark fab bottom right color="pink" v-on="on">
@@ -266,6 +272,11 @@ export default class Overview extends Vue {
 
   get budgetId() {
     return this.$route.params.id;
+  }
+
+  fetch() {
+    if (this.reloadInitialized) this.reloadInitialized();
+    if (this.fetchTransactions) this.fetchTransactions();
   }
 
   @Watch('$route')
