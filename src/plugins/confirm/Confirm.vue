@@ -4,12 +4,9 @@
       <v-toolbar dark :color="options.color" dense flat>
         <v-toolbar-title class="white--text">{{ $t(title) }}</v-toolbar-title>
       </v-toolbar>
-      <v-card-text
-        class="pa-3"
-        v-if="!options.input && !options.select"
-        v-html="$t(message)"
-        v-show="!!message"
-      ></v-card-text>
+      <v-card-text v-if="!options.input && !options.select" v-show="!!message" class="pa-3">
+        {{ $t(message) }}
+      </v-card-text>
       <v-card-text v-if="options.input">
         <v-text-field v-model="input" :type="options.input" :label="$t(message)"></v-text-field>
       </v-card-text>
@@ -26,44 +23,31 @@
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
-        <v-btn
-          v-if="options.buttons.cancel"
-          color="red"
-          text
-          @click.native="cancel"
-        >{{ $t('general.cancel') }}</v-btn>
-        <v-btn
-          v-if="options.buttons.no"
-          color="red"
-          text
-          @click.native="cancel"
-        >{{ $t('general.no') }}</v-btn>
-        <v-btn
-          v-if="options.buttons.yes"
-          color="primary darken-1"
-          text
-          @click.native="agree"
-        >{{ $t('general.yes') }}</v-btn>
-        <v-btn
-          v-if="options.buttons.ok"
-          color="primary darken-1"
-          text
-          @click.native="agree"
-        >{{ $t('general.ok') }}</v-btn>
+        <v-btn v-if="options.buttons.cancel" color="red" text @click.native="cancel">{{
+          $t('general.cancel')
+        }}</v-btn>
+        <v-btn v-if="options.buttons.no" color="red" text @click.native="cancel">{{
+          $t('general.no')
+        }}</v-btn>
+        <v-btn v-if="options.buttons.yes" color="primary darken-1" text @click.native="agree">{{
+          $t('general.yes')
+        }}</v-btn>
+        <v-btn v-if="options.buttons.ok" color="primary darken-1" text @click.native="agree">{{
+          $t('general.ok')
+        }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
-<script lang='ts'>
-import { ConfirmDialogOptions } from "./types";
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+<script lang="ts">
+import { ConfirmDialogOptions } from './types';
+import { Vue, Component } from 'vue-property-decorator';
 
 @Component
 export default class VueConfirm extends Vue {
   options: ConfirmDialogOptions = {
-    color: "primary",
-    selectList: null,
+    color: 'primary',
     select: false,
     width: 290,
     input: false,
@@ -71,36 +55,32 @@ export default class VueConfirm extends Vue {
       yes: false,
       no: false,
       cancel: true,
-      ok: true
-    }
+      ok: true,
+    },
   };
   selection: any = null;
-  dialog: boolean = false;
+  dialog = false;
   input: any = null;
-  inputType: string = "text";
+  inputType = 'text';
   resolve: any = null;
   reject: any = null;
-  message: string = null;
-  title: string = null;
+  message = '';
+  title = '';
 
   beforeDestroy() {
-    this.$wait.end("dialog");
+    this.$wait.end('dialog');
   }
 
-  open(
-    title: string,
-    message: string,
-    options: ConfirmDialogOptions
-  ): Promise<boolean | any> {
+  open(title: string, message: string, options: ConfirmDialogOptions): Promise<boolean | any> {
     this.input = null;
-    this.inputType = "text";
+    this.inputType = 'text';
     this.resolve = null;
     this.reject = null;
-    this.message = null;
-    this.title = null;
+    this.message = '';
+    this.title = '';
     this.options = {
-      color: "primary",
-      selectList: null,
+      color: 'primary',
+      selectList: undefined,
       select: false,
       width: 290,
       input: false,
@@ -108,8 +88,8 @@ export default class VueConfirm extends Vue {
         yes: false,
         no: false,
         cancel: true,
-        ok: true
-      }
+        ok: true,
+      },
     };
 
     this.dialog = true;

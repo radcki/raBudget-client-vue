@@ -12,21 +12,26 @@ export interface BudgetsState {
 
 export const stateData: BudgetsState = {
   budgets: [],
-  activeBudgetId: null
+  activeBudgetId: null,
 };
 
 const actions: ActionTree<BudgetsState, RootState> = {
   reloadInitialized({ state, dispatch }, budgetId) {
-    let budget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    const budget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!budget) {
+      return;
+    }
 
     if (budgetId && budgetId != budget.budgetId) {
       state.budgets
         .filter(v => v.budgetId != budgetId)
         .forEach(b => {
-          dispatch('fetchBudget', budget.budgetId);
+          dispatch('fetchBudget', b.budgetId);
         });
     } else {
-      if (!budget) {return}
+      if (!budget) {
+        return;
+      }
 
       dispatch('fetchBudget', budget.budgetId);
       if (budget.unassignedFunds) {
@@ -39,24 +44,23 @@ const actions: ActionTree<BudgetsState, RootState> = {
         dispatch('fetchSavingCategoriesBalance', budget.budgetId);
       }
     }
-
   },
 
   async fetchBudgets({ dispatch, commit }) {
     dispatch('wait/start', 'loading.budgets', { root: true });
     try {
-      let response = await budgetService.userBudgets()
+      const response = await budgetService.userBudgets();
 
       if (response.ok) {
-        let data = await response.json();
+        const data = await response.json();
         commit('setBudgets', data);
       } else if (response.status == 404) {
         commit('setBudgets', []);
       } else {
         commit('setBudgets', []);
       }
-        dispatch('wait/end', 'loading.budgets', { root: true });
-      } catch (error) {
+      dispatch('wait/end', 'loading.budgets', { root: true });
+    } catch (error) {
       dispatch('wait/end', 'loading.budgets', { root: true });
     }
   },
@@ -77,7 +81,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
           dispatch('wait/end', 'loading.budget', { root: true });
         }
       })
-      .catch(error => {
+      .catch(() => {
         dispatch('wait/end', 'loading.budget', { root: true });
       });
   },
@@ -99,10 +103,9 @@ const actions: ActionTree<BudgetsState, RootState> = {
           });
         }
       })
-      .catch(error => {
+      .catch(() => {
         dispatch('fetchBudgets');
       });
-
   },
 
   initializeBudgets({ state, dispatch }) {
@@ -115,7 +118,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
     if (!state.activeBudgetId) {
       return;
     }
-    let budget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    const budget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
     if (!budget) {
       return;
     }
@@ -132,7 +135,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
     if (!state.activeBudgetId) {
       return;
     }
-    let budget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    const budget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
     if (!budget) {
       return;
     }
@@ -149,14 +152,14 @@ const actions: ActionTree<BudgetsState, RootState> = {
         response.json().then(data => {
           commit('setSpendingCategoriesBalance', data);
           dispatch('wait/end', 'loading.spendingCategoriesBalance', {
-            root: true
+            root: true,
           });
         });
       } else {
         response.json<ErrorMessage>().then(data => {
           commit('alert/error', data.message, { root: true });
           dispatch('wait/end', 'loading.spendingCategoriesBalance', {
-            root: true
+            root: true,
           });
         });
       }
@@ -170,14 +173,14 @@ const actions: ActionTree<BudgetsState, RootState> = {
         response.json().then(data => {
           commit('setSavingCategoriesBalance', data);
           dispatch('wait/end', 'loading.savingCategoriesBalance', {
-            root: true
+            root: true,
           });
         });
       } else {
         response.json<ErrorMessage>().then(data => {
           commit('alert/error', data.message, { root: true });
           dispatch('wait/end', 'loading.savingCategoriesBalance', {
-            root: true
+            root: true,
           });
         });
       }
@@ -190,7 +193,7 @@ const actions: ActionTree<BudgetsState, RootState> = {
   },
 
   unloadBudgetFromStore({ state, commit, dispatch }, budgetId) {
-    let filteredBudgets = state.budgets.filter(v => v.budgetId != budgetId);
+    const filteredBudgets = state.budgets.filter(v => v.budgetId != budgetId);
 
     if (state.activeBudgetId == budgetId && filteredBudgets.length > 1) {
       dispatch('activeBudgetChange', filteredBudgets[0].budgetId);
@@ -205,14 +208,13 @@ const actions: ActionTree<BudgetsState, RootState> = {
 
   updateBudgetInStore({ commit }, updatedTransaction) {
     commit('setBudget', updatedTransaction);
-  }
+  },
 };
 
 const getters: GetterTree<BudgetsState, RootState> = {
-
   budget(state): Budget | null {
     if (state.activeBudgetId && state.budgets.length > 0) {
-      return state.budgets.find(v => v.budgetId == state.activeBudgetId);
+      return state.budgets.find(v => v.budgetId == state.activeBudgetId) || null;
     } else {
       return null;
     }
@@ -220,7 +222,7 @@ const getters: GetterTree<BudgetsState, RootState> = {
 
   budgetCategoryById: (state, getter) => (categoryId: number) => {
     if (getter.budget != null) {
-      return (getter.budget as Budget).budgetCategories.find(v=>v.budgetCategoryId == categoryId)
+      return (getter.budget as Budget).budgetCategories.find(v => v.budgetCategoryId == categoryId);
     }
   },
 
@@ -237,16 +239,13 @@ const getters: GetterTree<BudgetsState, RootState> = {
       ? null
       : (getter.budget as Budget).budgetCategories.filter(v => v.type == eCategoryType.Income),
 
-
   spendingCategoriesBalance: (state, getter) =>
     !getter.budget ? null : getter.budget.spendingCategoriesBalance,
-  unassignedFunds: (state, getter) =>
-    !getter.budget ? null : getter.budget.unassignedFunds,
+  unassignedFunds: (state, getter) => (!getter.budget ? null : getter.budget.unassignedFunds),
   savingCategoriesBalance: (state, getter) =>
     !getter.budget ? null : getter.budget.savingCategoriesBalance,
   incomeCategoriesBalance: (state, getter) =>
-    !getter.budget ? null : getter.budget.incomeCategoriesBalance
-
+    !getter.budget ? null : getter.budget.incomeCategoriesBalance,
 };
 
 const mutations: MutationTree<BudgetsState> = {
@@ -254,35 +253,35 @@ const mutations: MutationTree<BudgetsState> = {
     state.activeBudgetId = newActiveBudgetId;
   },
   setUnassignedFunds(state, funds: number) {
-    state.budgets.find(
-      v => v.budgetId == state.activeBudgetId
-    ).unassignedFunds = funds;
+    const activeBudget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!activeBudget) {
+      return;
+    }
+    activeBudget.unassignedFunds = funds;
   },
   setBudgets(state, data: Budget[]) {
-    let budgetsToSet = data.map(budget => {
+    const budgetsToSet: Budget[] = data.map(budget => {
       return {
         ...budget,
         startingDate: new Date(budget.startingDate),
         ...{
-          unassignedFunds: null,
-          spendingCategoriesBalance: null,
-          savingCategoriesBalance: null,
-          incomeCategoriesBalance: null
-        }
+          unassignedFunds: undefined,
+          spendingCategoriesBalance: undefined,
+          savingCategoriesBalance: undefined,
+          incomeCategoriesBalance: undefined,
+        },
       };
     });
-    for (let budget of budgetsToSet) {
+    for (const budget of budgetsToSet) {
       if (budget.budgetCategories) {
-        budget.budgetCategories = budget.budgetCategories.map((category) => {
-          category.amountConfigs = category.amountConfigs.map((config)=>{
+        budget.budgetCategories = budget.budgetCategories.map(category => {
+          category.amountConfigs = category.amountConfigs.map(config => {
             config.validFrom = new Date(config.validFrom);
-            config.validTo = config.validTo
-              ?  new Date(config.validTo)
-              : null;
-              return config;
-          })
+            config.validTo = config.validTo ? new Date(config.validTo) : null;
+            return config;
+          });
           return category;
-        })
+        });
       }
     }
     state.budgets = budgetsToSet;
@@ -290,20 +289,18 @@ const mutations: MutationTree<BudgetsState> = {
   setBudget(state, budget: Budget) {
     budget.startingDate = new Date(budget.startingDate);
     if (budget.budgetCategories) {
-      for (let category of budget.budgetCategories) {
-        for (let config of category.amountConfigs) {
+      for (const category of budget.budgetCategories) {
+        for (const config of category.amountConfigs) {
           config.validFrom = new Date(config.validFrom);
-          config.validTo = config.validTo
-            ? new Date(config.validTo)
-            : null;
+          config.validTo = config.validTo ? new Date(config.validTo) : null;
         }
       }
     }
 
-    let stateBudget = state.budgets.find(v => v.budgetId == budget.budgetId);
+    const stateBudget = state.budgets.find(v => v.budgetId == budget.budgetId);
 
     if (stateBudget) {
-      for (let param in stateBudget) {
+      for (const param in stateBudget) {
         if (budget[param]) {
           stateBudget[param] = budget[param];
         }
@@ -312,47 +309,59 @@ const mutations: MutationTree<BudgetsState> = {
       state.budgets.push({
         ...budget,
         ...{
-          unassignedFunds: null,
-          spendingCategoriesBalance: null,
-          savingCategoriesBalance: null,
-          incomeCategoriesBalance: null
-        }
+          unassignedFunds: undefined,
+          spendingCategoriesBalance: undefined,
+          savingCategoriesBalance: undefined,
+          incomeCategoriesBalance: undefined,
+        },
       });
     }
-
   },
   setSpendingCategoriesBalance(state, data) {
-    state.budgets.find(v => v.budgetId == state.activeBudgetId
-    ).spendingCategoriesBalance = data;
+    const activeBudget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!activeBudget) {
+      return;
+    }
+    activeBudget.spendingCategoriesBalance = data;
   },
   setSavingCategoriesBalance(state, data) {
-    state.budgets.find(
-      v => v.budgetId == state.activeBudgetId
-    ).savingCategoriesBalance = data;
+    const activeBudget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!activeBudget) {
+      return;
+    }
+    activeBudget.savingCategoriesBalance = data;
   },
   setIncomeCategoriesBalance(state, data) {
-    state.budgets.find(
-      v => v.budgetId == state.activeBudgetId
-    ).incomeCategoriesBalance = data;
+    const activeBudget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!activeBudget) {
+      return;
+    }
+    activeBudget.incomeCategoriesBalance = data;
   },
   clearBudgets(state) {
     state.budgets = [];
   },
   clearSpendingCategoriesBalance(state) {
-    state.budgets.find(
-      v => v.budgetId == state.activeBudgetId
-    ).spendingCategoriesBalance = null;
+    const activeBudget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!activeBudget) {
+      return;
+    }
+    activeBudget.spendingCategoriesBalance = undefined;
   },
   clearSavingCategoriesBalance(state) {
-    state.budgets.find(
-      v => v.budgetId == state.activeBudgetId
-    ).savingCategoriesBalance = null;
+    const activeBudget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!activeBudget) {
+      return;
+    }
+    activeBudget.savingCategoriesBalance = undefined;
   },
   clearIncomeCategoriesBalance(state) {
-    state.budgets.find(
-      v => v.budgetId == state.activeBudgetId
-    ).incomeCategoriesBalance = null;
-  }
+    const activeBudget = state.budgets.find(v => v.budgetId == state.activeBudgetId);
+    if (!activeBudget) {
+      return;
+    }
+    activeBudget.incomeCategoriesBalance = undefined;
+  },
 };
 
 export const budgets: Module<BudgetsState, RootState> = {
@@ -360,5 +369,5 @@ export const budgets: Module<BudgetsState, RootState> = {
   state: stateData,
   getters,
   actions,
-  mutations
+  mutations,
 };

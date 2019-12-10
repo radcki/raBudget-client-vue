@@ -1,7 +1,7 @@
 import { ReportData } from './ReportData';
 
 export interface PeriodBudgetReport {
-  budgetCategoryReports: BudgetCategoryPeriodReport[]
+  budgetCategoryReports: BudgetCategoryPeriodReport[];
   totalPeriodReport: ReportData;
 }
 

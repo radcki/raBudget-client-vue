@@ -1,12 +1,12 @@
 <template>
   <v-dialog
-    :fullscreen="mobile"
     v-model="dialog"
+    :fullscreen="mobile"
     max-width="800"
-    @keydown.esc="cancel"
     persistent
     :transition="mobile ? 'dialog-bottom-transition' : 'dialog-transition'"
     v-bind="$attrs"
+    @keydown.esc="cancel"
     v-on="$listeners"
   >
     <template v-for="(_, slot) of $scopedSlots" v-slot:[slot]="scope">
@@ -16,12 +16,12 @@
     <v-card v-if="budget">
       <v-toolbar color="primary" dark dense flat :fixed="mobile">
         <v-btn v-if="mobile" icon dark @click="cancel">
-          <v-icon>{{mdiClose}}</v-icon>
+          <v-icon>{{ mdiClose }}</v-icon>
         </v-btn>
-        <v-toolbar-title class="white--text">{{ $t("transactions.editing") }}</v-toolbar-title>
+        <v-toolbar-title class="white--text">{{ $t('transactions.editing') }}</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn v-if="!mobile" text icon @click="cancel">
-          <v-icon light>{{mdiClose}}</v-icon>
+          <v-icon light>{{ mdiClose }}</v-icon>
         </v-btn>
         <v-btn v-if="mobile" text @click.native="save">{{ $t('general.save') }}</v-btn>
       </v-toolbar>
@@ -31,18 +31,18 @@
             <v-layout row wrap align-center justify-center>
               <v-flex xs12>
                 <v-date-field
-                  :rules="requiredRule"
                   v-model="editor.transactionDate"
+                  :rules="requiredRule"
                   :label="$t('transactions.date')"
                 ></v-date-field>
               </v-flex>
 
               <v-flex xs12 md5>
                 <v-category-select
-                  :items="categories.filter(v=>v.type == categoryType)"
+                  v-model="editor.budgetCategory"
+                  :items="categories.filter(v => v.type == categoryType)"
                   :label="$t('general.category')"
                   :rules="requiredRule"
-                  v-model="editor.budgetCategory"
                 ></v-category-select>
               </v-flex>
 
@@ -74,50 +74,47 @@
             </v-layout>
           </v-container>
         </v-form>
-        <span class="subheading">{{ $t("transactions.finalAmount") }}:</span>
-        <span class="headline">{{finalAmount | currency($currencyConfig(budget))}}</span>
+        <span class="subheading">{{ $t('transactions.finalAmount') }}:</span>
+        <span class="headline">{{ finalAmount | currency($currencyConfig(budget)) }}</span>
       </v-card-text>
       <v-card-actions class="pt-0">
         <v-spacer></v-spacer>
 
-        <v-btn v-if="!mobile" color="red" text @click.native="cancel">{{ $t('general.cancel') }}</v-btn>
-        <v-btn
-          v-if="!mobile"
-          color="primary darken-1"
-          text
-          @click.native="save"
-        >{{ $t('general.save') }}</v-btn>
+        <v-btn v-if="!mobile" color="red" text @click.native="cancel">{{
+          $t('general.cancel')
+        }}</v-btn>
+        <v-btn v-if="!mobile" color="primary darken-1" text @click.native="save">{{
+          $t('general.save')
+        }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { mdiClose } from "@mdi/js";
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
-import { Action, namespace } from "vuex-class";
-import { Transaction } from "@/typings/Transaction";
-import { Budget } from "@/typings/Budget";
+import { mdiClose } from '@mdi/js';
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
+import { Transaction } from '@/typings/Transaction';
+import { Budget } from '@/typings/Budget';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 
 @Component({
   components: {
-    "v-category-select": () => import("../components/CategorySelect.vue"),
-    "v-date-field": () => import("../components/DateField.vue")
-  }
+    'v-category-select': () => import('../components/CategorySelect.vue'),
+    'v-date-field': () => import('../components/DateField.vue'),
+  },
 })
 export default class TransactionEditor extends Vue {
   @Prop(Object) value!: Transaction;
   @Prop(Object) dataBudget!: Budget;
 
-
   requiredRule: any[] = [v => !!v];
-  dialog: boolean = false;
-  valid: boolean = true;
+  dialog = false;
+  valid = true;
   eCategoryType = eCategoryType;
 
-/*
+  /*
   categoryTypes: any[] = [
     { value: "spendingCategories", text: "general.spendings" },
     { value: "incomeCategories", text: "general.incomes" },
@@ -133,9 +130,9 @@ export default class TransactionEditor extends Vue {
       transactionDate: null,
       description: null,
       amount: null,
-      modifyAmount: 0.0
+      modifyAmount: 0.0,
     },
-    ...Object.assign({},(this.value ? this.value : {}))
+    ...Object.assign({}, this.value ? this.value : {}),
   };
   mdiClose = mdiClose;
 
@@ -151,49 +148,53 @@ export default class TransactionEditor extends Vue {
   get finalAmount(): number {
     return 1 * this.editor.modifyAmount + 1 * this.editor.amount;
   }
-  get budget(): Budget {return this.dataBudget};
+  get budget(): Budget {
+    return this.dataBudget;
+  }
 
   @Watch('editor.budgetCategory')
-  OnCategoryChange(newCategory: BudgetCategory){
-    if (!newCategory){
+  OnCategoryChange(newCategory: BudgetCategory) {
+    if (!newCategory) {
       return;
     }
-    this.editor.budgetCategoryId = newCategory.budgetCategoryId
+    this.editor.budgetCategoryId = newCategory.budgetCategoryId;
   }
 
-  @Watch("dialog")
+  @Watch('dialog')
   OnDialog(open) {
     if (open) {
-      this.$wait.start("dialog");
+      this.$wait.start('dialog');
     } else {
-      this.$wait.end("dialog");
+      this.$wait.end('dialog');
     }
   }
 
-  @Watch("budget")
-  OnBudgetLoaded(budget){
-    this.editor.budgetCategory = this.categories.find(v=>v.budgetCategoryId == this.editor.budgetCategoryId)
+  @Watch('budget')
+  OnBudgetLoaded() {
+    this.editor.budgetCategory = this.categories.find(
+      v => v.budgetCategoryId == this.editor.budgetCategoryId,
+    );
   }
 
   mounted() {
-    this.$root.$on("closeDialogs", () => {
+    this.$root.$on('closeDialogs', () => {
       this.dialog = false;
     });
-    this.editor.budgetCategory = this.categories.find(v=>v.budgetCategoryId == this.editor.budgetCategoryId)
-    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
+    this.editor.budgetCategory = this.categories.find(
+      v => v.budgetCategoryId == this.editor.budgetCategoryId,
+    );
+    this.requiredRule = [v => !!v || this.$t('forms.requiredField')];
   }
   beforeDestroy() {
-    this.$wait.end("dialog");
+    this.$wait.end('dialog');
   }
 
   save(): void {
-    if (
-      (this.$refs.editorForm as Vue & { validate: () => boolean }).validate()
-    ) {
+    if ((this.$refs.editorForm as Vue & { validate: () => boolean }).validate()) {
       this.dialog = false;
       this.editor.amount = this.finalAmount;
       this.editor.modifyAmount = 0;
-      this.$emit("save", this.editor);
+      this.$emit('save', this.editor);
     }
   }
 

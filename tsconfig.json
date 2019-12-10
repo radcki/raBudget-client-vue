@@ -1,16 +1,17 @@
 {
   "compilerOptions": {
-    "module": "esNext",
+    "module": "esnext",
     "moduleResolution": "node",
-    "target": "es5",
-    "strict": false,
+    "target": "esnext",
+    "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
-    "strictPropertyInitialization": false,
+    "removeComments": true,
+    "allowJs": true,
     "sourceMap": true,
     "baseUrl": ".",
     "types": ["webpack-env", "vuetify", "vue-router", "vue-wait", "vue-i18n"],
@@ -19,12 +20,6 @@
     },
     "lib": ["es2019", "es2016", "es5", "dom", "dom.iterable", "scripthost"]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/**/*.ts", "tests/**/*.tsx"],
   "exclude": ["node_modules"]
 }

@@ -8,7 +8,7 @@ export interface MonthlyBudgetReport {
 
 export interface MonthReport {
   month: Month;
-  reportData: ReportData
+  reportData: ReportData;
 }
 
 export interface BudgetCategoryMonthlyReport {

@@ -2,7 +2,7 @@
   <v-container grid-list-md>
     <v-layout row wrap>
       <v-flex xs12>
-        <v-subheader class="headline">{{$t('transactions.recentTransactions')}}</v-subheader>
+        <v-subheader class="headline">{{ $t('transactions.recentTransactions') }}</v-subheader>
       </v-flex>
 
       <v-flex xs12>
@@ -14,7 +14,7 @@
                   <v-container fluid grid-list-sm class="pa-0">
                     <v-layout row wrap>
                       <v-flex xs6>
-                        <v-radio-group light v-model="categoryType" :mandatory="true" column>
+                        <v-radio-group v-model="categoryType" light :mandatory="true" column>
                           <v-radio
                             color="primary"
                             :label="$t('general.spendings')"
@@ -32,12 +32,12 @@
                           ></v-radio>
                         </v-radio-group>
                       </v-flex>
-                      <v-flex xs6 v-if="budget">
+                      <v-flex v-if="budget" xs6>
                         <v-category-select
-                          multiple
-                          :items="budget.budgetCategories.filter(v=>v.type == categoryType)"
                           v-if="budget.budgetCategories"
                           v-model="selectedCategories"
+                          multiple
+                          :items="budget.budgetCategories.filter(v => v.type == categoryType)"
                           :rules="requiredRule"
                           persistent-hint
                           :hint="$t('general.category')"
@@ -47,11 +47,11 @@
                   </v-container>
                 </v-flex>
 
-                <v-flex xs12 md6 v-if="budget">
+                <v-flex v-if="budget" xs12 md6>
                   <v-date-range-slider
+                    v-model="selectedRange"
                     :min="budget.startingDate"
                     :max="today"
-                    v-model="selectedRange"
                     step="days"
                   ></v-date-range-slider>
                 </v-flex>
@@ -62,25 +62,34 @@
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
-              @click="setFilters();fetchTransactions()"
-            >{{ $t('general.search') }}</v-btn>
+              @click="
+                setFilters();
+                fetchTransactions();
+              "
+              >{{ $t('general.search') }}</v-btn
+            >
           </v-card-actions>
         </v-card>
       </v-flex>
 
-      <v-flex xs12 v-if="transactions || $wait.is('loading.*')">
-        <v-subheader class="headline">{{$t('general.foundData')}}</v-subheader>
+      <v-flex v-if="transactions || $wait.is('loading.*')" xs12>
+        <v-subheader class="headline">{{ $t('general.foundData') }}</v-subheader>
       </v-flex>
 
       <v-flex
-        xs12
         v-if="$wait.is('loading.*') && !$vuetify.breakpoint.smAndUp"
+        xs12
         class="text-xs-center"
       >
-        <v-progress-circular :size="70" :width="7" color="amber darken-3" indeterminate></v-progress-circular>
+        <v-progress-circular
+          :size="70"
+          :width="7"
+          color="amber darken-3"
+          indeterminate
+        ></v-progress-circular>
       </v-flex>
 
-      <v-flex xs12 class="elevation-1 white" v-if="transactions">
+      <v-flex v-if="transactions" xs12 class="elevation-1 white">
         <v-layout row justify-end>
           <v-flex xs4>
             <v-text-field
@@ -108,26 +117,35 @@
             <tbody>
               <tr v-for="item in items" :key="item.transactionId">
                 <td>
-                  <v-icon class="px-2" size="40">{{ $categoryIcons[getCategoryById(item.budgetCategoryId).icon] }}</v-icon>
+                  <v-icon class="px-2" size="40">{{
+                    $categoryIcons[getCategoryById(item.budgetCategoryId).icon]
+                  }}</v-icon>
                   {{ getCategoryById(item.budgetCategoryId).name }}
                 </td>
-                <td>{{ new Date(item.transactionDate) | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale]) }}</td>
+                <td>
+                  {{
+                    new Date(item.transactionDate)
+                      | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
+                  }}
+                </td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
                 <td>
                   <v-transaction-editor
-                    v-on:save="updateTransaction"
                     :value="item"
                     :data-budget="budget"
+                    @save="updateTransaction"
                   >
-                    <template v-slot:activator="{on}">
-                      <v-btn color="primary" v-on="on" dark icon text>
-                        <v-icon>{{mdiPencil}}</v-icon>
+                    <template v-slot:activator="{ on }">
+                      <v-btn color="primary" dark icon text v-on="on">
+                        <v-icon>{{ mdiPencil }}</v-icon>
                       </v-btn>
                     </template>
                   </v-transaction-editor>
                   <v-btn color="red darken-1" dark icon text>
-                    <v-icon @click="deleteTransaction(item.transactionId)">{{mdiTrashCan}}</v-icon>
+                    <v-icon @click="deleteTransaction(item.transactionId)">{{
+                      mdiTrashCan
+                    }}</v-icon>
                   </v-btn>
                 </td>
               </tr>
@@ -139,35 +157,43 @@
           <template v-for="(transaction, index) in transactions">
             <v-list-item :key="index" class="pb-1">
               <v-list-item-avatar>
-                <v-icon>{{ $categoryIcons[getCategoryById(transaction.budgetCategoryId).icon] }}</v-icon>
+                <v-icon>{{
+                  $categoryIcons[getCategoryById(transaction.budgetCategoryId).icon]
+                }}</v-icon>
               </v-list-item-avatar>
 
               <v-list-item-content>
                 <v-list-item-title class="font-weight-medium">
-                  {{ transaction.description}}
-                  <span
-                    class="grey--text text--lighten-1 caption"
-                  >- {{ transaction.transactionDate | dateFormat("EEEE, d.MM.yyyy", $dateLocales[$locale]) }}</span>
+                  {{ transaction.description }}
+                  <span class="grey--text text--lighten-1 caption">
+                    -
+                    {{
+                      transaction.transactionDate
+                        | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
+                    }}
+                  </span>
                 </v-list-item-title>
 
-                <v-list-item-subtitle
-                  class="text--primary"
-                >{{transaction.amount | currency($currencyConfig(budget))}}</v-list-item-subtitle>
+                <v-list-item-subtitle class="text--primary">{{
+                  transaction.amount | currency($currencyConfig(budget))
+                }}</v-list-item-subtitle>
               </v-list-item-content>
 
               <v-list-item-action>
                 <v-transaction-editor
-                  v-on:save="updateTransaction"
                   :value="transaction"
                   :data-budget="budget"
+                  @save="updateTransaction"
                 >
-                  <template v-slot:activator="{on}">
-                    <v-icon v-on="on">{{mdiPencil}}</v-icon>
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on">{{ mdiPencil }}</v-icon>
                   </template>
                 </v-transaction-editor>
               </v-list-item-action>
               <v-list-item-action>
-                <v-icon @click="deleteTransaction(transaction.transactionId)">{{mdiTrashCan}}</v-icon>
+                <v-icon @click="deleteTransaction(transaction.transactionId)">{{
+                  mdiTrashCan
+                }}</v-icon>
               </v-list-item-action>
             </v-list-item>
           </template>
@@ -178,27 +204,28 @@
 </template>
 
 <script lang="ts">
-import { transactionsService } from "../_services/transactions.service";
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
-import { Action, State, namespace } from "vuex-class";
-import { subMonths, format } from "date-fns";
+import { transactionsService } from '../_services/transactions.service';
+import { Vue, Component, Watch } from 'vue-property-decorator';
+import { namespace } from 'vuex-class';
+import { subMonths, format } from 'date-fns';
 
-import { mdiMagnify, mdiPencil, mdiTrashCan } from "@mdi/js";
-import { eCategoryType } from "../typings/enums/eCategoryType";
-import { BudgetCategory } from "../typings/BudgetCategory";
-import { Budget } from "../typings/Budget";
+import { mdiMagnify, mdiPencil, mdiTrashCan } from '@mdi/js';
+import { eCategoryType } from '../typings/enums/eCategoryType';
+import { BudgetCategory } from '../typings/BudgetCategory';
+import { Budget } from '../typings/Budget';
 import { ErrorMessage } from '@/typings/TypedResponse';
+import { Transaction } from '@/typings/Transaction';
 
-const alertModule = namespace("alert");
-const budgetsModule = namespace("budgets");
-const transactionsModule = namespace("transactions");
+const alertModule = namespace('alert');
+const budgetsModule = namespace('budgets');
+const transactionsModule = namespace('transactions');
 
 @Component({
   components: {
-    "v-transaction-editor": () => import("../components/TransactionEditor.vue"),
-    "v-category-select": () => import("../components/CategorySelect.vue"),
-    "v-date-range-slider": () => import("../components/DateRangeSlider.vue")
-  }
+    'v-transaction-editor': () => import('../components/TransactionEditor.vue'),
+    'v-category-select': () => import('../components/CategorySelect.vue'),
+    'v-date-range-slider': () => import('../components/DateRangeSlider.vue'),
+  },
 })
 export default class Transactions extends Vue {
   search: string | null = null;
@@ -207,13 +234,8 @@ export default class Transactions extends Vue {
   selectedCategories: BudgetCategory[] | null = null;
   headers: any[] = [];
 
-  tab: number = 0;
-  color: string[] = [
-    "amber darken-1",
-    "green darken-1",
-    "blue darken-1",
-    "purple darken-1"
-  ];
+  tab = 0;
+  color: string[] = ['amber darken-1', 'green darken-1', 'blue darken-1', 'purple darken-1'];
   requiredRule: any[] = [];
 
   mdiMagnify = mdiMagnify;
@@ -222,13 +244,19 @@ export default class Transactions extends Vue {
   format = format;
   eCategoryType = eCategoryType;
 
-  @budgetsModule.Getter("budget") budget: Budget;
-  @transactionsModule.Getter("getTransactions") getTransactions;
-  @alertModule.Action("error") dispatchError;
-  @alertModule.Action("success") dispatchSuccess;
-  @budgetsModule.Action("activeBudgetChange") activeBudgetChange;
-  @budgetsModule.Action("reloadInitialized") reloadInitialized;
-  @transactionsModule.Action("fetchTransactions") fetchTransactions;
+  @budgetsModule.Getter('budget') budget!: Budget;
+  @transactionsModule.Getter('getTransactions') getTransactions!: {
+    spendings: Transaction[];
+    savings: Transaction[];
+    incomes: Transaction[];
+  };
+  @alertModule.Action('error') dispatchError!: (message: string) => void;
+  @alertModule.Action('success') dispatchSuccess!: (message: string) => void;
+  @budgetsModule.Action('activeBudgetChange') activeBudgetChange!: (
+    budgetId: number | string,
+  ) => void;
+  @budgetsModule.Action('reloadInitialized') reloadInitialized!: () => void;
+  @transactionsModule.Action('fetchTransactions') fetchTransactions!: () => void;
 
   get today() {
     return new Date();
@@ -240,22 +268,26 @@ export default class Transactions extends Vue {
       : subMonths(new Date(), 1);
   }
 
-  get transactions() {
+  get transactions(): Transaction[] {
     if (!this.getTransactions) {
-      return null
+      return [];
     }
     switch (this.categoryType) {
-      case eCategoryType.Spending: return this.getTransactions.spendings;
-      case eCategoryType.Income: return this.getTransactions.incomes;
-      case eCategoryType.Saving: return this.getTransactions.savings;
+      case eCategoryType.Spending:
+        return this.getTransactions.spendings;
+      case eCategoryType.Income:
+        return this.getTransactions.incomes;
+      case eCategoryType.Saving:
+        return this.getTransactions.savings;
     }
+    return [];
   }
 
-  getCategoryById(budgetCategoryId: number): BudgetCategory {
-    return this.budget.budgetCategories.find(v=>v.budgetCategoryId == budgetCategoryId);
+  getCategoryById(budgetCategoryId: number): BudgetCategory | null {
+    return this.budget.budgetCategories.find(v => v.budgetCategoryId == budgetCategoryId) || null;
   }
 
-  @Watch("$route")
+  @Watch('$route')
   OnRouteChange(to, from) {
     if (from.params.id != to.params.id) {
       this.activeBudgetChange(to.params.id);
@@ -267,87 +299,93 @@ export default class Transactions extends Vue {
     }
   }
 
-  @Watch("budget")
-  OnBudgetChange(budget) {
+  @Watch('budget')
+  OnBudgetChange() {
     if (this.budget) {
       this.selectedRange = [this.monthAgoOrStart, this.today];
-      this.selectedCategories = this.budget.budgetCategories.filter(v=>v.type == this.categoryType);
+      this.selectedCategories = this.budget.budgetCategories.filter(
+        v => v.type == this.categoryType,
+      );
     }
     this.setFilters();
   }
 
-  @Watch("categoryType")
-  OnCategoryTypeChange(value) {
+  @Watch('categoryType')
+  OnCategoryTypeChange() {
     if (this.budget && this.budget.budgetCategories) {
-      this.selectedCategories = this.budget.budgetCategories.filter(v=>v.type == this.categoryType);
+      this.selectedCategories = this.budget.budgetCategories.filter(
+        v => v.type == this.categoryType,
+      );
     }
     this.setFilters();
   }
 
   created() {
-    this.requiredRule = [v => !!v || this.$t("forms.requiredField")];
+    this.requiredRule = [v => !!v || this.$t('forms.requiredField')];
     this.headers = [
       {
-        text: this.$t("general.category"),
+        text: this.$t('general.category'),
         sortable: true,
-        value: "category"
+        value: 'category',
       },
       {
-        text: this.$t("general.date"),
+        text: this.$t('general.date'),
         sortable: true,
-        value: "date"
+        value: 'date',
       },
       {
-        text: this.$t("general.description"),
+        text: this.$t('general.description'),
         sortable: true,
-        value: "description"
+        value: 'description',
       },
       {
-        text: this.$t("general.amount"),
+        text: this.$t('general.amount'),
         sortable: true,
-        value: "amount"
+        value: 'amount',
       },
       {
-        text: this.$t("general.actions"),
-        sortable: false
-      }
+        text: this.$t('general.actions'),
+        sortable: false,
+      },
     ];
     this.activeBudgetChange(this.$route.params.id);
     if (this.budget) {
-      this.selectedCategories = this.budget.budgetCategories.filter(v=>v.type == this.categoryType);
+      this.selectedCategories = this.budget.budgetCategories.filter(
+        v => v.type == this.categoryType,
+      );
       this.selectedRange = [this.monthAgoOrStart, this.today];
       this.setFilters();
     }
   }
 
   setFilters() {
-    this.$store.dispatch("transactions/setFilters", {
+    this.$store.dispatch('transactions/setFilters', {
       budgetId: this.$route.params.id,
       limitCount: null,
       startDate: this.selectedRange[0],
       endDate: this.selectedRange[1],
-      categories: this.selectedCategories
+      categories: this.selectedCategories,
     });
   }
 
   updateTransaction(transaction) {
-    this.$wait.start("saving.transaction");
+    this.$wait.start('saving.transaction');
     transactionsService
       .updateTransaction(this.budget.budgetId, transaction)
       .then(response => {
         if (response.ok) {
-          this.$wait.end("saving.transaction");
+          this.$wait.end('saving.transaction');
           this.reloadInitialized();
           this.fetchTransactions();
         } else {
           response.json<ErrorMessage>().then(data => {
-            this.$wait.end("saving.transaction");
+            this.$wait.end('saving.transaction');
             this.dispatchError(data.message);
           });
         }
       })
       .catch(error => {
-        this.$wait.end("saving.transaction");
+        this.$wait.end('saving.transaction');
         error.json().then(data => {
           this.dispatchError(data.message);
         });
@@ -355,25 +393,25 @@ export default class Transactions extends Vue {
   }
 
   async deleteTransaction(transactionId) {
-    let confirm = await this.$confirm({
-      title: "general.remove",
-      message: "transactions.deleteConfirm",
+    const confirm = await this.$confirm({
+      title: 'general.remove',
+      message: 'transactions.deleteConfirm',
       options: {
-        color: "red",
-        buttons: { yes: true, no: true, cancel: false, ok: false }
-      }
+        color: 'red',
+        buttons: { yes: true, no: true, cancel: false, ok: false },
+      },
     });
 
     if (confirm) {
-      let response = await transactionsService.deleteTransaction(
+      const response = await transactionsService.deleteTransaction(
         this.budget.budgetId,
-        transactionId
+        transactionId,
       );
       if (response.ok) {
         this.reloadInitialized();
         this.fetchTransactions();
       } else {
-        let error = await response.json<ErrorMessage>();
+        const error = await response.json<ErrorMessage>();
         this.dispatchError(error.message);
       }
     }

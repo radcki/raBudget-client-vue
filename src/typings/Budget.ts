@@ -3,7 +3,6 @@ import { User } from './User';
 import { BudgetCategory } from './BudgetCategory';
 
 export interface Budget {
-  id: number | null;
   budgetId: number;
   name: string;
   currency: Currency;
@@ -17,4 +16,11 @@ export interface Budget {
   spendingCategoriesBalance?: any[];
   savingCategoriesBalance?: any[];
   incomeCategoriesBalance?: any[];
+}
+
+export interface CreateBudgetCommand {
+  name: string;
+  currency: Currency;
+  budgetCategories: BudgetCategory[];
+  startingDate: Date;
 }
