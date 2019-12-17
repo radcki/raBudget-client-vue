@@ -150,7 +150,7 @@ import { Budget } from '@/typings/Budget';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { eFrequency } from '@/typings/enums/eFrequency';
-import { TransactionSchedule } from '../typings/TransactionSchedule';
+import { TransactionSchedule } from '@/typings/TransactionSchedule';
 import { differenceInDays, differenceInWeeks, differenceInMonths } from 'date-fns';
 import { namespace } from 'vuex-class';
 
@@ -175,8 +175,8 @@ interface EntryEditor {
 
 @Component({
   components: {
-    'v-category-select': () => import('../components/CategorySelect.vue'),
-    'v-date-field': () => import('../components/DateField.vue'),
+    'v-category-select': () => import('@/components/CategorySelect.vue'),
+    'v-date-field': () => import('@/components/DateField.vue'),
   },
 })
 export default class TransactionScheduleEditor extends Vue {

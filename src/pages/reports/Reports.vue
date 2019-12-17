@@ -485,7 +485,7 @@ table.v-table tbody th {
 }
 </style>
 <script lang="ts">
-import { budgetService } from '../_services/budget.service';
+import { budgetService } from '@/_services/budget.service';
 import { debounce } from 'debounce';
 import { GChart } from 'vue-google-charts';
 import { mdiChevronRight } from '@mdi/js';
@@ -493,12 +493,12 @@ import { mdiChevronRight } from '@mdi/js';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { format, endOfMonth, startOfMonth } from 'date-fns';
-import { eCategoryType } from '../typings/enums/eCategoryType';
-import { BudgetCategory } from '../typings/BudgetCategory';
-import { Budget } from '../typings/Budget';
-import { ErrorMessage } from '../typings/TypedResponse';
-import { BudgetCategoryMonthlyReport } from '../typings/MonthlyBudgetReport';
-import { BudgetCategoryPeriodReport } from '../typings/PeriodBudgetReport';
+import { eCategoryType } from '@/typings/enums/eCategoryType';
+import { BudgetCategory } from '@/typings/BudgetCategory';
+import { Budget } from '@/typings/Budget';
+import { ErrorMessage } from '@/typings/TypedResponse';
+import { BudgetCategoryMonthlyReport } from '@/typings/MonthlyBudgetReport';
+import { BudgetCategoryPeriodReport } from '@/typings/PeriodBudgetReport';
 
 const alertModule = namespace('alert');
 const budgetsModule = namespace('budgets');
@@ -517,8 +517,8 @@ enum eReportMode {
 @Component({
   components: {
     GChart,
-    'v-date-range-slider': () => import('../components/DateRangeSlider.vue'),
-    'v-category-select': () => import('../components/CategorySelect.vue'),
+    'v-date-range-slider': () => import('@/components/DateRangeSlider.vue'),
+    'v-category-select': () => import('@/components/CategorySelect.vue'),
   },
 })
 export default class Reports extends Vue {

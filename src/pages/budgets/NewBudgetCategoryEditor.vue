@@ -78,10 +78,10 @@
 
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
-import { Budget } from '../typings/Budget';
-import { eCategoryType } from '../typings/enums/eCategoryType';
+import { Budget } from '@/typings/Budget';
+import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { mdiCash, mdiPlus, mdiPencil, mdiCancel } from '@mdi/js';
-import { BudgetCategory } from '../typings/BudgetCategory';
+import { BudgetCategory } from '@/typings/BudgetCategory';
 
 @Component
 export default class NewBudgetCategoryEditor extends Vue {

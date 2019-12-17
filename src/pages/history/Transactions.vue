@@ -109,6 +109,7 @@
           :items="transactions"
           :loading="$wait.is('loading.*')"
           :search="search"
+          item-key="transactionId"
           must-sort
           sort-by
           footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
@@ -204,15 +205,15 @@
 </template>
 
 <script lang="ts">
-import { transactionsService } from '../_services/transactions.service';
+import { transactionsService } from '@/_services/transactions.service';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { subMonths, format } from 'date-fns';
 
 import { mdiMagnify, mdiPencil, mdiTrashCan } from '@mdi/js';
-import { eCategoryType } from '../typings/enums/eCategoryType';
-import { BudgetCategory } from '../typings/BudgetCategory';
-import { Budget } from '../typings/Budget';
+import { eCategoryType } from '@/typings/enums/eCategoryType';
+import { BudgetCategory } from '@/typings/BudgetCategory';
+import { Budget } from '@/typings/Budget';
 import { ErrorMessage } from '@/typings/TypedResponse';
 import { Transaction } from '@/typings/Transaction';
 
@@ -222,9 +223,9 @@ const transactionsModule = namespace('transactions');
 
 @Component({
   components: {
-    'v-transaction-editor': () => import('../components/TransactionEditor.vue'),
-    'v-category-select': () => import('../components/CategorySelect.vue'),
-    'v-date-range-slider': () => import('../components/DateRangeSlider.vue'),
+    'v-transaction-editor': () => import('@/components/TransactionEditor.vue'),
+    'v-category-select': () => import('@/components/CategorySelect.vue'),
+    'v-date-range-slider': () => import('@/components/DateRangeSlider.vue'),
   },
 })
 export default class Transactions extends Vue {

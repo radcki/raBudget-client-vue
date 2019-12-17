@@ -81,13 +81,13 @@
 </template>
 
 <script lang="ts">
-import { budgetService } from '../_services/budget.service';
-import { transactionsService } from '../_services/transactions.service';
+import { budgetService } from '@/_services/budget.service';
+import { transactionsService } from '@/_services/transactions.service';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Budget } from '@/typings/Budget';
 import { BudgetCategory } from '@/typings/BudgetCategory';
-import { eCategoryType } from '../typings/enums/eCategoryType';
+import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { startOfMonth } from 'date-fns';
 
 const alertModule = namespace('alert');
@@ -95,7 +95,7 @@ const budgetsModule = namespace('budgets');
 
 @Component({
   components: {
-    'categories-list': () => import('../components/CategoriesList.vue'),
+    'categories-list': () => import('@/components/CategoriesList.vue'),
   },
 })
 export default class BudgetCategories extends Vue {

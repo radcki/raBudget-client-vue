@@ -1,15 +1,15 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
-const HomePage = () => import('../home/HomePage.vue');
-const NewBudget = () => import('../budgets/NewBudget.vue');
-const BudgetCategories = () => import('../budgets/BudgetCategories.vue');
-const EditBudget = () => import('../budgets/EditBudget.vue');
-const Overview = () => import('../overview/Overview.vue');
-const Transactions = () => import('../history/Transactions.vue');
-const Allocations = () => import('../history/Allocations.vue');
-const Reports = () => import('../reports/Reports.vue');
-const TransactionSchedules = () => import('../transactionSchedules/TransactionSchedules.vue');
+const HomePage = () => import('../pages/home/HomePage.vue');
+const NewBudget = () => import('../pages/budgets/NewBudget.vue');
+const BudgetCategories = () => import('../pages/budgets/BudgetCategories.vue');
+const EditBudget = () => import('../pages/budgets/EditBudget.vue');
+const Overview = () => import('../pages/overview/Overview.vue');
+const Transactions = () => import('../pages/history/Transactions.vue');
+const Allocations = () => import('../pages/history/Allocations.vue');
+const Reports = () => import('../pages/reports/Reports.vue');
+const TransactionSchedules = () => import('../pages/transactionSchedules/TransactionSchedules.vue');
 
 Vue.use(Router);
 
