@@ -193,14 +193,14 @@
 </template>
 
 <script lang="ts">
-import { budgetService } from '../_services/budget.service';
+import { budgetService } from '@/_services/budget.service';
 import { mdiFormatTitle, mdiCash, mdiPlus, mdiPencil, mdiCancel } from '@mdi/js';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { Vue, Component } from 'vue-property-decorator';
 import { Currency } from '@/typings/Currency';
-import { BudgetCategory } from '../typings/BudgetCategory';
+import { BudgetCategory } from '@/typings/BudgetCategory';
 import { namespace } from 'vuex-class';
-import { CreateBudgetCommand } from '../typings/Budget';
+import { CreateBudgetCommand } from '@/typings/Budget';
 
 interface BudgetEditor {
   name: string;
@@ -214,8 +214,8 @@ const alertModule = namespace('alert');
 
 @Component({
   components: {
-    'categories-list': () => import('../components/CategoriesList.vue'),
-    'v-date-field': () => import('../components/DateField.vue'),
+    'categories-list': () => import('@/components/CategoriesList.vue'),
+    'v-date-field': () => import('@/components/DateField.vue'),
     'v-new-budget-category-editor': () => import('./NewBudgetCategoryEditor.vue'),
   },
 })

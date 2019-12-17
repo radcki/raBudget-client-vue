@@ -38,14 +38,14 @@
                 >
               </v-badge>
             </v-subheader>
-            <v-new-entry
+            <new-entry
               v-show="newEntryVisible == 'manual'"
               :data-budget="budget"
               :input-data="newEntryInputData"
               @saved="fetch()"
-            ></v-new-entry>
+            ></new-entry>
 
-            <v-scheduled-transactions-list
+            <scheduled-transactions-list
               v-if="budget"
               v-show="newEntryVisible == 'scheduled'"
               max-height="350"
@@ -53,29 +53,29 @@
               :data-budget="budget"
               :title="$t('transactionSchedules.transactionSchedules')"
               @create="passScheduledToEditor"
-            ></v-scheduled-transactions-list>
+            ></scheduled-transactions-list>
           </v-flex>
 
           <v-flex v-if="$vuetify.breakpoint.xsOnly" xs12 class="py-3">
-            <v-scheduled-transactions-list
+            <scheduled-transactions-list
               v-if="budget"
               max-height="150"
               :items="closestScheduledTransactions"
               :data-budget="budget"
               :title="$t('transactionSchedules.transactionSchedules')"
               @create="passScheduledToEditor"
-            ></v-scheduled-transactions-list>
+            ></scheduled-transactions-list>
           </v-flex>
 
           <v-flex v-if="$vuetify.breakpoint.smAndUp" xs12 sm6 md12>
             <v-subheader class="headline">{{ $t('budgets.savingsStatus') }}</v-subheader>
-            <v-mini-categories-summary
+            <mini-categories-summary
               color="white--text"
               :loading="$wait.is('loading.savingCategoriesBalance')"
               background-color="blue darken-1"
               :data-balance="savingCategoriesBalance"
               :data-budget="budget"
-            ></v-mini-categories-summary>
+            ></mini-categories-summary>
           </v-flex>
         </v-layout>
       </v-flex>
@@ -87,70 +87,44 @@
           </v-flex>
 
           <v-flex xs12 sm6 class="pt-0">
-            <v-card class="text-sm-center" color="light-green darken-1" dark>
-              <v-card-title class="subtitle-2">{{ $t('budgets.availablefunds') }}</v-card-title>
-              <v-card-text class="display-1 pb-1">
-                <v-animated-number
-                  v-if="budget.currentFunds"
-                  :value="budget.currentFunds"
-                  :format-value="formatAmount"
-                  :duration="300"
-                />
-                <span v-else>-</span>
-              </v-card-text>
-              <v-card-actions style="min-height: 7px" class="pa-0 ma-0">
-                <v-progress-linear
-                  v-show="$wait.is('loading.budget*')"
-                  class="pa-0 ma-0"
-                  indeterminate
-                  color="white"
-                ></v-progress-linear>
-              </v-card-actions>
-            </v-card>
+            <value-card
+              :value="budget.currentFunds"
+              :budget="budget"
+              :label="$t('budgets.availablefunds')"
+              color="light-green darken-1"
+              :loading="$wait.is('loading.availablefunds*')"
+            ></value-card>
           </v-flex>
 
           <v-flex xs12 sm6 class="pt-0">
-            <v-card class="text-sm-center" color="blue-grey darken-1" dark>
-              <v-card-title class="subtitle-2">{{ $t('budgets.unassignedFunds') }}</v-card-title>
-              <v-card-text class="display-1 pb-1">
-                <v-animated-number
-                  v-if="budget.unassignedFunds"
-                  :value="budget.unassignedFunds"
-                  :format-value="formatAmount"
-                  :duration="300"
-                />
-                <span v-else>-</span>
-              </v-card-text>
-              <v-card-actions style="min-height: 7px" class="pa-0 ma-0">
-                <v-progress-linear
-                  v-show="$wait.is('loading.unassignedFunds*')"
-                  class="pa-0 ma-0"
-                  indeterminate
-                  color="white"
-                ></v-progress-linear>
-              </v-card-actions>
-            </v-card>
+            <value-card
+              :value="budget.unassignedFunds"
+              :budget="budget"
+              :label="$t('budgets.unassignedFunds')"
+              color="blue-grey darken-1"
+              :loading="$wait.is('loading.unassignedFunds*')"
+            ></value-card>
           </v-flex>
 
           <v-flex xs12>
-            <v-large-categories-summary
+            <large-categories-summary
               :loading="$wait.is('loading.spendingCategoriesBalance')"
               :data-balance="spendingCategoriesBalance"
               :data-budget="budget"
-            ></v-large-categories-summary>
+            ></large-categories-summary>
           </v-flex>
         </v-layout>
       </v-flex>
 
       <v-flex v-if="!$vuetify.breakpoint.smAndUp" xs12>
         <v-subheader class="headline">{{ $t('budgets.savingsStatus') }}</v-subheader>
-        <v-mini-categories-summary
+        <mini-categories-summary
           color="white--text"
           :loading="$wait.is('loading.savingCategoriesBalance')"
           background-color="blue darken-1"
           :data-balance="savingCategoriesBalance"
           :data-budget="budget"
-        ></v-mini-categories-summary>
+        ></mini-categories-summary>
       </v-flex>
 
       <v-flex xs12>
@@ -158,7 +132,7 @@
       </v-flex>
 
       <v-flex v-if="budget && transactions && transactions.spendings" xs12 sm6 lg4>
-        <v-mini-transactions-list
+        <mini-transactions-list
           :items="transactions.spendings"
           color="amber darken-1"
           :title="$t('transactions.recentSpending')"
@@ -166,11 +140,11 @@
           :loading="$wait.is('*.transactions')"
           @updated="fetch()"
           @deleted="fetch()"
-        ></v-mini-transactions-list>
+        ></mini-transactions-list>
       </v-flex>
 
       <v-flex v-if="budget && transactions && transactions.incomes" xs12 sm6 lg4>
-        <v-mini-transactions-list
+        <mini-transactions-list
           :items="transactions.incomes"
           color="green darken-1"
           :title="$t('transactions.recentIncome')"
@@ -178,11 +152,11 @@
           :loading="$wait.is('*.transactions')"
           @updated="fetch()"
           @deleted="fetch()"
-        ></v-mini-transactions-list>
+        ></mini-transactions-list>
       </v-flex>
 
       <v-flex v-if="budget && transactions && transactions.savings" xs12 sm6 lg4>
-        <v-mini-transactions-list
+        <mini-transactions-list
           :items="transactions.savings"
           color="blue darken-1"
           :title="$t('transactions.recentSaving')"
@@ -190,11 +164,11 @@
           :loading="$wait.is('*.transactions')"
           @updated="fetch()"
           @deleted="fetch()"
-        ></v-mini-transactions-list>
+        ></mini-transactions-list>
       </v-flex>
     </v-layout>
 
-    <v-new-entry
+    <new-entry
       v-if="$vuetify.breakpoint.xs"
       ref="newEntryDialog"
       dialog
@@ -207,7 +181,7 @@
           <v-icon>{{ mdiPlus }}</v-icon>
         </v-btn>
       </template>
-    </v-new-entry>
+    </new-entry>
 
     <transaction-editor ref="transactionEditor"></transaction-editor>
   </v-container>
@@ -218,7 +192,7 @@ import { mdiPlus } from '@mdi/js';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { Budget } from '@/typings/Budget';
-import { Transaction } from '../typings/Transaction';
+import { Transaction } from '@/typings/Transaction';
 import NewEntry from './NewEntry.vue';
 
 const budgetsModule = namespace('budgets');
@@ -228,12 +202,12 @@ const alertModule = namespace('alert');
 @Component({
   components: {
     'transaction-editor': () => import('@/components/TransactionEditor.vue'),
-    'v-mini-transactions-list': () => import('@/components/MiniTransactionsList.vue'),
-    'v-scheduled-transactions-list': () => import('@/components/ScheduledTransactionsList.vue'),
-    'v-mini-categories-summary': () => import('@/components/MiniCategoriesSummary.vue'),
-    'v-large-categories-summary': () => import('@/components/LargeCategoriesSummary.vue'),
-    'v-new-entry': () => import('./NewEntry.vue'),
-    'v-animated-number': () => import('@/components/AnimatedNumber.vue'),
+    'mini-transactions-list': () => import('@/components/MiniTransactionsList.vue'),
+    'scheduled-transactions-list': () => import('@/components/ScheduledTransactionsList.vue'),
+    'mini-categories-summary': () => import('@/components/MiniCategoriesSummary.vue'),
+    'large-categories-summary': () => import('./components/LargeCategoriesSummary.vue'),
+    'new-entry': () => import('./NewEntry.vue'),
+    'value-card': () => import('./components/ValueCard.vue'),
   },
 })
 export default class Overview extends Vue {
@@ -315,14 +289,6 @@ export default class Overview extends Vue {
       if (this.initializeCategoriesBalance) this.initializeCategoriesBalance();
       if (this.initializeUnassignedFunds) this.initializeUnassignedFunds();
     }, 300);
-
-    // this.fetchClosestScheduledTransactions()
-  }
-
-  formatAmount(value) {
-    return this.$options.filters
-      ? this.$options.filters.currency(value, this.$currencyConfig(this.budget))
-      : value;
   }
 
   passScheduledToEditor(transaction: Transaction) {

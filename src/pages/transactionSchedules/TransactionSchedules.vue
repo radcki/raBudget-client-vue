@@ -200,7 +200,7 @@
 </template>
 
 <script lang="ts">
-import { transactionSchedulesService } from '../_services/transactionSchedules.service';
+import { transactionSchedulesService } from '@/_services/transactionSchedules.service';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { mdiPlusCircleOutline, mdiPencil, mdiTrashCan, mdiMagnify } from '@mdi/js';
@@ -219,7 +219,7 @@ const alertModule = namespace('alert');
 @Component({
   components: {
     'v-transaction-schedule-editor': () => import('./TransactionScheduleEditor.vue'),
-    'v-date-field': () => import('../components/DateField.vue'),
+    'v-date-field': () => import('@/components/DateField.vue'),
   },
 })
 export default class TransactionSchedules extends Vue {

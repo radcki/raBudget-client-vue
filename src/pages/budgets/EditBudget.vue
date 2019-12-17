@@ -72,7 +72,7 @@
 </template>
 
 <script lang="ts">
-import { budgetService } from '../_services/budget.service';
+import { budgetService } from '@/_services/budget.service';
 
 import {
   mdiFormatTitle,
@@ -84,8 +84,8 @@ import {
 } from '@mdi/js';
 import { Vue, Component } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
-import { Budget } from '../typings/Budget';
-import { Currency } from '../typings/Currency';
+import { Budget } from '@/typings/Budget';
+import { Currency } from '@/typings/Currency';
 
 const budgetsModule = namespace('budgets');
 const alertModule = namespace('alert');

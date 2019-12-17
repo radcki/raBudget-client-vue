@@ -241,18 +241,18 @@
 </template>
 
 <script lang="ts">
-import { transactionsService } from '../_services/transactions.service';
-import { allocationsService } from '../_services/allocations.service';
-import { transactionSchedulesService } from '../_services/transactionSchedules.service';
+import { transactionsService } from '@/_services/transactions.service';
+import { allocationsService } from '@/_services/allocations.service';
+import { transactionSchedulesService } from '@/_services/transactionSchedules.service';
 
-import { eCategoryType } from '../typings/enums/eCategoryType';
+import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
-import { Transaction } from '../typings/Transaction';
-import { BudgetCategory } from '../typings/BudgetCategory';
-import { TransactionSchedule } from '../typings/TransactionSchedule';
-import { eFrequency } from '../typings/enums/eFrequency';
-import { Allocation } from '../typings/Allocation';
+import { Transaction } from '@/typings/Transaction';
+import { BudgetCategory } from '@/typings/BudgetCategory';
+import { TransactionSchedule } from '@/typings/TransactionSchedule';
+import { eFrequency } from '@/typings/enums/eFrequency';
+import { Allocation } from '@/typings/Allocation';
 import { ErrorMessage } from '@/typings/TypedResponse';
 import { mdiClose } from '@mdi/js';
 import { Budget } from '@/typings/Budget';
@@ -273,8 +273,8 @@ const transactionsModule = namespace('transactions');
 const alertModule = namespace('alert');
 @Component({
   components: {
-    'v-category-select': () => import('../components/CategorySelect.vue'),
-    'v-date-field': () => import('../components/DateField.vue'),
+    'v-category-select': () => import('@/components/CategorySelect.vue'),
+    'v-date-field': () => import('@/components/DateField.vue'),
   },
 })
 export default class NewEntry extends Vue {

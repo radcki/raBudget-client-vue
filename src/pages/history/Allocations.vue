@@ -179,15 +179,15 @@
 </template>
 
 <script lang="ts">
-import { allocationsService } from '../_services/allocations.service';
+import { allocationsService } from '@/_services/allocations.service';
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
 import { subMonths, format } from 'date-fns';
 
 import { mdiMagnify, mdiPencil, mdiTrashCan } from '@mdi/js';
-import { eCategoryType } from '../typings/enums/eCategoryType';
-import { BudgetCategory } from '../typings/BudgetCategory';
-import { Budget } from '../typings/Budget';
+import { eCategoryType } from '@/typings/enums/eCategoryType';
+import { BudgetCategory } from '@/typings/BudgetCategory';
+import { Budget } from '@/typings/Budget';
 import { Allocation } from '@/typings/Allocation';
 import { ErrorMessage } from '@/typings/TypedResponse';
 
@@ -196,9 +196,9 @@ const budgetsModule = namespace('budgets');
 
 @Component({
   components: {
-    'v-allocation-editor': () => import('../components/AllocationEditor.vue'),
-    'v-category-select': () => import('../components/CategorySelect.vue'),
-    'v-date-range-slider': () => import('../components/DateRangeSlider.vue'),
+    'v-allocation-editor': () => import('@/components/AllocationEditor.vue'),
+    'v-category-select': () => import('@/components/CategorySelect.vue'),
+    'v-date-range-slider': () => import('@/components/DateRangeSlider.vue'),
   },
 })
 export default class Allocations extends Vue {
