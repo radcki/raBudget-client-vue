@@ -17,8 +17,21 @@ export default new Vuetify({
     themes: {
       light: {
         income: colors.lightGreen.darken3,
-        saving: colors.indigo.base,
+        saving: colors.blue.base,
         spending: colors.amber.base,
+        allocation: colors.purple.darken1,
+        navigationBar: colors.white,
+        navigationBarHeader: colors.blueGrey.darken1,
+        navigationBarAccent: colors.grey.lighten4,
+      },
+      dark: {
+        income: colors.lightGreen.darken4,
+        saving: colors.blue.darken3,
+        spending: colors.amber.darken3,
+        allocation: colors.purple.darken3,
+        navigationBar: colors.grey.darken4,
+        navigationBarHeader: colors.grey.darken3,
+        navigationBarAccent: colors.grey.darken3,
       },
     },
   },

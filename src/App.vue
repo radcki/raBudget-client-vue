@@ -1,226 +1,143 @@
 <template>
   <v-app>
-    <v-navigation-drawer
-      v-if="$keycloak.authenticated"
-      v-model="drawer"
-      width="260"
-      enable-resize-watcher
-      mobile-break-point="960"
-      fixed
-      clipped
-      app
-    >
-      <v-list dense single-line>
-        <v-list-item>
-          <v-list-item-title class="grey--text text--darken-1"
-            >{{ $t('general.budgets') }}:</v-list-item-title
-          >
-          <v-list-item-action class="justify-end">
-            <v-btn :to="{ name: 'newBudget' }" icon small class="grey--text text--darken-1">
+    <v-app-bar dense fixed app :collapse="!mobile" color="navigationBar">
+      <v-app-bar-nav-icon v-if="$keycloak.authenticated && mobile" @click.stop="drawer = !drawer">
+        <v-icon>{{ mdiMenu }}</v-icon>
+      </v-app-bar-nav-icon>
+
+      <v-menu v-if="!!budget" offset-y>
+        <template v-slot:activator="{ on }">
+          <v-btn text class="subheading" v-on="on">
+            {{ budget.name }}<v-icon>{{ mdiChevronDown }}</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item :to="{ name: 'newBudget' }">
+            <v-list-item-title>{{ $t('budgets.new') }}</v-list-item-title>
+            <v-list-item-action>
               <v-icon>{{ mdiPlusCircleOutline }}</v-icon>
-            </v-btn>
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider></v-divider>
-        <v-list-group
-          v-for="(budget, i) in budgets"
-          :key="i"
-          :data="budget"
-          active-class="grey lighten-4 black--text"
-          :value="$route.params.id == budget.budgetId"
-          no-action
-          class="pl-0 ml-0"
-        >
-          <v-list-item slot="activator" class="pl-0 ml-0">
-            <v-list-item-content>
-              <v-list-item-title>{{ budget.name }}</v-list-item-title>
-              <v-list-item-subtitle>
-                <small>
-                  {{ $t('general.funds') }}:
-                  {{ budget.currentFunds | currency($currencyConfig(budget)) }}
-                </small>
-              </v-list-item-subtitle>
-            </v-list-item-content>
-
-            <v-list-item-action>
-              <v-btn
-                icon
-                small
-                class="grey--text text--darken-1"
-                :to="{ name: 'editBudget', params: { id: budget.budgetId } }"
-              >
-                <v-icon small>{{ mdiPencil }}</v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </v-list-item>
-
-          <v-list-item
-            class="grey--text text--darken-1"
-            :to="{ name: 'overview', params: { id: budget.budgetId } }"
-          >
-            <v-list-item-content>
-              <v-list-item-title>{{ $t('budgets.overview') }}</v-list-item-title>
-            </v-list-item-content>
-
-            <v-list-item-action>
-              <v-icon>{{ mdiHome }}</v-icon>
-            </v-list-item-action>
-          </v-list-item>
-
-          <v-list-item
-            class="grey--text text--darken-1"
-            :to="{ name: 'history', params: { id: budget.budgetId } }"
-          >
-            <v-list-item-content>
-              <v-list-item-title>{{ $t('budgets.history') }}</v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-icon>{{ mdiFormatListBulleted }}</v-icon>
-            </v-list-item-action>
-          </v-list-item>
-
-          <v-list-item
-            class="grey--text text--darken-1"
-            :to="{ name: 'transactionSchedules', params: { id: budget.budgetId } }"
-          >
-            <v-list-item-content>
-              <v-list-item-title>{{
-                $t('transactionSchedules.transactionSchedules')
-              }}</v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-icon>{{ mdiCalendarClock }}</v-icon>
-            </v-list-item-action>
-          </v-list-item>
-
-          <v-list-item
-            class="grey--text text--darken-1"
-            :to="{ name: 'reports', params: { id: budget.budgetId } }"
-          >
-            <v-list-item-content>
-              <v-list-item-title>{{ $t('reports.reports') }}</v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-icon>{{ mdiPollBox }}</v-icon>
-            </v-list-item-action>
-          </v-list-item>
-
-          <v-list-item
-            class="grey--text text--darken-1"
-            :to="{ name: 'budgetCategories', params: { id: budget.budgetId } }"
-          >
-            <v-list-item-content>
-              <v-list-item-title>{{ $t('budgets.categories') }}</v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-icon>{{ mdiTune }}</v-icon>
-            </v-list-item-action>
-          </v-list-item>
-
-          <v-list-item
-            class="grey--text text--darken-1"
-            :to="{ name: 'allocations', params: { id: budget.budgetId } }"
-          >
-            <v-list-item-content>
-              <v-list-item-title>{{ $t('general.allocations') }}</v-list-item-title>
-            </v-list-item-content>
-            <v-list-item-action>
-              <v-icon>{{ mdiDirections }}</v-icon>
             </v-list-item-action>
           </v-list-item>
           <v-divider></v-divider>
-        </v-list-group>
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-app-bar
-      :color="$keycloak.authenticated ? 'blue-grey darken-2' : 'blue-grey lighten-2'"
-      dark
-      dense
-      fixed
-      clipped-left
-      app
-    >
-      <v-app-bar-nav-icon v-if="$keycloak.authenticated" @click.stop="drawer = !drawer">
-        <v-icon>{{ mdiMenu }}</v-icon>
-      </v-app-bar-nav-icon>
-      <v-toolbar-title class="align-center">
-        <span class="title">raBudget</span>
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
-
-      <v-menu>
-        <template v-slot:activator="{ on }">
-          <v-btn text v-on="on">
-            <v-icon class="mr-2">{{ mdiWeb }}</v-icon>
-            {{ $locale }}
-          </v-btn>
-        </template>
-
-        <v-list light dense subheader>
-          <v-list-item @click="switchLocale('pl')">
-            <v-list-item-avatar>
-              <v-icon v-if="$locale == 'pl'" size="24">{{ mdiCheckCircle }}</v-icon>
-              <v-icon v-else size="24">{{ mdiCircleOutline }}</v-icon>
-            </v-list-item-avatar>
-            <v-list-item-title>PL</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item @click="switchLocale('en')">
-            <v-list-item-avatar>
-              <v-icon v-if="$locale == 'en'" size="24">{{ mdiCheckCircle }}</v-icon>
-              <v-icon v-else size="24">{{ mdiCircleOutline }}</v-icon>
-            </v-list-item-avatar>
-            <v-list-item-title>EN</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-
-      <v-menu v-if="$keycloak.authenticated">
-        <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on">
-            <v-icon>{{ mdiDotsVertical }}</v-icon>
-          </v-btn>
-        </template>
-
-        <v-list light subheader>
-          <template v-if="isAdmin">
-            <v-subheader>ADMIN</v-subheader>
-            <v-list-item to="/admin/users">
-              <v-list-item-action>
-                <v-icon color="red">{{ mdiAccountMultiple }}</v-icon>
-              </v-list-item-action>
-              <v-list-item-title>{{ $t('admin.users') }}</v-list-item-title>
-            </v-list-item>
-
-            <v-list-item to="/admin/logs">
-              <v-list-item-action>
-                <v-icon color="red">{{ mdiFormatListBulleted }}</v-icon>
-              </v-list-item-action>
-              <v-list-item-title>{{ $t('admin.logs') }}</v-list-item-title>
-            </v-list-item>
-          </template>
-          <v-subheader>{{ $t('account.logged') }}: {{ user.username }}</v-subheader>
-
-          <v-list-item to="/profile">
+          <v-list-item
+            v-for="(budget, index) in budgets"
+            :key="index"
+            :to="{ name: $route.name, params: { id: budget.budgetId } }"
+          >
+            <v-list-item-title>{{ budget.name }}</v-list-item-title>
             <v-list-item-action>
-              <v-icon>{{ mdiAccountBoxOutline }}</v-icon>
+              <v-btn icon :to="{ name: 'editBudget', params: { id: budget.budgetId } }">
+                <v-icon>{{ mdiPencil }}</v-icon>
+              </v-btn>
             </v-list-item-action>
-            <v-list-item-title>{{ $t('account.account') }}</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item @click="signOut">
-            <v-list-item-action>
-              <v-icon>{{ mdiLogout }}</v-icon>
-            </v-list-item-action>
-            <v-list-item-title>{{ $t('account.signOut') }}</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-menu>
     </v-app-bar>
 
-    <v-snackbar v-if="alert.message" v-model="alert.message" right top :color="alert.type">
+    <v-navigation-drawer
+      v-model="drawer"
+      width="260"
+      enable-resize-watcher
+      mobile-break-point="960"
+      color="navigationBar"
+      class="elevation-2"
+      :floating="!mobile"
+      app
+      :mini-variant="minNav"
+    >
+      <template v-slot:append>
+        <v-divider></v-divider>
+        <v-expand-transition>
+          <div v-if="!minNav" class="navigationBarAccent pb-3">
+            <v-list-item two-line>
+              <v-list-item-content>
+                <v-list-item-subtitle> {{ $t('account.logged') }}: </v-list-item-subtitle>
+                <v-list-item-title class="py-3">
+                  {{ user.fullName }}
+                </v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-row no-gutters>
+              <v-col class="text-right">
+                <v-menu>
+                  <template v-slot:activator="{ on }">
+                    <v-btn icon v-on="on">
+                      <v-icon class="mr-2">{{ mdiWeb }}</v-icon>
+                    </v-btn>
+                  </template>
+
+                  <v-list light dense subheader>
+                    <v-list-item @click="switchLocale('pl')">
+                      <v-list-item-avatar>
+                        <v-icon v-if="$locale == 'pl'" size="24">{{ mdiCheckCircle }}</v-icon>
+                        <v-icon v-else size="24">{{ mdiCircleOutline }}</v-icon>
+                      </v-list-item-avatar>
+                      <v-list-item-title>PL</v-list-item-title>
+                    </v-list-item>
+
+                    <v-list-item @click="switchLocale('en')">
+                      <v-list-item-avatar>
+                        <v-icon v-if="$locale == 'en'" size="24">{{ mdiCheckCircle }}</v-icon>
+                        <v-icon v-else size="24">{{ mdiCircleOutline }}</v-icon>
+                      </v-list-item-avatar>
+                      <v-list-item-title>EN</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-col>
+              <v-col v-if="$keycloak.authenticated" class="text-center">
+                <v-btn icon to="/profile">
+                  <v-icon>{{ mdiAccountBoxOutline }}</v-icon>
+                </v-btn>
+              </v-col>
+              <v-col class="text-center">
+                <v-btn icon @click="$vuetify.theme.dark = !$vuetify.theme.dark">
+                  <v-icon>{{ mdiWeatherNight }}</v-icon>
+                </v-btn>
+              </v-col>
+              <v-col v-if="$keycloak.authenticated" class="text-left" @click="signOut">
+                <v-btn icon>
+                  <v-icon>{{ mdiLogout }}</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </div>
+        </v-expand-transition>
+        <v-divider></v-divider>
+      </template>
+      <v-list dense single-line class="pt-0">
+        <v-list-item class="navigationBarHeader elevation-5">
+          <v-list-item-title v-if="!minNav">
+            <span class="title white--text">raBudget</span>
+          </v-list-item-title>
+          <v-list-item-action>
+            <v-btn icon dark @click.stop="minNav = !minNav">
+              <v-icon>{{ minNav ? mdiChevronRight : mdiChevronLeft }}</v-icon>
+            </v-btn>
+          </v-list-item-action>
+        </v-list-item>
+
+        <v-divider class="mb-3"></v-divider>
+
+        <menu-item
+          v-for="(item, i) in menuItems"
+          :key="item.name + i.toString()"
+          :name="item.name"
+          :icon="item.icon"
+          :to="item.to"
+          :children="item.children"
+        ></menu-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <v-snackbar
+      v-if="alert && alert.message"
+      v-model="alert.message"
+      right
+      top
+      :color="alert ? alert.type : null"
+    >
       {{ $t(alert.message) }}
       <v-btn dark text @click="clearAlert">
         <v-icon>{{ mdiClose }}</v-icon>
@@ -274,14 +191,23 @@ import {
   mdiDirections,
   mdiAccountMultiple,
   mdiClose,
+  mdiChevronLeft,
+  mdiChevronRight,
+  mdiChevronDown,
+  mdiWeatherNight,
 } from '@mdi/js';
 import { Budget } from './typings/Budget';
+import MenuItem from './typings/MenuItem';
 
 const budgetsStore = namespace('budgets');
 const alertStore = namespace('alert');
 const accountStore = namespace('account');
 
-@Component
+@Component({
+  components: {
+    'menu-item': () => import('@/components/MenuItem.vue'),
+  },
+})
 export default class App extends Vue {
   drawer = true;
   loadingOverlay = false;
@@ -303,16 +229,25 @@ export default class App extends Vue {
   mdiDirections = mdiDirections;
   mdiAccountMultiple = mdiAccountMultiple;
   mdiClose = mdiClose;
+  mdiChevronLeft = mdiChevronLeft;
+  mdiChevronRight = mdiChevronRight;
+  mdiChevronDown = mdiChevronDown;
+  mdiWeatherNight = mdiWeatherNight;
 
-  get alert() {
-    return this.$store.state.alert;
-  }
+  minNav = false;
+
+  @budgetsStore.Getter('budget') budget?: Budget;
+  @budgetsStore.State('budgets') budgets?: Budget[];
+  @budgetsStore.Action('activeBudgetChange') activeBudgetChange?: (
+    budgetId: number | string,
+  ) => void;
+
+  @alertStore.State('alert') alert?: any;
+
   get account() {
     return this.$store.state.account;
   }
-  get budgets(): Budget[] | null {
-    return this.$store.state.budgets.budgets;
-  }
+
   get user() {
     return this.$store.getters['account/currentUser'];
   }
@@ -327,6 +262,70 @@ export default class App extends Vue {
     );
   }
 
+  get mobile() {
+    return this.$vuetify.breakpoint.smAndDown;
+  }
+
+  get menuItems(): MenuItem[] {
+    if (!this.budget) {
+      return [];
+    }
+    return [
+      {
+        name: this.$t('budgets.overview').toString(),
+        icon: mdiHome,
+        to: { name: 'overview', params: { id: this.budget.budgetId } },
+        children: [],
+      },
+      {
+        name: this.$t('budgets.history').toString(),
+        icon: mdiFormatListBulleted,
+        to: { name: 'history', params: { id: this.budget.budgetId } },
+        children: [],
+      },
+      {
+        name: this.$t('transactionSchedules.transactionSchedules').toString(),
+        icon: mdiCalendarClock,
+        to: { name: 'transactionSchedules', params: { id: this.budget.budgetId } },
+        children: [],
+      },
+      {
+        name: this.$t('reports.reports').toString(),
+        icon: mdiPollBox,
+        to: { name: 'reports', params: { id: this.budget.budgetId } },
+        children: [],
+      },
+      {
+        name: this.$t('budgets.categories').toString(),
+        icon: mdiTune,
+        to: { name: 'budgetCategories', params: { id: this.budget.budgetId } },
+        children: [],
+      },
+      {
+        name: this.$t('general.allocations').toString(),
+        icon: mdiDirections,
+        to: { name: 'allocations', params: { id: this.budget.budgetId } },
+        children: [],
+      },
+    ];
+  }
+
+  @Watch('mobile')
+  OnResize(mobile) {
+    this.drawer = !mobile;
+  }
+
+  @Watch('selectedBudgetId')
+  OnBudgetChange(newBudgetId, oldBudgetId) {
+    if (newBudgetId == oldBudgetId) {
+      return;
+    }
+    if (this.activeBudgetChange) {
+      this.activeBudgetChange(newBudgetId);
+    }
+    this.$router.push({ ...this.$route, params: { id: newBudgetId } });
+  }
+
   mounted() {
     const savedLocale = this.$locale;
     if (savedLocale) {
@@ -339,6 +338,9 @@ export default class App extends Vue {
 
     if (this.$keycloak.authenticated) {
       this.initializeBudgets().then(() => {
+        if (this.$route.params.id) {
+          this.selectedBudgetId = this.$route.params.id;
+        }
         this.noBudgetsGuard();
       });
     }
@@ -376,6 +378,7 @@ export default class App extends Vue {
         activeBudget = this.budgets[0];
       }
       if (activeBudget) {
+        this.selectedBudgetId = activeBudget.budgetId;
         this.$router.push({
           name: 'overview',
           params: { id: activeBudget.budgetId.toString() },
