@@ -5,7 +5,7 @@
         <v-subheader class="headline">{{ $t('budgets.new') }}</v-subheader>
       </v-flex>
       <v-flex xs12>
-        <v-stepper v-model="step">
+        <v-stepper v-model="step" class="cardBackground">
           <v-stepper-header>
             <v-stepper-step :complete="step > 1" step="1">
               {{ $t('budgets.budget') }}

@@ -9,7 +9,7 @@
         <v-tab class="subheading white--text" ripple>{{ $t('general.allocation') }}</v-tab>
       </v-tabs>
 
-      <v-card>
+      <v-card color="cardBackground">
         <v-card-text>
           <v-form ref="editorForm" v-model="valid" lazy-validation>
             <v-container grid-list-md>

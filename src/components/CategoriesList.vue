@@ -1,5 +1,5 @@
 <template>
-  <v-list subheader class="elevation-3">
+  <v-list subheader class="cardBackground elevation-3">
     <v-subheader :class="color" dark>
       {{ title }}
       <v-spacer></v-spacer>

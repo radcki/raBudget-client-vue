@@ -5,10 +5,10 @@
         <v-icon>{{ mdiMenu }}</v-icon>
       </v-app-bar-nav-icon>
 
-      <v-menu v-if="!!budget" offset-y>
+      <v-menu offset-y>
         <template v-slot:activator="{ on }">
           <v-btn text class="subheading" v-on="on">
-            {{ budget.name }}<v-icon>{{ mdiChevronDown }}</v-icon>
+            {{ budget ? budget.name : '' }}<v-icon>{{ mdiChevronDown }}</v-icon>
           </v-btn>
         </template>
         <v-list>
@@ -22,7 +22,10 @@
           <v-list-item
             v-for="(budget, index) in budgets"
             :key="index"
-            :to="{ name: $route.name, params: { id: budget.budgetId } }"
+            :to="{
+              name: $route.params.id ? $route.name : 'overview',
+              params: { id: budget.budgetId },
+            }"
           >
             <v-list-item-title>{{ budget.name }}</v-list-item-title>
             <v-list-item-action>
@@ -118,7 +121,7 @@
           </v-list-item-action>
         </v-list-item>
 
-        <v-divider class="mb-3"></v-divider>
+        <v-divider class="mb-5"></v-divider>
 
         <menu-item
           v-for="(item, i) in menuItems"
@@ -144,7 +147,7 @@
       </v-btn>
     </v-snackbar>
 
-    <v-content>
+    <v-content class="contentBackground">
       <router-view></router-view>
     </v-content>
   </v-app>
@@ -198,6 +201,7 @@ import {
 } from '@mdi/js';
 import { Budget } from './typings/Budget';
 import MenuItem from './typings/MenuItem';
+import { Route } from 'vue-router';
 
 const budgetsStore = namespace('budgets');
 const alertStore = namespace('alert');
@@ -243,6 +247,7 @@ export default class App extends Vue {
   ) => void;
 
   @alertStore.State('alert') alert?: any;
+  @alertStore.Action('error') error?: (message: string) => void;
 
   get account() {
     return this.$store.state.account;
@@ -315,15 +320,44 @@ export default class App extends Vue {
     this.drawer = !mobile;
   }
 
-  @Watch('selectedBudgetId')
-  OnBudgetChange(newBudgetId, oldBudgetId) {
-    if (newBudgetId == oldBudgetId) {
+  @Watch('$route', { immediate: true, deep: true })
+  onUrlChange(route: Route) {
+    if (
+      route.params['id'] &&
+      this.budgets &&
+      !this.budgets.find(v => v.budgetId.toString() == route.params['id'])
+    ) {
+      if (this.error) this.error(this.$t('budgets.notFound').toString());
+      this.$router.push('/');
+      return;
+    }
+    if (
+      this.budget &&
+      this.budget.budgetId.toString() != route.params['id'] &&
+      this.activeBudgetChange
+    ) {
+      this.activeBudgetChange(route.params['id']);
+    }
+  }
+
+  @Watch('budget', { immediate: true, deep: true })
+  OnBudgetChange(newBudget: Budget, oldBudget: Budget) {
+    if (!newBudget || !oldBudget || newBudget.budgetId == oldBudget.budgetId) {
       return;
     }
     if (this.activeBudgetChange) {
-      this.activeBudgetChange(newBudgetId);
+      this.activeBudgetChange(newBudget.budgetId);
     }
-    this.$router.push({ ...this.$route, params: { id: newBudgetId } });
+    this.$router.push({ ...this.$route, params: { id: newBudget.budgetId.toString() } });
+  }
+
+  @Watch('$vuetify.theme.dark')
+  onThemeChange(isDark) {
+    localStorage.setItem('darkTheme', isDark);
+  }
+
+  beforeCreate() {
+    this.$vuetify.theme.dark = !!localStorage.getItem('darkTheme') || false;
   }
 
   mounted() {
@@ -338,8 +372,8 @@ export default class App extends Vue {
 
     if (this.$keycloak.authenticated) {
       this.initializeBudgets().then(() => {
-        if (this.$route.params.id) {
-          this.selectedBudgetId = this.$route.params.id;
+        if (this.$route.params.id && this.activeBudgetChange) {
+          this.activeBudgetChange(this.$route.params.id);
         }
         this.noBudgetsGuard();
       });
@@ -377,8 +411,8 @@ export default class App extends Vue {
       } else if (this.budgets) {
         activeBudget = this.budgets[0];
       }
-      if (activeBudget) {
-        this.selectedBudgetId = activeBudget.budgetId;
+      if (activeBudget && this.activeBudgetChange) {
+        this.activeBudgetChange(this.$route.params.id);
         this.$router.push({
           name: 'overview',
           params: { id: activeBudget.budgetId.toString() },

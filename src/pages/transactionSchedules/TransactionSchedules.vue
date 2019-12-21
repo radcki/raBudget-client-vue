@@ -8,7 +8,7 @@
       </v-flex>
 
       <v-flex xs12 class="mb-4">
-        <v-card class="px-3">
+        <v-card class="px-3" color="cardBackground">
           <v-card-text>
             <v-container fluid grid-list-sm class="pa-0">
               <v-layout row wrap>
@@ -66,7 +66,7 @@
         ></v-progress-circular>
       </v-flex>
 
-      <v-flex v-if="transactionSchedules" xs12 class="elevation-1 white">
+      <v-flex v-if="transactionSchedules" xs12 class="elevation-1 cardBackground">
         <v-layout row justify-end>
           <v-flex xs4>
             <v-text-field
@@ -87,6 +87,7 @@
           :loading="$wait.is('loading.*')"
           :search="search"
           must-sort
+          class="cardBackground"
           footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
         >
           <template v-slot:body="{ items }">

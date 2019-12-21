@@ -5,7 +5,7 @@
         <v-list-item-title class="subheading white--text">{{ title }}</v-list-item-title>
       </v-list-item>
       <div
-        class="white"
+        class="carbBackground"
         :style="maxHeight ? 'overflow-y: auto; max-height: ' + maxHeight + 'px' : ''"
       >
         <v-list-item

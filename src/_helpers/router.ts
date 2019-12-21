@@ -79,7 +79,7 @@ router.beforeEach((to, from, next) => {
   const publicPages = ['/login', '/register', '/password-reset'];
   const authRequired = !publicPages.includes(to.path);
   if (!authRequired) {
-    return next(true);
+    return next();
   }
   if (router.app.$keycloak.authenticated) {
     next();

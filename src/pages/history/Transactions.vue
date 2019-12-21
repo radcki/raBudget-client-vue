@@ -6,7 +6,7 @@
       </v-flex>
 
       <v-flex xs12>
-        <v-card class="px-3">
+        <v-card class="px-3" color="cardBackground">
           <v-card-text>
             <v-container fluid grid-list-sm class="pa-0">
               <v-layout row wrap>
@@ -14,7 +14,7 @@
                   <v-container fluid grid-list-sm class="pa-0">
                     <v-layout row wrap>
                       <v-flex xs6>
-                        <v-radio-group v-model="categoryType" light :mandatory="true" column>
+                        <v-radio-group v-model="categoryType" :mandatory="true" column>
                           <v-radio
                             color="primary"
                             :label="$t('general.spendings')"
@@ -89,7 +89,7 @@
         ></v-progress-circular>
       </v-flex>
 
-      <v-flex v-if="transactions" xs12 class="elevation-1 white">
+      <v-flex v-if="transactions" xs12 class="elevation-1 cardBackground">
         <v-layout row justify-end>
           <v-flex xs4>
             <v-text-field
@@ -110,6 +110,7 @@
           :loading="$wait.is('loading.*')"
           :search="search"
           item-key="transactionId"
+          class="cardBackground"
           must-sort
           sort-by
           footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
@@ -216,6 +217,7 @@ import { BudgetCategory } from '@/typings/BudgetCategory';
 import { Budget } from '@/typings/Budget';
 import { ErrorMessage } from '@/typings/TypedResponse';
 import { Transaction } from '@/typings/Transaction';
+import { TranscationFilters } from '../../_store/transactions.module';
 
 const alertModule = namespace('alert');
 const budgetsModule = namespace('budgets');
@@ -258,6 +260,7 @@ export default class Transactions extends Vue {
   ) => void;
   @budgetsModule.Action('reloadInitialized') reloadInitialized!: () => void;
   @transactionsModule.Action('fetchTransactions') fetchTransactions!: () => void;
+  @transactionsModule.Action('setFilters') setFiltersAction!: (filters: TranscationFilters) => void;
 
   get today() {
     return new Date();
@@ -360,13 +363,20 @@ export default class Transactions extends Vue {
   }
 
   setFilters() {
-    this.$store.dispatch('transactions/setFilters', {
-      budgetId: this.$route.params.id,
-      limitCount: null,
-      startDate: this.selectedRange[0],
-      endDate: this.selectedRange[1],
-      categories: this.selectedCategories,
-    });
+    if (this.setFiltersAction) {
+      this.setFiltersAction({
+        budgetId: this.budget.budgetId,
+        limitCount: {
+          incomes: null,
+          savings: null,
+          spendings: null,
+        },
+        startDate: this.selectedRange[0],
+        endDate: this.selectedRange[1],
+        categories: this.selectedCategories || [],
+        categoryType: this.categoryType,
+      });
+    }
   }
 
   updateTransaction(transaction) {

@@ -6,7 +6,7 @@
       </v-flex>
 
       <v-flex xs12>
-        <v-card>
+        <v-card color="cardBackground">
           <v-card-text>
             <div>
               Plan wydatków: {{ spendingCategoriesSum | currency($currencyConfig(budget)) }}

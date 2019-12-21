@@ -72,7 +72,7 @@
             <mini-categories-summary
               color="white--text"
               :loading="$wait.is('loading.savingCategoriesBalance')"
-              background-color="blue darken-1"
+              background-color="saving"
               :data-balance="savingCategoriesBalance"
               :data-budget="budget"
             ></mini-categories-summary>
@@ -91,7 +91,7 @@
               :value="budget.currentFunds"
               :budget="budget"
               :label="$t('budgets.availablefunds')"
-              color="light-green darken-1"
+              color="income"
               :loading="$wait.is('loading.availablefunds*')"
             ></value-card>
           </v-flex>
@@ -121,7 +121,7 @@
         <mini-categories-summary
           color="white--text"
           :loading="$wait.is('loading.savingCategoriesBalance')"
-          background-color="blue darken-1"
+          background-color="saving"
           :data-balance="savingCategoriesBalance"
           :data-budget="budget"
         ></mini-categories-summary>
@@ -134,36 +134,39 @@
       <v-flex v-if="budget && transactions && transactions.spendings" xs12 sm6 lg4>
         <mini-transactions-list
           :items="transactions.spendings"
-          color="amber darken-1"
+          color="spending"
           :title="$t('transactions.recentSpending')"
           :data-budget="budget"
-          :loading="$wait.is('*.transactions')"
+          :loading="$wait.is('*.transactions.spending')"
           @updated="fetch()"
           @deleted="fetch()"
+          @load-more="loadMore(eCategoryType.Spending, 3)"
         ></mini-transactions-list>
       </v-flex>
 
       <v-flex v-if="budget && transactions && transactions.incomes" xs12 sm6 lg4>
         <mini-transactions-list
           :items="transactions.incomes"
-          color="green darken-1"
+          color="income"
           :title="$t('transactions.recentIncome')"
           :data-budget="budget"
-          :loading="$wait.is('*.transactions')"
+          :loading="$wait.is('*.transactions.income')"
           @updated="fetch()"
           @deleted="fetch()"
+          @load-more="loadMore(eCategoryType.Income, 3)"
         ></mini-transactions-list>
       </v-flex>
 
       <v-flex v-if="budget && transactions && transactions.savings" xs12 sm6 lg4>
         <mini-transactions-list
           :items="transactions.savings"
-          color="blue darken-1"
+          color="saving"
           :title="$t('transactions.recentSaving')"
           :data-budget="budget"
-          :loading="$wait.is('*.transactions')"
+          :loading="$wait.is('*.transactions.saving')"
           @updated="fetch()"
           @deleted="fetch()"
+          @load-more="loadMore(eCategoryType.Saving, 3)"
         ></mini-transactions-list>
       </v-flex>
     </v-layout>
@@ -194,6 +197,8 @@ import { namespace } from 'vuex-class';
 import { Budget } from '@/typings/Budget';
 import { Transaction } from '@/typings/Transaction';
 import NewEntry from './NewEntry.vue';
+import { TranscationFilters } from '@/_store/transactions.module';
+import { eCategoryType } from '../../typings/enums/eCategoryType';
 
 const budgetsModule = namespace('budgets');
 const transactionsModule = namespace('transactions');
@@ -214,10 +219,12 @@ export default class Overview extends Vue {
   mdiPlus = mdiPlus;
   newEntryVisible = 'manual';
   newEntryInputData: Transaction | null = null;
+  eCategoryType = eCategoryType;
 
   @budgetsModule.State('budgets') budgets?: Budget[];
   @budgetsModule.Getter('budget') budget?: Budget;
   @transactionsModule.State('closestScheduledTransactions') closestScheduledTransactions?: any[];
+  @transactionsModule.State('mainFilters') transactionFilters?: TranscationFilters;
 
   @alertModule.Action('error') dispatchError?: (message) => void;
   @alertModule.Action('success') dispatchSuccess?: (message) => void;
@@ -232,7 +239,7 @@ export default class Overview extends Vue {
   ) => void;
   @transactionsModule.Action('fetchTransactions') fetchTransactions?: () => void;
   @transactionsModule.Action('unloadTransactionFromStore') unloadTransactionFromStore?: () => void;
-  @transactionsModule.Action('setFilters') setFilters?: (filters) => void;
+  @transactionsModule.Action('setFilters') setFilters?: (filters: TranscationFilters) => void;
 
   get spendingCategoriesBalance() {
     return this.budget ? this.budget.spendingCategoriesBalance : null;
@@ -277,18 +284,54 @@ export default class Overview extends Vue {
 
     if (this.setFilters) {
       this.setFilters({
-        budgetId: this.$route.params.id,
-        limitCount: 8,
+        budgetId: +this.$route.params.id,
+        limitCount: {
+          incomes: 8,
+          savings: 8,
+          spendings: 8,
+        },
         startDate: null,
         endDate: null,
-        categories: null,
+        categories: [],
+        categoryType: null,
       });
+      if (this.fetchTransactions) this.fetchTransactions();
     }
 
     setTimeout(() => {
       if (this.initializeCategoriesBalance) this.initializeCategoriesBalance();
       if (this.initializeUnassignedFunds) this.initializeUnassignedFunds();
     }, 300);
+  }
+
+  loadMore(categoryType: eCategoryType, count) {
+    if (!this.transactionFilters) {
+      return;
+    }
+    const currentFilters = Object.assign({}, this.transactionFilters.limitCount);
+
+    switch (categoryType) {
+      case eCategoryType.Spending:
+        currentFilters.spendings += count;
+        break;
+      case eCategoryType.Saving:
+        currentFilters.savings += count;
+        break;
+      case eCategoryType.Income:
+        currentFilters.incomes += count;
+        break;
+    }
+    if (this.setFilters) {
+      this.setFilters({
+        budgetId: +this.$route.params.id,
+        limitCount: currentFilters,
+        startDate: null,
+        endDate: null,
+        categories: [],
+        categoryType: null,
+      });
+      if (this.fetchTransactions) this.fetchTransactions();
+    }
   }
 
   passScheduledToEditor(transaction: Transaction) {
