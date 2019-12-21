@@ -9,7 +9,7 @@
         <v-tab class="subheading white--text" ripple>{{ $t('general.allocation') }}</v-tab>
       </v-tabs>
 
-      <v-card>
+      <v-card color="cardBackground">
         <v-card-text>
           <v-form ref="editorForm" v-model="valid" lazy-validation>
             <v-container grid-list-md>
@@ -287,7 +287,7 @@ export default class NewEntry extends Vue {
   createSchedule = false;
   addScheduleDisabled = false;
   tab = 0;
-  color: string[] = ['amber darken-1', 'green darken-1', 'blue darken-1', 'purple darken-1'];
+  color: string[] = ['spending', 'income', 'saving', 'allocation'];
 
   occurrenceFrequencies: any[] = [
     { value: 1, text: 'transactionSchedules.day' },

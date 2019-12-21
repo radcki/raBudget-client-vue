@@ -1,5 +1,5 @@
 <template>
-  <v-card :class="backgroundColor">
+  <v-card :color="backgroundColor">
     <v-card-text :class="color">
       <v-layout v-if="loading" row wrap>
         <v-flex xs12>
@@ -15,7 +15,7 @@
             {{ findCategoryById(category.budgetCategoryId).name }}
           </v-flex>
           <v-flex :key="index + '_savingsum'" xs4>
-            <v-chip class="amber darken-3 elevation-3 white--text" small>
+            <v-chip class="spending elevation-3 white--text" small>
               <v-animated-number
                 :value="category.totalTransactionsSum"
                 :format-value="formatAmount"
@@ -24,7 +24,7 @@
             </v-chip>
           </v-flex>
           <v-flex :key="index + '_savingplan'" xs4>
-            <v-chip class="amber darken-3 elevation-3 white--text" small>
+            <v-chip class="spending elevation-3 white--text" small>
               <v-animated-number
                 :value="category.thisMonthBudgetBalance"
                 :format-value="formatAmount"

@@ -6,7 +6,7 @@
       </v-flex>
 
       <v-flex xs12>
-        <v-card class="px-3">
+        <v-card class="px-3" color="cardBackground">
           <v-card-text>
             <v-container fluid grid-list-sm class="pa-0">
               <v-layout row wrap>
@@ -57,7 +57,7 @@
         <v-icon color="red" size="80">{{mdiAlertCircleOutline}}</v-icon>
       </v-flex>
       -->
-      <v-flex v-if="allocations" xs12 class="elevation-1 white">
+      <v-flex v-if="allocations" xs12 class="elevation-1 cardBackground">
         <v-layout row justify-end>
           <v-flex xs4>
             <v-text-field
@@ -77,6 +77,7 @@
           :items="allocations"
           :loading="$wait.is('loading.allocations')"
           :search="search"
+          class="cardBackground"
           must-sort
           sort-by
           footer-items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"

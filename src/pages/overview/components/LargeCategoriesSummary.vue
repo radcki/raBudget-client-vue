@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card color="cardBackground">
     <v-card-text>
       <v-layout row wrap justify-center>
         <v-flex v-if="$vuetify.breakpoint.smAndUp" xs3 style="min-height: 18px">
@@ -26,7 +26,7 @@
           </v-flex>
 
           <v-flex :key="index + '_cat'" class="text-xs-left" xs12 sm3>
-            <v-avatar slot="activator" size="28px" color="amber">
+            <v-avatar slot="activator" size="28px" color="spending">
               <v-icon color="white" small>{{
                 $categoryIcons[findCategoryById(category.budgetCategoryId).icon]
               }}</v-icon>

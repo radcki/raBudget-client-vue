@@ -6,7 +6,7 @@
       </v-flex>
 
       <v-flex xs12>
-        <v-card v-if="budget && budget.startingDate" class="px-3">
+        <v-card v-if="budget && budget.startingDate" class="px-3" color="cardBackground">
           <v-card-text>
             <v-date-range-slider
               v-model="selectedRange"
@@ -40,7 +40,7 @@
         >
       </v-flex>
       <v-flex xs12 d-flex style="min-height: 500px;">
-        <v-card class="px-3">
+        <v-card class="px-3" color="cardBackground">
           <div class="pt-3 progress-wrapper">
             <v-progress-linear
               v-if="loading"
@@ -67,11 +67,11 @@
                   <v-flex v-if="mode == eReportMode.Period" xs12>
                     <v-data-table
                       v-if="periodReport && $vuetify.breakpoint.smAndUp"
-                      class
                       :headers="headers"
                       hide-default-footer
                       disable-pagination
                       item-key="budgetCategoryId"
+                      class="cardBackground"
                       :items="periodReport"
                     >
                       <template v-slot:body="{ items }">
@@ -82,9 +82,9 @@
                                 size="28px"
                                 :color="
                                   categoryType == eCategoryType.Spending
-                                    ? 'amber'
+                                    ? 'spending'
                                     : categoryType == eCategoryType.Income
-                                    ? 'indigo'
+                                    ? 'income'
                                     : ''
                                 "
                               >
@@ -394,8 +394,8 @@
                     <v-container class="pa-0">
                       <v-layout row wrap justify-center class="pa-0">
                         <v-flex xs12 md3>
-                          <v-list dense>
-                            <v-subheader>Rodzaj danych</v-subheader>
+                          <v-list dense color="cardBackground">
+                            <v-subheader>{{ $t('reports.dataTyp') }}</v-subheader>
                             <v-list-item
                               :class="
                                 chartDataType == eChartType.transactionsSum ? 'primary--text' : ''

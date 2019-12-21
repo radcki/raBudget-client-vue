@@ -1,6 +1,6 @@
 <template>
-  <v-list class="py-0 elevation-1" dense subheader>
-    <v-list-item :class="color + 'py-1'">
+  <v-list class="py-0 elevation-1 cardBackground" dense subheader>
+    <v-list-item :class="color + ' py-1'">
       <v-list-item-title>
         <v-row no-gutters>
           <v-col class="pa-0 mt-2">
@@ -66,6 +66,12 @@
         </v-list-item-action>
       </v-list-item>
     </template>
+    <v-divider></v-divider>
+    <v-list-item @click="$emit('load-more')">
+      <v-list-item-content>
+        <v-list-item-title class="text-right">{{ $t('transactions.loadMore') }}</v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
   </v-list>
 </template>
 <script lang="ts">
