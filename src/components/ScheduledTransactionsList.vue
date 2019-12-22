@@ -1,13 +1,10 @@
 <template>
-  <v-list class="py-0 elevation-1" dense subheader>
+  <v-list class="py-0 elevation-1" dense color="cardBackground" subheader>
     <template v-if="$vuetify.breakpoint.mdAndUp">
       <v-list-item class="grey darken-2 py-1">
         <v-list-item-title class="subheading white--text">{{ title }}</v-list-item-title>
       </v-list-item>
-      <div
-        class="carbBackground"
-        :style="maxHeight ? 'overflow-y: auto; max-height: ' + maxHeight + 'px' : ''"
-      >
+      <div :style="maxHeight ? 'overflow-y: auto; max-height: ' + maxHeight + 'px' : ''">
         <v-list-item
           v-for="transaction in items"
           :key="'tr_' + transaction.transactionScheduleId + transaction.transactionDate"
@@ -47,7 +44,7 @@
         <v-list-item-title class="py-1 subheading white--text">{{ title }}</v-list-item-title>
       </template>
       <div
-        class="white"
+        class="cardBackground"
         :style="maxHeight ? 'overflow-y: auto; max-height: ' + maxHeight + 'px' : ''"
       >
         <v-list-item
