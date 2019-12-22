@@ -1,13 +1,13 @@
 <template>
   <v-app>
-    <v-app-bar dense fixed app :collapse="!mobile" color="navigationBar">
+    <v-app-bar dense fixed app :collapse="!mobile" color="navigationBarHeader">
       <v-app-bar-nav-icon v-if="$keycloak.authenticated && mobile" @click.stop="drawer = !drawer">
         <v-icon>{{ mdiMenu }}</v-icon>
       </v-app-bar-nav-icon>
 
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
-          <v-btn text class="subheading" v-on="on">
+          <v-btn text class="subheading" dark v-on="on">
             {{ budget ? budget.name : '' }}<v-icon>{{ mdiChevronDown }}</v-icon>
           </v-btn>
         </template>
@@ -36,6 +36,10 @@
           </v-list-item>
         </v-list>
       </v-menu>
+      <template v-if="mobile">
+        <v-spacer></v-spacer>
+        <span class="title white--text">raBudget</span>
+      </template>
     </v-app-bar>
 
     <v-navigation-drawer
@@ -115,8 +119,11 @@
             <span class="title white--text">raBudget</span>
           </v-list-item-title>
           <v-list-item-action>
-            <v-btn icon dark @click.stop="minNav = !minNav">
+            <v-btn v-if="!mobile" icon dark @click.stop="minNavSelected = !minNavSelected">
               <v-icon>{{ minNav ? mdiChevronRight : mdiChevronLeft }}</v-icon>
+            </v-btn>
+            <v-btn v-if="mobile" icon dark @click.stop="drawer = !drawer">
+              <v-icon>{{ mdiChevronLeft }}</v-icon>
             </v-btn>
           </v-list-item-action>
         </v-list-item>
@@ -238,7 +245,10 @@ export default class App extends Vue {
   mdiChevronDown = mdiChevronDown;
   mdiWeatherNight = mdiWeatherNight;
 
-  minNav = false;
+  minNavSelected = true;
+  get minNav() {
+    return this.mobile ? false : this.minNavSelected;
+  }
 
   @budgetsStore.Getter('budget') budget?: Budget;
   @budgetsStore.State('budgets') budgets?: Budget[];
