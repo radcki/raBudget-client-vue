@@ -35,6 +35,13 @@ function userBudgets() {
 }
 
 function createBudget(budgetData: CreateBudgetCommand) {
+  budgetData.budgetCategories.map(category => {
+    category.amountConfigs = category.amountConfigs.map(v => {
+      v.amount = +v.amount;
+      return v;
+    });
+    return category;
+  });
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -155,6 +162,10 @@ function getMonthlyReport(budgetId: number, startDate, endDate) {
 
 function createCategory(budgetId, category: BudgetCategory) {
   category.budgetCategoryId = 0;
+  category.amountConfigs.map(v => {
+    v.amount = +v.amount;
+    return v;
+  });
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -169,6 +180,10 @@ function createCategory(budgetId, category: BudgetCategory) {
 }
 
 function updateCategory(budgetId: number, category: BudgetCategory) {
+  category.amountConfigs.map(v => {
+    v.amount = +v.amount;
+    return v;
+  });
   const requestOptions = {
     method: 'PUT',
     headers: {

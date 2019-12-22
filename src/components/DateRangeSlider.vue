@@ -88,14 +88,14 @@ export default class DateRangeSlider extends Vue {
   @Prop(Array) value!: Date[];
   @Prop(String) step!: string;
 
-  selectedMin: Date = this.value[0];
-  selectedMax: Date = this.value[1];
+  selectedMin: Date = new Date(this.value[0].toISOString());
+  selectedMax: Date = new Date(this.value[1].toISOString());
   sliderValue: (number | null)[] = [null, null];
 
   @Watch('value')
-  OnValueChange(newValue) {
-    this.selectedMin = newValue[0];
-    this.selectedMax = newValue[1];
+  OnValueChange(newValue: Date[]) {
+    if (newValue[0] != this.selectedMin) this.selectedMin = new Date(newValue[0].toISOString());
+    if (newValue[1] != this.selectedMax) this.selectedMax = new Date(newValue[1].toISOString());
     this.sliderValue = [this.stepsFromMin(this.selectedMin), this.stepsFromMax(this.selectedMax)];
   }
 
@@ -137,7 +137,7 @@ export default class DateRangeSlider extends Vue {
   @Watch('sliderValue.1')
   OnSliderMaxChange(value) {
     if (value) {
-      this.selectedMax = this.dateAdd(this.max, value);
+      this.selectedMax = this.dateAdd(this.min, value);
     }
   }
 

@@ -26,6 +26,7 @@ function transferTransactions(
 }
 
 function createTransaction(budgetId: number, transactionData: Transaction) {
+  transactionData.amount = +transactionData.amount; //ensure number
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -57,7 +58,7 @@ function updateTransaction(budgetId, transactionData: Transaction) {
     },
     body: JSON.stringify({
       description: transactionData.description,
-      amount: transactionData.amount,
+      amount: +transactionData.amount,
       transactionDate: transactionData.transactionDate,
       budgetCategoryId: transactionData.budgetCategoryId,
     } as Transaction),
@@ -77,20 +78,25 @@ function listTransactions(
   categoryType: eCategoryType | null | undefined,
 ) {
   const requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      limitCategoryTypeResults: limitCount,
-      transactionDateStartFilter: startDate,
-      transactionDateEndFilter: endDate,
-      categoryIdFilter: categories ? categories.map(v => v.budgetCategoryId) : null,
-      categoryType: categoryType,
-    }),
   };
+  const searchParams = new URLSearchParams();
+  if (limitCount) searchParams.append('limitCategoryTypeResults', limitCount.toString());
+  if (startDate) searchParams.append('transactionDateStart', startDate.toISOString());
+  if (endDate) searchParams.append('transactionDateEnd', endDate.toISOString());
+  if (categories && categories.length > 0) {
+    for (const category of categories) {
+      if (category.budgetCategoryId)
+        searchParams.append('categoryId', category.budgetCategoryId.toString());
+    }
+  }
+  if (categoryType) searchParams.append('categoryType', categoryType.toString());
+
   return apiHandler.fetchAuthorized<Transaction[]>(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactions/filter`,
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactions/?` + searchParams,
     requestOptions,
   );
 }

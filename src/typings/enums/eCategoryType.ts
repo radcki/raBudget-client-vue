@@ -1,5 +1,5 @@
 export enum eCategoryType {
-  Spending = 0,
-  Income = 1,
-  Saving = 2,
+  Spending = 1,
+  Income = 2,
+  Saving = 3,
 }
