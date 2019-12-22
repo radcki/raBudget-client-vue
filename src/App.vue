@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar dense fixed app :collapse="!mobile" color="navigationBarHeader">
+    <v-app-bar dense fixed app :collapse="!mobile" dark color="navigationBarHeader">
       <v-app-bar-nav-icon v-if="$keycloak.authenticated && mobile" @click.stop="drawer = !drawer">
         <v-icon>{{ mdiMenu }}</v-icon>
       </v-app-bar-nav-icon>
@@ -53,6 +53,33 @@
       app
       :mini-variant="minNav"
     >
+      <v-list dense single-line class="pt-0">
+        <v-list-item class="navigationBarHeader elevation-5">
+          <v-list-item-title v-if="!minNav">
+            <span class="title white--text">raBudget</span>
+          </v-list-item-title>
+          <v-list-item-action>
+            <v-btn v-if="!mobile" icon dark @click.stop="minNavSelected = !minNavSelected">
+              <v-icon>{{ minNav ? mdiChevronRight : mdiChevronLeft }}</v-icon>
+            </v-btn>
+            <v-btn v-if="mobile" icon dark @click.stop="drawer = !drawer">
+              <v-icon>{{ mdiChevronLeft }}</v-icon>
+            </v-btn>
+          </v-list-item-action>
+        </v-list-item>
+
+        <v-divider class="mb-5"></v-divider>
+
+        <menu-item
+          v-for="(item, i) in menuItems"
+          :key="item.name + i.toString()"
+          :name="item.name"
+          :icon="item.icon"
+          :to="item.to"
+          :children="item.children"
+        ></menu-item>
+      </v-list>
+
       <template v-slot:append>
         <v-divider></v-divider>
         <v-expand-transition>
@@ -113,32 +140,6 @@
         </v-expand-transition>
         <v-divider></v-divider>
       </template>
-      <v-list dense single-line class="pt-0">
-        <v-list-item class="navigationBarHeader elevation-5">
-          <v-list-item-title v-if="!minNav">
-            <span class="title white--text">raBudget</span>
-          </v-list-item-title>
-          <v-list-item-action>
-            <v-btn v-if="!mobile" icon dark @click.stop="minNavSelected = !minNavSelected">
-              <v-icon>{{ minNav ? mdiChevronRight : mdiChevronLeft }}</v-icon>
-            </v-btn>
-            <v-btn v-if="mobile" icon dark @click.stop="drawer = !drawer">
-              <v-icon>{{ mdiChevronLeft }}</v-icon>
-            </v-btn>
-          </v-list-item-action>
-        </v-list-item>
-
-        <v-divider class="mb-5"></v-divider>
-
-        <menu-item
-          v-for="(item, i) in menuItems"
-          :key="item.name + i.toString()"
-          :name="item.name"
-          :icon="item.icon"
-          :to="item.to"
-          :children="item.children"
-        ></menu-item>
-      </v-list>
     </v-navigation-drawer>
 
     <v-snackbar
