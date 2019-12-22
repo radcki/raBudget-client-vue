@@ -9,7 +9,7 @@ function createTransactionSchedule(budgetId: number, data: TransactionSchedule) 
     },
     body: JSON.stringify({
       description: data.description,
-      amount: data.amount,
+      amount: +data.amount,
       startDate: data.startDate,
       endDate: data.endDate,
       budgetCategoryId: data.budgetCategoryId,
@@ -32,7 +32,7 @@ function updateTransactionSchedule(budgetId: number, data: TransactionSchedule) 
     },
     body: JSON.stringify({
       description: data.description,
-      amount: data.amount,
+      amount: +data.amount,
       startDate: data.startDate,
       endDate: data.endDate,
       budgetCategoryId: data.budgetCategoryId,

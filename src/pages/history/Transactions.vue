@@ -312,6 +312,7 @@ export default class Transactions extends Vue {
       );
     }
     this.setFilters();
+    this.fetchTransactions();
   }
 
   @Watch('categoryType')
@@ -322,6 +323,7 @@ export default class Transactions extends Vue {
       );
     }
     this.setFilters();
+    this.fetchTransactions();
   }
 
   created() {
@@ -353,12 +355,16 @@ export default class Transactions extends Vue {
       },
     ];
     this.activeBudgetChange(this.$route.params.id);
+  }
+
+  mounted() {
     if (this.budget) {
       this.selectedCategories = this.budget.budgetCategories.filter(
         v => v.type == this.categoryType,
       );
       this.selectedRange = [this.monthAgoOrStart, this.today];
       this.setFilters();
+      this.fetchTransactions();
     }
   }
 

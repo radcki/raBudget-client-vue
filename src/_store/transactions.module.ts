@@ -24,8 +24,7 @@ export interface TransactionsState {
     spendings: Transaction[];
   };
   closestScheduledTransactions: any[];
-  dataLoadFilters: TranscationFilters;
-  mainFilters: TranscationFilters;
+  filters: TranscationFilters;
 }
 
 export interface LimitCountFilter {
@@ -41,19 +40,7 @@ const transactionsState: TransactionsState = {
     spendings: [],
   },
   closestScheduledTransactions: [],
-  dataLoadFilters: {
-    budgetId: null,
-    limitCount: {
-      incomes: null,
-      savings: null,
-      spendings: null,
-    },
-    startDate: null,
-    endDate: null,
-    categories: [],
-    categoryType: null,
-  },
-  mainFilters: {
+  filters: {
     budgetId: null,
     limitCount: {
       incomes: null,
@@ -72,84 +59,41 @@ const actions: ActionTree<TransactionsState, RootState> = {
     commit('setBudgetFilter', budgetId);
     commit('clearTransactions');
   },
-  setFilters({ state, commit }, filter: TranscationFilters) {
+  setFilters({ state, commit, dispatch }, filter: TranscationFilters) {
     let requireReload = false;
-    if (filter.budgetId != state.dataLoadFilters.budgetId) {
+    if (filter.budgetId != state.filters.budgetId) {
       requireReload = true;
       commit('setBudgetFilter', filter.budgetId);
     }
-    if (!state.dataLoadFilters) {
-      commit('setCountLoadFilter', filter.limitCount);
-      commit('setStartDateLoadFilter', filter.startDate);
-      commit('setEndDateLoadFilter', filter.endDate);
-      commit('setCategoriesLoadFilter', filter.categories);
-      requireReload = true;
-    }
-
-    commit('setCountLoadFilter', filter.limitCount);
+    commit('setCategoryTypeFilter', filter.categoryType);
     commit('setCountFilter', filter.limitCount);
-
-    if (
-      !state.dataLoadFilters.startDate ||
-      (state.dataLoadFilters.startDate && !filter.startDate) ||
-      (filter.startDate && new Date(state.dataLoadFilters.startDate) > filter.startDate)
-    ) {
-      requireReload = true;
-      commit('setStartDateLoadFilter', filter.startDate);
-    }
     commit('setStartDateFilter', filter.startDate);
-
-    if (
-      !state.dataLoadFilters.endDate ||
-      (state.dataLoadFilters.endDate && !filter.endDate) ||
-      (filter.endDate && new Date(state.dataLoadFilters.endDate) < filter.endDate)
-    ) {
-      requireReload = true;
-      commit('setEndDateLoadFilter', filter.endDate);
-    }
     commit('setEndDateFilter', filter.endDate);
-
-    if (state.dataLoadFilters.categories && !filter.categories) {
-      requireReload = true;
-      commit('setCategoriesLoadFilter', filter.categories);
-    } else if (state.mainFilters.categories && filter.categories) {
-      for (const category of state.mainFilters.categories) {
-        if (
-          !state.dataLoadFilters.categories ||
-          !state.dataLoadFilters.categories.find(
-            v => v.budgetCategoryId == category.budgetCategoryId,
-          )
-        ) {
-          requireReload = true;
-          commit('setCategoriesLoadFilter', filter.categories);
-        }
-      }
-    }
     commit('setCategoriesFilter', filter.categories);
 
     if (requireReload) {
-      //dispatch('fetchTransactions');
+      dispatch('fetchTransactions');
     }
   },
 
   async fetchTransactions({ commit, dispatch, state }) {
-    if (!state.mainFilters.budgetId) {
+    if (!state.filters.budgetId) {
       return;
     }
 
     if (
-      state.dataLoadFilters.categoryType == null ||
-      state.dataLoadFilters.categoryType == undefined ||
-      state.dataLoadFilters.categoryType == eCategoryType.Spending
+      state.filters.categoryType == null ||
+      state.filters.categoryType == undefined ||
+      state.filters.categoryType == eCategoryType.Spending
     ) {
       dispatch('wait/start', 'loading.transactions.spending', { root: true });
       transactionsService
         .listTransactions(
-          state.mainFilters.budgetId,
-          state.dataLoadFilters.limitCount.spendings,
-          state.dataLoadFilters.startDate,
-          state.dataLoadFilters.endDate,
-          state.dataLoadFilters.categories,
+          state.filters.budgetId,
+          state.filters.limitCount.spendings,
+          state.filters.startDate,
+          state.filters.endDate,
+          state.filters.categories,
           eCategoryType.Spending,
         )
         .then(async response => {
@@ -167,18 +111,18 @@ const actions: ActionTree<TransactionsState, RootState> = {
     }
 
     if (
-      state.dataLoadFilters.categoryType == null ||
-      state.dataLoadFilters.categoryType == undefined ||
-      state.dataLoadFilters.categoryType == eCategoryType.Saving
+      state.filters.categoryType == null ||
+      state.filters.categoryType == undefined ||
+      state.filters.categoryType == eCategoryType.Saving
     ) {
       dispatch('wait/start', 'loading.transactions.saving', { root: true });
       transactionsService
         .listTransactions(
-          state.mainFilters.budgetId,
-          state.dataLoadFilters.limitCount.savings,
-          state.dataLoadFilters.startDate,
-          state.dataLoadFilters.endDate,
-          state.dataLoadFilters.categories,
+          state.filters.budgetId,
+          state.filters.limitCount.savings,
+          state.filters.startDate,
+          state.filters.endDate,
+          state.filters.categories,
           eCategoryType.Saving,
         )
         .then(async response => {
@@ -195,18 +139,18 @@ const actions: ActionTree<TransactionsState, RootState> = {
     }
 
     if (
-      state.dataLoadFilters.categoryType == null ||
-      state.dataLoadFilters.categoryType == undefined ||
-      state.dataLoadFilters.categoryType == eCategoryType.Income
+      state.filters.categoryType == null ||
+      state.filters.categoryType == undefined ||
+      state.filters.categoryType == eCategoryType.Income
     ) {
       dispatch('wait/start', 'loading.transactions.income', { root: true });
       transactionsService
         .listTransactions(
-          state.mainFilters.budgetId,
-          state.dataLoadFilters.limitCount.incomes,
-          state.dataLoadFilters.startDate,
-          state.dataLoadFilters.endDate,
-          state.dataLoadFilters.categories,
+          state.filters.budgetId,
+          state.filters.limitCount.incomes,
+          state.filters.startDate,
+          state.filters.endDate,
+          state.filters.categories,
           eCategoryType.Income,
         )
         .then(async response => {
@@ -227,7 +171,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
     dispatch('wait/start', 'loading.scheduledTransactions', { root: true });
     transactionSchedulesService
       .listClosestOccurrences(
-        state.mainFilters.budgetId,
+        state.filters.budgetId,
         format(addMonths(new Date(), 1), 'yyyy-MM-dd'),
       )
       .then(response => {
@@ -275,7 +219,7 @@ const actions: ActionTree<TransactionsState, RootState> = {
     commit('setSavingTransactions', filteredSavings);
     commit('setIncomeTransactions', filteredIncomes);
 
-    if (state.mainFilters.limitCount && countChanged) {
+    if (state.filters.limitCount && countChanged) {
       dispatch('fetchTransactions');
     }
     dispatch('budgets/reloadInitialized', null, { root: true });
@@ -299,122 +243,29 @@ const actions: ActionTree<TransactionsState, RootState> = {
 };
 
 const getters: GetterTree<TransactionsState, RootState> = {
-  startDateMoment: state => {
-    return state.mainFilters.startDate ? new Date(state.mainFilters.startDate) : null;
-  },
-  endDateMoment: state => {
-    return state.mainFilters.endDate ? new Date(state.mainFilters.endDate) : null;
-  },
-  getTransactions: (state, getter) => {
-    const transactionsClone = {};
-    // tslint:disable-next-line: forin
-    for (const transactionType in state.transactions) {
-      if (state.mainFilters.limitCount[transactionType]) {
-        transactionsClone[transactionType] = state.transactions[transactionType].slice(
-          0,
-          state.mainFilters.limitCount[transactionType],
-        );
-      }
-      if (getter.startDateMoment) {
-        transactionsClone[transactionType] = state.transactions[transactionType].filter(
-          v => new Date(v.date) >= getter.startDateMoment,
-        );
-      }
-      if (getter.endDateMoment) {
-        transactionsClone[transactionType] = state.transactions[transactionType].filter(
-          v => new Date(v.date) <= getter.endDateMoment,
-        );
-      }
-      if (state.mainFilters.categories && state.mainFilters.categories.length > 0) {
-        transactionsClone[transactionType] = state.transactions[transactionType].filter(
-          v => !!state.mainFilters.categories.find(c => c.budgetCategoryId == v.budgetCategoryId),
-        );
-      }
-    }
-    return transactionsClone;
+  getTransactions: state => {
+    return state.transactions;
   },
 };
 
 const mutations: MutationTree<TransactionsState> = {
   setBudgetFilter(state, filter: number) {
-    state.mainFilters.budgetId = filter;
+    state.filters.budgetId = filter;
   },
   setCountFilter(state, filter: LimitCountFilter) {
-    state.mainFilters.limitCount = filter;
+    state.filters.limitCount = filter;
   },
   setStartDateFilter(state, filter: Date) {
-    state.mainFilters.startDate = filter;
+    state.filters.startDate = filter;
   },
   setEndDateFilter(state, filter: Date) {
-    state.mainFilters.endDate = filter;
+    state.filters.endDate = filter;
   },
   setCategoriesFilter(state, filter: BudgetCategory[]) {
-    state.mainFilters.categories = filter;
+    state.filters.categories = filter;
   },
-
-  setCountLoadFilter(state, filter: LimitCountFilter) {
-    if (!state.dataLoadFilters) {
-      state.dataLoadFilters = {
-        budgetId: null,
-        categories: [],
-        endDate: null,
-        limitCount: {
-          incomes: null,
-          savings: null,
-          spendings: null,
-        },
-        startDate: null,
-      };
-    }
-    state.dataLoadFilters.limitCount = filter;
-  },
-  setStartDateLoadFilter(state, filter: Date) {
-    if (!state.dataLoadFilters) {
-      state.dataLoadFilters = {
-        budgetId: null,
-        categories: [],
-        endDate: null,
-        limitCount: {
-          incomes: null,
-          savings: null,
-          spendings: null,
-        },
-        startDate: null,
-      };
-    }
-    state.dataLoadFilters.startDate = filter;
-  },
-  setEndDateLoadFilter(state, filter: Date) {
-    if (!state.dataLoadFilters) {
-      state.dataLoadFilters = {
-        budgetId: null,
-        categories: [],
-        endDate: null,
-        limitCount: {
-          incomes: null,
-          savings: null,
-          spendings: null,
-        },
-        startDate: null,
-      };
-    }
-    state.dataLoadFilters.endDate = filter;
-  },
-  setCategoriesLoadFilter(state, filter: BudgetCategory[]) {
-    if (!state.dataLoadFilters) {
-      state.dataLoadFilters = {
-        budgetId: null,
-        categories: [],
-        endDate: null,
-        limitCount: {
-          incomes: null,
-          savings: null,
-          spendings: null,
-        },
-        startDate: null,
-      };
-    }
-    state.dataLoadFilters.categories = filter;
+  setCategoryTypeFilter(state, filter: eCategoryType) {
+    state.filters.categoryType = filter;
   },
 
   clearTransactions(state) {

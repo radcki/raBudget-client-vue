@@ -3,6 +3,7 @@ import { Allocation } from '@/typings/Allocation';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 
 function createAllocation(budgetId: number, allocationData: Allocation) {
+  allocationData.amount = +allocationData.amount; //ensure number
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -34,7 +35,7 @@ function updateAllocation(budgetId, allocationData: Allocation) {
     },
     body: JSON.stringify({
       description: allocationData.description,
-      amount: allocationData.amount,
+      amount: +allocationData.amount,
       allocationDate: allocationData.allocationDate,
       targetBudgetCategoryId: allocationData.targetBudgetCategoryId,
       sourceBudgetCategoryId: allocationData.sourceBudgetCategoryId,
