@@ -126,36 +126,36 @@ function getCategoriesBalance(budgetId: number, categoryType: eCategoryType) {
   );
 }
 
-function getPeriodReport(budgetId: number, startDate, endDate) {
+function getPeriodReport(budgetId: number, startDate: Date, endDate: Date) {
   const requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      dateStartFilter: startDate,
-      dateEndFilter: endDate,
-    }),
   };
+  const searchParams = new URLSearchParams();
+  if (startDate) searchParams.append('dateStart', startDate.toISOString());
+  if (endDate) searchParams.append('dateEnd', endDate.toISOString());
+
   return apiHandler.fetchAuthorized<PeriodBudgetReport>(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/period-report/`,
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/period-report/?${searchParams.toString()}`,
     requestOptions,
   );
 }
 
 function getMonthlyReport(budgetId: number, startDate, endDate) {
   const requestOptions = {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      dateStartFilter: startDate,
-      dateEndFilter: endDate,
-    }),
   };
+  const searchParams = new URLSearchParams();
+  if (startDate) searchParams.append('dateStart', startDate.toISOString());
+  if (endDate) searchParams.append('dateEnd', endDate.toISOString());
+
   return apiHandler.fetchAuthorized<MonthlyBudgetReport>(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/monthly-report/`,
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/monthly-report/?${searchParams.toString()}`,
     requestOptions,
   );
 }
