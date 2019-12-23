@@ -1,5 +1,11 @@
-on: push
-name: npm build, lint and publish
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 jobs:
   build-and-publish:
     name: build and publish
