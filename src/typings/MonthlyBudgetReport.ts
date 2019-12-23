@@ -1,5 +1,6 @@
 import { Month } from './Month';
 import { ReportData } from './ReportData';
+import { eCategoryType } from './enums/eCategoryType';
 
 export interface MonthlyBudgetReport {
   budgetCategoryReports: BudgetCategoryMonthlyReport[];
@@ -13,5 +14,6 @@ export interface MonthReport {
 
 export interface BudgetCategoryMonthlyReport {
   budgetCategoryId: number;
+  budgetCategoryType: eCategoryType;
   monthlyReports: MonthReport[];
 }

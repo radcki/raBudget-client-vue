@@ -66,7 +66,7 @@
                 <v-slide-x-transition>
                   <v-flex v-if="mode == eReportMode.Period" xs12>
                     <v-data-table
-                      v-if="periodReport && $vuetify.breakpoint.smAndUp"
+                      v-if="periodReport && $vuetify.breakpoint.smAndUp && budget"
                       :headers="headers"
                       hide-default-footer
                       disable-pagination
@@ -97,22 +97,21 @@
                               </span>
                             </td>
                             <td class="py-1">
-                              {{ item.reportData.budgetAmount | currency($currencyConfig(budget)) }}
+                              {{ item.reportData.budgetedSum | currency($currencyConfig(budget)) }}
                               <v-tooltip bottom>
                                 <template v-slot:activator="{}">
                                   <v-progress-linear
-                                    v-if="item.reportData.budgetAmount != 0"
+                                    v-if="item.reportData.budgetedSum != 0"
                                     class="ma-0"
                                     :height="10"
                                     :value="
-                                      (100 * item.reportData.budgetAmount) /
-                                        periodTotals.budgetAmount
+                                      (100 * item.reportData.budgetedSum) / periodTotals.budgetedSum
                                     "
                                   ></v-progress-linear>
                                 </template>
                                 <span>
                                   {{
-                                    (item.reportData.budgetAmount / periodTotals.budgetAmount)
+                                    (item.reportData.budgetedSum / periodTotals.budgetedSum)
                                       | percentage
                                   }}
                                 </span>
@@ -228,7 +227,7 @@
                               <strong>{{ $t('general.sum') }}</strong>
                             </td>
                             <td class="py-1">
-                              {{ periodTotals.budgetAmount | currency($currencyConfig(budget)) }}
+                              {{ periodTotals.budgetedSum | currency($currencyConfig(budget)) }}
                             </td>
                             <td class="py-1">
                               {{ periodTotals.transactionsSum | currency($currencyConfig(budget)) }}
@@ -247,7 +246,7 @@
                       </template>
                     </v-data-table>
 
-                    <v-container v-if="periodReport && $vuetify.breakpoint.xsOnly">
+                    <v-container v-if="periodReport && $vuetify.breakpoint.xsOnly  && budget">
                       <v-layout row wrap justify-center>
                         <template v-for="(data, index) in periodReport">
                           <v-flex v-if="index > 0" :key="index + '_divider'" xs12>
@@ -279,7 +278,7 @@
                           >
                           <v-flex :key="index + '_budgeted'" sm2 xs6>
                             <div class="text-xs-center caption">
-                              {{ data.budgetAmount | currency($currencyConfig(budget)) }}
+                              {{ data.budgetedSum | currency($currencyConfig(budget)) }}
                             </div>
                           </v-flex>
 
@@ -345,7 +344,7 @@
                         </v-flex>
                         <v-flex sm2 xs6>
                           <div class="text-xs-center caption">
-                            {{ periodTotals.budgetAmount | currency($currencyConfig(budget)) }}
+                            {{ periodTotals.budgetedSum | currency($currencyConfig(budget)) }}
                           </div>
                         </v-flex>
 
@@ -640,7 +639,7 @@ export default class Reports extends Vue {
 
   get periodTotals() {
     const data = {
-      budgetAmount: 0,
+      budgetedSum: 0,
       transactionsSum: 0,
       allocationsSum: 0,
       averagePerDay: 0,
@@ -648,7 +647,7 @@ export default class Reports extends Vue {
     };
     for (let i = 0, n = this.periodData[this.categoryType].length; i < n; i++) {
       const cat = this.periodData[this.categoryType][i].reportData;
-      data.budgetAmount += cat.budgetedSum;
+      data.budgetedSum += cat.budgetedSum;
       data.transactionsSum += cat.transactionsSum;
       data.allocationsSum += cat.allocationsSum;
       data.averagePerDay += cat.averagePerDay;
@@ -750,25 +749,19 @@ export default class Reports extends Vue {
     const endDate = endOfMonth(new Date(this.selectedRange[1] || new Date()));
     if (!this.budget) return;
     budgetService
-      .getPeriodReport(this.budget.budgetId, startingDate, format(endDate, 'yyyy-MM-dd'))
+      .getPeriodReport(this.budget.budgetId, startingDate || this.budget.startingDate, endDate)
       .then(response => {
         if (response.ok) {
           response.json().then(data => {
             this.$wait.end('loading.periodReport');
-            this.periodData[eCategoryType.Spending] = data.budgetCategoryReports.filter(v =>
-              this.findCategoryById
-                ? this.findCategoryById(v.budgetCategoryId).type
-                : 0 == eCategoryType.Spending,
+            this.periodData[eCategoryType.Spending] = data.budgetCategoryReports.filter(
+              v => v.budgetCategoryType == eCategoryType.Spending,
             );
-            this.periodData[eCategoryType.Saving] = data.budgetCategoryReports.filter(v =>
-              this.findCategoryById
-                ? this.findCategoryById(v.budgetCategoryId).type
-                : 0 == eCategoryType.Saving,
+            this.periodData[eCategoryType.Saving] = data.budgetCategoryReports.filter(
+              v => v.budgetCategoryType == eCategoryType.Saving,
             );
-            this.periodData[eCategoryType.Income] = data.budgetCategoryReports.filter(v =>
-              this.findCategoryById
-                ? this.findCategoryById(v.budgetCategoryId).type
-                : 0 == eCategoryType.Income,
+            this.periodData[eCategoryType.Income] = data.budgetCategoryReports.filter(
+              v => v.budgetCategoryType == eCategoryType.Income,
             );
           });
         } else {
@@ -787,35 +780,27 @@ export default class Reports extends Vue {
     if (!this.budget) {
       return;
     }
-    budgetService
-      .getMonthlyReport(this.budget.budgetId, startingDate, format(endDate, 'yyyy-MM-dd'))
-      .then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            this.$wait.end('loading.monthlyReport');
-            this.monthlyData[eCategoryType.Spending] = data.budgetCategoryReports.filter(v =>
-              this.findCategoryById
-                ? this.findCategoryById(v.budgetCategoryId).type
-                : 0 == eCategoryType.Spending,
-            );
-            this.monthlyData[eCategoryType.Saving] = data.budgetCategoryReports.filter(v =>
-              this.findCategoryById
-                ? this.findCategoryById(v.budgetCategoryId).type
-                : 0 == eCategoryType.Saving,
-            );
-            this.monthlyData[eCategoryType.Income] = data.budgetCategoryReports.filter(v =>
-              this.findCategoryById
-                ? this.findCategoryById(v.budgetCategoryId).type
-                : 0 == eCategoryType.Income,
-            );
-          });
-        } else {
-          response.json<ErrorMessage>().then(data => {
-            this.$wait.end('loading.monthlyReport');
-            this.dispatchError(data.message);
-          });
-        }
-      });
+    budgetService.getMonthlyReport(this.budget.budgetId, startingDate, endDate).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          this.$wait.end('loading.monthlyReport');
+          this.monthlyData[eCategoryType.Spending] = data.budgetCategoryReports.filter(
+            v => v.budgetCategoryType == eCategoryType.Spending,
+          );
+          this.monthlyData[eCategoryType.Saving] = data.budgetCategoryReports.filter(
+            v => v.budgetCategoryType == eCategoryType.Saving,
+          );
+          this.monthlyData[eCategoryType.Income] = data.budgetCategoryReports.filter(
+            v => v.budgetCategoryType == eCategoryType.Income,
+          );
+        });
+      } else {
+        response.json<ErrorMessage>().then(data => {
+          this.$wait.end('loading.monthlyReport');
+          this.dispatchError(data.message);
+        });
+      }
+    });
   }
 }
 </script>
