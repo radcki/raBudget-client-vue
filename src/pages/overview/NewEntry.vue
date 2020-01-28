@@ -359,7 +359,7 @@ export default class NewEntry extends Vue {
     } else {
       this.editor.category = data.category;
     }
-    this.tab = this.editor.category ? this.editor.category.type : this.tab;
+    this.tab = this.editor.category ? this.editor.category.type - 1 : this.tab;
     this.createSchedule = false;
     this.addScheduleDisabled = true;
   }
