@@ -345,7 +345,6 @@ export default class App extends Vue {
       ) {
         if (this.error) this.error(this.$t('budgets.notFound').toString());
 
-        console.log('redirect to home', this.$route, this.budgets);
         this.$router.push('/');
         return;
       }
