@@ -282,6 +282,10 @@ export default class App extends Vue {
     return this.$vuetify.breakpoint.smAndDown;
   }
 
+  get budgetsAreLoading() {
+    return this.$wait.is('loading.budgets');
+  }
+
   get menuItems(): MenuItem[] {
     if (!this.budget) {
       return [];
@@ -327,21 +331,29 @@ export default class App extends Vue {
   }
 
   @Watch('mobile')
-  OnResize(mobile) {
+  onResize(mobile) {
     this.drawer = !mobile;
+  }
+
+  @Watch('budgetsAreLoading')
+  onBudgetsLoadingStatusChange(isLoading) {
+    if (!isLoading) {
+      if (
+        this.$route.params['id'] &&
+        this.budgets &&
+        !this.budgets.find(v => v.budgetId.toString() == this.$route.params['id'])
+      ) {
+        if (this.error) this.error(this.$t('budgets.notFound').toString());
+
+        console.log('redirect to home', this.$route, this.budgets);
+        this.$router.push('/');
+        return;
+      }
+    }
   }
 
   @Watch('$route', { immediate: true, deep: true })
   onUrlChange(route: Route) {
-    if (
-      route.params['id'] &&
-      this.budgets &&
-      !this.budgets.find(v => v.budgetId.toString() == route.params['id'])
-    ) {
-      if (this.error) this.error(this.$t('budgets.notFound').toString());
-      this.$router.push('/');
-      return;
-    }
     if (
       this.budget &&
       this.budget.budgetId.toString() != route.params['id'] &&

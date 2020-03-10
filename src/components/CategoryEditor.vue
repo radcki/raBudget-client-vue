@@ -152,9 +152,7 @@ export default class CategoryEditor extends Vue {
   @Prop(Object) dataBudget?: Budget;
 
   dialog = false;
-  requiredRule: ((v) => boolean | string)[] = [
-    v => !!v || this.$t('forms.requiredField').toString(),
-  ];
+  requiredRule: ((v) => boolean | string)[] = [];
   icons: string[] = Object.keys(this.$categoryIcons);
 
   category: BudgetCategory = {
@@ -197,6 +195,7 @@ export default class CategoryEditor extends Vue {
     this.$root.$on('closeDialogs', () => {
       this.dialog = false;
     });
+    this.requiredRule = [v => !!v || this.$t('forms.requiredField').toString()];
   }
   addPeriod() {
     this.category.amountConfigs.push({
