@@ -1,15 +1,16 @@
 <template>
   <div>
     <template v-if="!dialog">
-      <v-tabs slot="extension" v-model="tab" show-arrows :background-color="color[tab]" grow>
-        <v-tabs-slider></v-tabs-slider>
-        <v-tab class="subheading white--text" ripple>{{ $t('general.spending') }}</v-tab>
-        <v-tab class="subheading white--text" ripple>{{ $t('general.income') }}</v-tab>
-        <v-tab class="subheading white--text" ripple>{{ $t('general.saving') }}</v-tab>
-        <v-tab class="subheading white--text" ripple>{{ $t('general.allocation') }}</v-tab>
-      </v-tabs>
-
       <v-card color="cardBackground">
+        <v-card-title :class="`pa-1 pb-0 ${color[tab]}`">
+          <v-tabs slot="extension" v-model="tab" show-arrows :background-color="color[tab]" grow>
+            <v-tabs-slider></v-tabs-slider>
+            <v-tab class="subheading white--text" ripple>{{ $t('general.spending') }}</v-tab>
+            <v-tab class="subheading white--text" ripple>{{ $t('general.income') }}</v-tab>
+            <v-tab class="subheading white--text" ripple>{{ $t('general.saving') }}</v-tab>
+            <v-tab class="subheading white--text" ripple>{{ $t('general.allocation') }}</v-tab>
+          </v-tabs>
+        </v-card-title>
         <v-card-text>
           <v-form ref="editorForm" v-model="valid" lazy-validation>
             <v-container grid-list-md>

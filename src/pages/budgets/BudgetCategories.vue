@@ -143,7 +143,7 @@ export default class BudgetCategories extends Vue {
     }
     return this.categories.income
       .map(v => this.readCurrentAmount(v))
-      .reduce(function(a, b) {
+      .reduce(function (a, b) {
         return 1 * (a || 0) + 1 * (b || 0);
       });
   }
@@ -154,7 +154,7 @@ export default class BudgetCategories extends Vue {
     }
     return this.categories.spending
       .map(v => this.readCurrentAmount(v))
-      .reduce(function(a, b) {
+      .reduce(function (a, b) {
         return 1 * (a || 0) + 1 * (b || 0);
       });
   }
@@ -165,7 +165,7 @@ export default class BudgetCategories extends Vue {
     }
     return this.categories.saving
       .map(v => this.readCurrentAmount(v))
-      .reduce(function(a, b) {
+      .reduce(function (a, b) {
         return 1 * (a || 0) + 1 * (b || 0);
       });
   }
@@ -260,7 +260,7 @@ export default class BudgetCategories extends Vue {
   transferTransactions(category: BudgetCategory) {
     const type = category.type == 0 ? 'spending' : category.type == 1 ? 'income' : 'savings';
 
-    const categories = this.categories[type].map(function(value) {
+    const categories = this.categories[type].map(function (value) {
       return { text: value['name'], value: value['categoryId'] };
     });
 

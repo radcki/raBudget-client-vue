@@ -272,7 +272,7 @@ export default class App extends Vue {
     return (
       this.account.user &&
       this.account.user.roles &&
-      this.account.user.roles.filter(function(v) {
+      this.account.user.roles.filter(function (v) {
         return v === 1;
       }).length > 0
     );
@@ -370,7 +370,10 @@ export default class App extends Vue {
     if (this.activeBudgetChange) {
       this.activeBudgetChange(newBudget.budgetId);
     }
-    this.$router.push({ ...this.$route, params: { id: newBudget.budgetId.toString() } });
+    this.$router.push({
+      name: this.$route.name || 'home',
+      params: { id: newBudget.budgetId.toString() },
+    });
   }
 
   @Watch('$vuetify.theme.dark')

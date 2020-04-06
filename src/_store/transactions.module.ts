@@ -275,7 +275,7 @@ const mutations: MutationTree<TransactionsState> = {
   },
 
   setSpendingTransactions(state, payload: Transaction[]) {
-    payload = payload.map(function(transaction) {
+    payload = payload.map(function (transaction) {
       transaction.transactionDate = new Date(transaction.transactionDate);
       if (transaction.registeredDate) {
         transaction.registeredDate = new Date(transaction.registeredDate);
@@ -285,7 +285,7 @@ const mutations: MutationTree<TransactionsState> = {
     state.transactions.spendings = payload;
   },
   setSavingTransactions(state, payload: Transaction[]) {
-    payload = payload.map(function(transaction) {
+    payload = payload.map(function (transaction) {
       transaction.transactionDate = new Date(transaction.transactionDate);
       if (transaction.registeredDate) {
         transaction.registeredDate = new Date(transaction.registeredDate);
@@ -295,7 +295,7 @@ const mutations: MutationTree<TransactionsState> = {
     state.transactions.savings = payload;
   },
   setIncomeTransactions(state, payload: Transaction[]) {
-    payload = payload.map(function(transaction) {
+    payload = payload.map(function (transaction) {
       transaction.transactionDate = new Date(transaction.transactionDate);
       if (transaction.registeredDate) {
         transaction.registeredDate = new Date(transaction.registeredDate);

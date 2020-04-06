@@ -157,7 +157,7 @@
 
         <v-list v-if="!$vuetify.breakpoint.smAndUp" dense subheader>
           <template v-for="(transaction, index) in transactions">
-            <v-list-item :key="index" class="pb-1">
+            <v-list-item :key="`i_${transaction.transactionId}_${index}`" class="pb-1">
               <v-list-item-avatar>
                 <v-icon>{{
                   $categoryIcons[getCategoryById(transaction.budgetCategoryId).icon]
@@ -181,7 +181,7 @@
                 }}</v-list-item-subtitle>
               </v-list-item-content>
 
-              <v-list-item-action>
+              <v-list-item-action :key="`a1_${transaction.transactionId}_${index}`">
                 <v-transaction-editor
                   :value="transaction"
                   :data-budget="budget"
@@ -192,7 +192,7 @@
                   </template>
                 </v-transaction-editor>
               </v-list-item-action>
-              <v-list-item-action>
+              <v-list-item-action :key="`a2_${transaction.transactionId}_${index}`">
                 <v-icon @click="deleteTransaction(transaction.transactionId)">{{
                   mdiTrashCan
                 }}</v-icon>

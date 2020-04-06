@@ -29,7 +29,7 @@ import {
   mdiGamepad,
   mdiPhone,
   mdiAirplane,
-  mdiCoinOutline,
+  mdiCurrencyUsdCircleOutline,
   mdiFormatPaint,
   mdiGamepadSquare,
   mdiLaptop,
@@ -112,7 +112,7 @@ Vue.prototype.$categoryIcons = {
   games: mdiGamepad,
   phone: mdiPhone,
   airplanemode_active: mdiAirplane,
-  monetization_on: mdiCoinOutline,
+  monetization_on: mdiCurrencyUsdCircleOutline,
   format_paint: mdiFormatPaint,
   videogame_asset: mdiGamepadSquare,
   computer: mdiLaptop,
@@ -148,7 +148,7 @@ Vue.prototype.$categoryIcons = {
 };
 /* eslint-enable @typescript-eslint/camelcase */
 
-Vue.prototype.$categoryColor = function(categoryType: eCategoryType) {
+Vue.prototype.$categoryColor = function (categoryType: eCategoryType) {
   switch (categoryType) {
     case eCategoryType.Income:
       return 'income';
@@ -173,7 +173,7 @@ Vue.filter('percentage', (value, decimals) => {
   return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals) + '%';
 });
 
-Vue.prototype.$currencyConfig = function(budget: Budget) {
+Vue.prototype.$currencyConfig = function (budget: Budget) {
   if (!budget.currency) {
     return null;
   }
