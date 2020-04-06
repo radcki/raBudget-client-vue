@@ -130,7 +130,7 @@
                                     :height="10"
                                     :value="
                                       (100 * item.reportData.transactionsSum) /
-                                        periodTotals.transactionsSum
+                                      periodTotals.transactionsSum
                                     "
                                   ></v-progress-linear>
                                 </template>
@@ -156,7 +156,7 @@
                                     :height="10"
                                     :value="
                                       (100 * item.reportData.allocationsSum) /
-                                        periodTotals.allocationsSum
+                                      periodTotals.allocationsSum
                                     "
                                   ></v-progress-linear>
                                 </template>
@@ -181,7 +181,7 @@
                                     :height="10"
                                     :value="
                                       (100 * item.reportData.averagePerDay) /
-                                        periodTotals.averagePerDay
+                                      periodTotals.averagePerDay
                                     "
                                   ></v-progress-linear>
                                 </template>
@@ -206,7 +206,7 @@
                                     :height="10"
                                     :value="
                                       (100 * item.reportData.averagePerMonth) /
-                                        periodTotals.averagePerMonth
+                                      periodTotals.averagePerMonth
                                     "
                                   ></v-progress-linear>
                                 </template>
@@ -246,7 +246,7 @@
                       </template>
                     </v-data-table>
 
-                    <v-container v-if="periodReport && $vuetify.breakpoint.xsOnly  && budget">
+                    <v-container v-if="periodReport && $vuetify.breakpoint.xsOnly && budget">
                       <v-layout row wrap justify-center>
                         <template v-for="(data, index) in periodReport">
                           <v-flex v-if="index > 0" :key="index + '_divider'" xs12>

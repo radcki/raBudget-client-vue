@@ -1,10 +1,10 @@
 <template>
-  <v-list class="py-0 elevation-1 cardBackground" dense subheader>
-    <v-list-item :class="color + ' py-1'">
-      <v-list-item-title>
+  <v-card class="cardBackground">
+    <v-card-title :class="`${color} py-1 mb-0`">
+      <div style="width: 100%;">
         <v-row no-gutters>
-          <v-col class="pa-0 mt-2">
-            <span class="subheading white--text text-sm-left">{{ title }}</span>
+          <v-col class="pa-0 mt-0">
+            <span class="subtitle-2 white--text text-sm-left">{{ title }}</span>
           </v-col>
         </v-row>
         <v-row no-gutters style="min-height: 5px;">
@@ -20,59 +20,67 @@
           >
           </v-progress-linear>
         </v-row>
-      </v-list-item-title>
-    </v-list-item>
-    <template v-for="(transactions, date) in itemsByDate">
-      <v-list-item-title :key="date" class="my-1 px-3 text-xs-right grey--text caption">{{
-        new Date(date) | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
-      }}</v-list-item-title>
-      <v-divider :key="date + '_divider'" inset></v-divider>
-      <v-list-item
-        v-for="transaction in transactions"
-        :key="'tr_' + transaction.transactionId"
-        class="pb-1"
-      >
-        <v-list-item-avatar :size="24">
-          <v-icon>
-            {{
-              categoryIcon(transaction.budgetCategoryId)
-                ? $categoryIcons[categoryIcon(transaction.budgetCategoryId)]
-                : null
-            }}
-          </v-icon>
-        </v-list-item-avatar>
-
-        <v-list-item-content>
-          <v-list-item-title class="font-weight-medium">{{
-            transaction.description
+      </div>
+    </v-card-title>
+    <v-card-text class="pa-0 ma-0">
+      <v-list class="py-0 mt-0 cardBackground" dense subheader>
+        <template v-for="(transactions, date) in itemsByDate">
+          <v-list-item-title :key="date" class="my-1 px-3 text-xs-right grey--text caption">{{
+            new Date(date) | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
           }}</v-list-item-title>
-          <v-list-item-subtitle class="text--primary">{{
-            transaction.amount | currency($currencyConfig(dataBudget))
-          }}</v-list-item-subtitle>
-        </v-list-item-content>
-        <v-list-item-action>
-          <v-transaction-editor
-            :value="transaction"
-            :data-budget="budget"
-            @save="updateTransaction"
+          <v-divider :key="date + '_divider'" inset></v-divider>
+          <v-list-item
+            v-for="transaction in transactions"
+            :key="'tr_' + transaction.transactionId"
+            class="pb-1"
           >
-            <template v-slot:activator="{ on }">
-              <v-icon v-on="on">{{ mdiPencil }}</v-icon>
-            </template>
-          </v-transaction-editor>
-        </v-list-item-action>
-        <v-list-item-action>
-          <v-icon @click="deleteTransaction(transaction.transactionId)">{{ mdiTrashCan }}</v-icon>
-        </v-list-item-action>
-      </v-list-item>
-    </template>
-    <v-divider></v-divider>
-    <v-list-item @click="$emit('load-more')">
-      <v-list-item-content>
-        <v-list-item-title class="text-right">{{ $t('transactions.loadMore') }}</v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
-  </v-list>
+            <v-list-item-avatar :size="24">
+              <v-icon>
+                {{
+                  categoryIcon(transaction.budgetCategoryId)
+                    ? $categoryIcons[categoryIcon(transaction.budgetCategoryId)]
+                    : null
+                }}
+              </v-icon>
+            </v-list-item-avatar>
+
+            <v-list-item-content>
+              <v-list-item-title class="font-weight-medium">{{
+                transaction.description
+              }}</v-list-item-title>
+              <v-list-item-subtitle class="text--primary">{{
+                transaction.amount | currency($currencyConfig(dataBudget))
+              }}</v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-transaction-editor
+                :value="transaction"
+                :data-budget="budget"
+                @save="updateTransaction"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-icon v-on="on">{{ mdiPencil }}</v-icon>
+                </template>
+              </v-transaction-editor>
+            </v-list-item-action>
+            <v-list-item-action>
+              <v-icon @click="deleteTransaction(transaction.transactionId)">{{
+                mdiTrashCan
+              }}</v-icon>
+            </v-list-item-action>
+          </v-list-item>
+        </template>
+        <v-divider></v-divider>
+        <v-list-item @click="$emit('load-more')">
+          <v-list-item-content>
+            <v-list-item-title class="text-right">{{
+              $t('transactions.loadMore')
+            }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-card-text>
+  </v-card>
 </template>
 <script lang="ts">
 import { transactionsService } from '../_services/transactions.service';

@@ -84,7 +84,7 @@
         >
           <template v-slot:body="{ items }">
             <tbody>
-              <tr v-for="item in items" :key="item.transactionId">
+              <tr v-for="item in items" :key="item.allocationId">
                 <td>
                   <v-icon class="px-2" size="40">{{
                     $categoryIcons[getCategoryById(item.targetBudgetCategoryId).icon]
@@ -125,7 +125,7 @@
 
         <v-list v-if="!$vuetify.breakpoint.smAndUp" class="py-0" dense subheader>
           <template v-for="(allocation, index) in allocations">
-            <v-list-item :key="index" class="pb-1">
+            <v-list-item :key="`i_${allocation.allocationId}_${index}`" class="pb-1">
               <v-list-item-avatar>
                 <v-icon>{{
                   $categoryIcons[getCategoryById(allocation.targetBudgetCategoryId).icon]
@@ -155,7 +155,7 @@
                 }}</v-list-item-subtitle>
               </v-list-item-content>
 
-              <v-list-item-action>
+              <v-list-item-action :key="`a1_${allocation.allocationId}_${index}`">
                 <v-allocation-editor
                   :value="allocation"
                   :data-budget="budget"
@@ -166,7 +166,7 @@
                   </template>
                 </v-allocation-editor>
               </v-list-item-action>
-              <v-list-item-action>
+              <v-list-item-action :key="`a2_${allocation.transactionId}_${index}`">
                 <v-icon @click="deleteAllocation(allocation.allocationId)">{{
                   mdiTrashCan
                 }}</v-icon>

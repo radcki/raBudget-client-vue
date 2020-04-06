@@ -208,15 +208,15 @@ export default {
     ...mapState({
       account: state => state.account,
     }),
-    today: function() {
+    today: function () {
       return format(new Date(), 'yyyy-MM-dd');
     },
   },
   watch: {
-    minDate: function() {
+    minDate: function () {
       this.fetchLogs();
     },
-    maxDate: function() {
+    maxDate: function () {
       this.fetchLogs();
     },
   },
@@ -228,7 +228,7 @@ export default {
       dispatchError: 'alert/error',
       dispatchSuccess: 'alert/success',
     }),
-    fetchLogs: function() {
+    fetchLogs: function () {
       this.loading = true;
       logsService.getPeriod(this.minDate, this.maxDate).then(response => {
         if (response.ok) {
@@ -240,7 +240,7 @@ export default {
         this.loading = false;
       });
     },
-    conditionalColor: function(value) {
+    conditionalColor: function (value) {
       const v = value.toLowerCase();
       if (v === 'none') {
         return 'white';

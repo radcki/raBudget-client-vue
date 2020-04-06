@@ -10,13 +10,17 @@
     <template v-slot:activator="{ on }">
       <v-text-field
         v-model="date"
+        class="r-date-field"
+        :type="pickerType"
+        max="9999-12-31"
+        :format="dateFormat"
         :clearable="clearable"
         :label="label"
         :rules="rules"
         :hide-details="hideDetails"
         :prepend-icon="mdiCalendar"
         :prepend-inner-icon="readonly ? 'lock' : ''"
-        readonly
+        :readonly="readonly"
         v-on="on"
       ></v-text-field>
     </template>
@@ -29,10 +33,23 @@
   </v-menu>
 </template>
 
+<style>
+.r-date-field input {
+  -webkit-appearance: none;
+}
+.r-date-field input::-webkit-calendar-picker-indicator,
+.r-date-field input::-webkit-clear-button,
+.r-date-field input::-webkit-inner-spin-button {
+  display: none;
+  -webkit-appearance: none;
+}
+</style>
+
 <script lang="ts">
 import { mdiCalendar } from '@mdi/js';
 import { format } from 'date-fns';
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
+import { debounce } from 'debounce';
 
 @Component
 export default class DateField extends Vue {
@@ -47,25 +64,32 @@ export default class DateField extends Vue {
   date: string | null = null;
   dateMenu = false;
   mdiCalendar = mdiCalendar;
+  debouncedEmit: any = null;
 
   get pickerType() {
     return this.type == 'month' ? 'month' : 'date';
   }
 
+  get dateFormat() {
+    return this.pickerType == 'date' ? 'yyyy-MM-dd' : 'yyyy-MM';
+  }
+
   @Watch('date')
   OnInput(value) {
-    this.$emit('input', new Date(value));
+    if (isNaN(Date.parse(value)) == true) {
+      return;
+    }
+    this.debouncedEmit('input', new Date(value));
   }
 
   @Watch('value')
   OnValueChange(value) {
-    this.date = !value ? null : format(value, this.pickerType == 'date' ? 'yyyy-MM-dd' : 'yyyy-MM');
+    this.date = !value ? null : format(value, this.dateFormat);
   }
 
   mounted() {
-    this.date = !this.value
-      ? null
-      : format(this.value, this.pickerType == 'date' ? 'yyyy-MM-dd' : 'yyyy-MM');
+    this.date = !this.value ? null : format(this.value, this.dateFormat);
+    this.debouncedEmit = debounce(this.$emit, 200);
   }
 }
 </script>

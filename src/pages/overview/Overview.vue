@@ -19,7 +19,7 @@
               <a
                 :class="
                   (newEntryVisible == 'manual' ? 'headline ' : '') +
-                    'mr-3 grey--text text--darken-1'
+                  'mr-3 grey--text text--darken-1'
                 "
                 @click="newEntryVisible = 'manual'"
                 >{{ $t('transactions.newtransaction') }}</a
@@ -31,7 +31,7 @@
                 <a
                   :class="
                     (newEntryVisible == 'scheduled' ? 'headline ' : '') +
-                      'mr-1 grey--text text--darken-1'
+                    'mr-1 grey--text text--darken-1'
                   "
                   @click="newEntryVisible = 'scheduled'"
                   >{{ $t('transactionSchedules.transactionSchedules') }}</a
@@ -224,7 +224,7 @@ export default class Overview extends Vue {
   @budgetsModule.State('budgets') budgets?: Budget[];
   @budgetsModule.Getter('budget') budget?: Budget;
   @transactionsModule.State('closestScheduledTransactions') closestScheduledTransactions?: any[];
-  @transactionsModule.State('mainFilters') transactionFilters?: TranscationFilters;
+  @transactionsModule.State('filters') transactionFilters?: TranscationFilters;
 
   @alertModule.Action('error') dispatchError?: (message) => void;
   @alertModule.Action('success') dispatchSuccess?: (message) => void;
@@ -308,6 +308,7 @@ export default class Overview extends Vue {
     if (!this.transactionFilters) {
       return;
     }
+    console.log('more');
     const currentFilters = Object.assign({}, this.transactionFilters.limitCount);
 
     switch (categoryType) {
@@ -336,7 +337,7 @@ export default class Overview extends Vue {
 
   passScheduledToEditor(transaction: Transaction) {
     this.newEntryInputData = null;
-    this.$nextTick(function() {
+    this.$nextTick(function () {
       this.newEntryInputData = transaction;
     });
 

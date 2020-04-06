@@ -118,7 +118,7 @@ export default class CategoriesList extends Vue {
     if (this.items && this.items.length > 0) {
       return this.items
         .map(v => this.readCurrentAmount(v))
-        .reduce(function(a, b) {
+        .reduce(function (a, b) {
           return 1 * a + 1 * b;
         });
     }
