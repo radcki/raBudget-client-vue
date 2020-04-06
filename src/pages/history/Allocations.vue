@@ -57,124 +57,131 @@
         <v-icon color="red" size="80">{{mdiAlertCircleOutline}}</v-icon>
       </v-flex>
       -->
-      <v-flex v-if="allocations" xs12 class="elevation-1 cardBackground">
-        <v-layout row justify-end>
-          <v-flex xs4>
-            <v-text-field
-              v-if="$vuetify.breakpoint.smAndUp"
-              v-model="search"
-              :append-icon="mdiMagnify"
-              :label="$t('general.search')"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-flex>
-        </v-layout>
+      <v-card v-if="allocations" style="width: 100%;" class="elevation-1 cardBackground">
+        <v-card-text>
+          <v-layout row justify-end>
+            <v-flex xs4>
+              <v-text-field
+                v-if="$vuetify.breakpoint.smAndUp"
+                v-model="search"
+                :append-icon="mdiMagnify"
+                :label="$t('general.search')"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-flex>
+          </v-layout>
 
-        <v-data-table
-          v-if="$vuetify.breakpoint.smAndUp"
-          :headers="headers"
-          :items="allocations"
-          :loading="$wait.is('loading.allocations')"
-          :search="search"
-          class="cardBackground"
-          must-sort
-          sort-by
-          footer-items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
-        >
-          <template v-slot:body="{ items }">
-            <tbody>
-              <tr v-for="item in items" :key="item.allocationId">
-                <td>
-                  <v-icon class="px-2" size="40">{{
-                    $categoryIcons[getCategoryById(item.targetBudgetCategoryId).icon]
-                  }}</v-icon>
-                  {{ getCategoryById(item.targetBudgetCategoryId).name }}
-                </td>
-                <td>
-                  <template v-if="item.sourceBudgetCategoryId">
+          <v-data-table
+            v-if="$vuetify.breakpoint.smAndUp"
+            :headers="headers"
+            :items="allocations"
+            :loading="$wait.is('loading.allocations')"
+            :search="search"
+            item-key="allocationId"
+            class="cardBackground"
+            must-sort
+            sort-by
+            footer-items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
+          >
+            <template v-slot:body="{ items }">
+              <tbody>
+                <tr v-for="item in items" :key="item.allocationId">
+                  <td>
                     <v-icon class="px-2" size="40">{{
-                      $categoryIcons[getCategoryById(item.sourceBudgetCategoryId).icon]
+                      $categoryIcons[getCategoryById(item.targetBudgetCategoryId).icon]
                     }}</v-icon>
-                    {{ getCategoryById(item.sourceBudgetCategoryId).name }}
-                  </template>
-                  <template v-else>-</template>
-                </td>
-                <td>
-                  {{
-                    new Date(item.allocationDate)
-                      | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
-                  }}
-                </td>
-                <td>{{ item.description }}</td>
-                <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
-                <td>
-                  <v-allocation-editor :value="item" :data-budget="budget" @save="updateAllocation">
+                    {{ getCategoryById(item.targetBudgetCategoryId).name }}
+                  </td>
+                  <td>
+                    <template v-if="item.sourceBudgetCategoryId">
+                      <v-icon class="px-2" size="40">{{
+                        $categoryIcons[getCategoryById(item.sourceBudgetCategoryId).icon]
+                      }}</v-icon>
+                      {{ getCategoryById(item.sourceBudgetCategoryId).name }}
+                    </template>
+                    <template v-else>-</template>
+                  </td>
+                  <td>
+                    {{
+                      new Date(item.allocationDate)
+                        | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
+                    }}
+                  </td>
+                  <td>{{ item.description }}</td>
+                  <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
+                  <td>
+                    <v-allocation-editor
+                      :value="item"
+                      :data-budget="budget"
+                      @save="updateAllocation"
+                    >
+                      <template v-slot:activator="{ on }">
+                        <v-icon color="primary" v-on="on">{{ mdiPencil }}</v-icon>
+                      </template>
+                    </v-allocation-editor>
+                    <v-icon color="red darken-1" @click="deleteAllocation(item.allocationId)">{{
+                      mdiTrashCan
+                    }}</v-icon>
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-data-table>
+
+          <v-list v-if="!$vuetify.breakpoint.smAndUp" class="py-0 cardBackground" dense subheader>
+            <template v-for="(allocation, index) in allocations">
+              <v-list-item :key="`i_${allocation.allocationId}_${index}`" class="pb-1">
+                <v-list-item-avatar>
+                  <v-icon>{{
+                    $categoryIcons[getCategoryById(allocation.targetBudgetCategoryId).icon]
+                  }}</v-icon>
+                </v-list-item-avatar>
+
+                <v-list-item-avatar v-if="allocation.sourceBudgetCategoryId">
+                  <v-icon>{{
+                    $categoryIcons[getCategoryById(allocation.sourceBudgetCategoryId).icon]
+                  }}</v-icon>
+                </v-list-item-avatar>
+
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-medium">
+                    {{ allocation.description }}
+                    <span class="grey--text text--lighten-1 caption">
+                      -
+                      {{
+                        new Date(allocation.allocationDate)
+                          | dateFormat('dddd, d.MM.yyyy', $dateLocales[$locale])
+                      }}
+                    </span>
+                  </v-list-item-title>
+
+                  <v-list-item-subtitle class="text--primary">{{
+                    allocation.amount | currency($currencyConfig(budget))
+                  }}</v-list-item-subtitle>
+                </v-list-item-content>
+
+                <v-list-item-action :key="`a1_${allocation.allocationId}_${index}`">
+                  <v-allocation-editor
+                    :value="allocation"
+                    :data-budget="budget"
+                    @save="updateAllocation"
+                  >
                     <template v-slot:activator="{ on }">
-                      <v-icon color="primary" v-on="on">{{ mdiPencil }}</v-icon>
+                      <v-icon v-on="on">{{ mdiPencil }}</v-icon>
                     </template>
                   </v-allocation-editor>
-                  <v-icon color="red darken-1" @click="deleteAllocation(item.allocationId)">{{
+                </v-list-item-action>
+                <v-list-item-action :key="`a2_${allocation.transactionId}_${index}`">
+                  <v-icon @click="deleteAllocation(allocation.allocationId)">{{
                     mdiTrashCan
                   }}</v-icon>
-                </td>
-              </tr>
-            </tbody>
-          </template>
-        </v-data-table>
-
-        <v-list v-if="!$vuetify.breakpoint.smAndUp" class="py-0" dense subheader>
-          <template v-for="(allocation, index) in allocations">
-            <v-list-item :key="`i_${allocation.allocationId}_${index}`" class="pb-1">
-              <v-list-item-avatar>
-                <v-icon>{{
-                  $categoryIcons[getCategoryById(allocation.targetBudgetCategoryId).icon]
-                }}</v-icon>
-              </v-list-item-avatar>
-
-              <v-list-item-avatar v-if="allocation.sourceBudgetCategoryId">
-                <v-icon>{{
-                  $categoryIcons[getCategoryById(allocation.sourceBudgetCategoryId).icon]
-                }}</v-icon>
-              </v-list-item-avatar>
-
-              <v-list-item-content>
-                <v-list-item-title class="font-weight-medium">
-                  {{ allocation.description }}
-                  <span class="grey--text text--lighten-1 caption">
-                    -
-                    {{
-                      new Date(allocation.allocationDate)
-                        | dateFormat('dddd, d.MM.yyyy', $dateLocales[$locale])
-                    }}
-                  </span>
-                </v-list-item-title>
-
-                <v-list-item-subtitle class="text--primary">{{
-                  allocation.amount | currency($currencyConfig(budget))
-                }}</v-list-item-subtitle>
-              </v-list-item-content>
-
-              <v-list-item-action :key="`a1_${allocation.allocationId}_${index}`">
-                <v-allocation-editor
-                  :value="allocation"
-                  :data-budget="budget"
-                  @save="updateAllocation"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-icon v-on="on">{{ mdiPencil }}</v-icon>
-                  </template>
-                </v-allocation-editor>
-              </v-list-item-action>
-              <v-list-item-action :key="`a2_${allocation.transactionId}_${index}`">
-                <v-icon @click="deleteAllocation(allocation.allocationId)">{{
-                  mdiTrashCan
-                }}</v-icon>
-              </v-list-item-action>
-            </v-list-item>
-          </template>
-        </v-list>
-      </v-flex>
+                </v-list-item-action>
+              </v-list-item>
+            </template>
+          </v-list>
+        </v-card-text>
+      </v-card>
     </v-layout>
   </v-container>
 </template>

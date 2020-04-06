@@ -89,118 +89,120 @@
         ></v-progress-circular>
       </v-flex>
 
-      <v-flex v-if="transactions" xs12 class="elevation-1 cardBackground">
-        <v-layout row justify-end>
-          <v-flex xs4>
-            <v-text-field
-              v-if="$vuetify.breakpoint.smAndUp"
-              v-model="search"
-              :append-icon="mdiMagnify"
-              :label="$t('general.search')"
-              single-line
-              hide-details
-            ></v-text-field>
-          </v-flex>
-        </v-layout>
+      <v-card v-if="transactions" style="width: 100%;" class="elevation-1 cardBackground">
+        <v-card-text>
+          <v-layout row justify-end>
+            <v-flex xs4>
+              <v-text-field
+                v-if="$vuetify.breakpoint.smAndUp"
+                v-model="search"
+                :append-icon="mdiMagnify"
+                :label="$t('general.search')"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-flex>
+          </v-layout>
 
-        <v-data-table
-          v-if="$vuetify.breakpoint.smAndUp"
-          :headers="headers"
-          :items="transactions"
-          :loading="$wait.is('loading.*')"
-          :search="search"
-          item-key="transactionId"
-          class="cardBackground"
-          must-sort
-          sort-by
-          footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
-        >
-          <template v-slot:body="{ items }">
-            <tbody>
-              <tr v-for="item in items" :key="item.transactionId">
-                <td>
-                  <v-icon class="px-2" size="40">{{
-                    $categoryIcons[getCategoryById(item.budgetCategoryId).icon]
+          <v-data-table
+            v-if="$vuetify.breakpoint.smAndUp"
+            :headers="headers"
+            :items="transactions"
+            :loading="$wait.is('loading.*')"
+            :search="search"
+            item-key="transactionId"
+            class="cardBackground"
+            must-sort
+            sort-by
+            footer-props.items-per-page-options="[15,25,50,{text: $t('general.all'), value: -1}]"
+          >
+            <template v-slot:body="{ items }">
+              <tbody>
+                <tr v-for="item in items" :key="item.transactionId">
+                  <td>
+                    <v-icon class="px-2" size="40">{{
+                      $categoryIcons[getCategoryById(item.budgetCategoryId).icon]
+                    }}</v-icon>
+                    {{ getCategoryById(item.budgetCategoryId).name }}
+                  </td>
+                  <td>
+                    {{
+                      new Date(item.transactionDate)
+                        | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
+                    }}
+                  </td>
+                  <td>{{ item.description }}</td>
+                  <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
+                  <td>
+                    <v-transaction-editor
+                      :value="item"
+                      :data-budget="budget"
+                      @save="updateTransaction"
+                    >
+                      <template v-slot:activator="{ on }">
+                        <v-btn color="primary" dark icon text v-on="on">
+                          <v-icon>{{ mdiPencil }}</v-icon>
+                        </v-btn>
+                      </template>
+                    </v-transaction-editor>
+                    <v-btn color="red darken-1" dark icon text>
+                      <v-icon @click="deleteTransaction(item.transactionId)">{{
+                        mdiTrashCan
+                      }}</v-icon>
+                    </v-btn>
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-data-table>
+
+          <v-list v-if="!$vuetify.breakpoint.smAndUp" dense subheader class="cardBackground">
+            <template v-for="(transaction, index) in transactions">
+              <v-list-item :key="`i_${transaction.transactionId}_${index}`" class="pb-1">
+                <v-list-item-avatar>
+                  <v-icon>{{
+                    $categoryIcons[getCategoryById(transaction.budgetCategoryId).icon]
                   }}</v-icon>
-                  {{ getCategoryById(item.budgetCategoryId).name }}
-                </td>
-                <td>
-                  {{
-                    new Date(item.transactionDate)
-                      | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
-                  }}
-                </td>
-                <td>{{ item.description }}</td>
-                <td>{{ item.amount | currency($currencyConfig(budget)) }}</td>
-                <td>
+                </v-list-item-avatar>
+
+                <v-list-item-content>
+                  <v-list-item-title class="font-weight-medium">
+                    {{ transaction.description }}
+                    <span class="grey--text text--lighten-1 caption">
+                      -
+                      {{
+                        transaction.transactionDate
+                          | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
+                      }}
+                    </span>
+                  </v-list-item-title>
+
+                  <v-list-item-subtitle class="text--primary">{{
+                    transaction.amount | currency($currencyConfig(budget))
+                  }}</v-list-item-subtitle>
+                </v-list-item-content>
+
+                <v-list-item-action :key="`a1_${transaction.transactionId}_${index}`">
                   <v-transaction-editor
-                    :value="item"
+                    :value="transaction"
                     :data-budget="budget"
                     @save="updateTransaction"
                   >
                     <template v-slot:activator="{ on }">
-                      <v-btn color="primary" dark icon text v-on="on">
-                        <v-icon>{{ mdiPencil }}</v-icon>
-                      </v-btn>
+                      <v-icon v-on="on">{{ mdiPencil }}</v-icon>
                     </template>
                   </v-transaction-editor>
-                  <v-btn color="red darken-1" dark icon text>
-                    <v-icon @click="deleteTransaction(item.transactionId)">{{
-                      mdiTrashCan
-                    }}</v-icon>
-                  </v-btn>
-                </td>
-              </tr>
-            </tbody>
-          </template>
-        </v-data-table>
-
-        <v-list v-if="!$vuetify.breakpoint.smAndUp" dense subheader>
-          <template v-for="(transaction, index) in transactions">
-            <v-list-item :key="`i_${transaction.transactionId}_${index}`" class="pb-1">
-              <v-list-item-avatar>
-                <v-icon>{{
-                  $categoryIcons[getCategoryById(transaction.budgetCategoryId).icon]
-                }}</v-icon>
-              </v-list-item-avatar>
-
-              <v-list-item-content>
-                <v-list-item-title class="font-weight-medium">
-                  {{ transaction.description }}
-                  <span class="grey--text text--lighten-1 caption">
-                    -
-                    {{
-                      transaction.transactionDate
-                        | dateFormat('EEEE, d.MM.yyyy', $dateLocales[$locale])
-                    }}
-                  </span>
-                </v-list-item-title>
-
-                <v-list-item-subtitle class="text--primary">{{
-                  transaction.amount | currency($currencyConfig(budget))
-                }}</v-list-item-subtitle>
-              </v-list-item-content>
-
-              <v-list-item-action :key="`a1_${transaction.transactionId}_${index}`">
-                <v-transaction-editor
-                  :value="transaction"
-                  :data-budget="budget"
-                  @save="updateTransaction"
-                >
-                  <template v-slot:activator="{ on }">
-                    <v-icon v-on="on">{{ mdiPencil }}</v-icon>
-                  </template>
-                </v-transaction-editor>
-              </v-list-item-action>
-              <v-list-item-action :key="`a2_${transaction.transactionId}_${index}`">
-                <v-icon @click="deleteTransaction(transaction.transactionId)">{{
-                  mdiTrashCan
-                }}</v-icon>
-              </v-list-item-action>
-            </v-list-item>
-          </template>
-        </v-list>
-      </v-flex>
+                </v-list-item-action>
+                <v-list-item-action :key="`a2_${transaction.transactionId}_${index}`">
+                  <v-icon @click="deleteTransaction(transaction.transactionId)">{{
+                    mdiTrashCan
+                  }}</v-icon>
+                </v-list-item-action>
+              </v-list-item>
+            </template>
+          </v-list>
+        </v-card-text>
+      </v-card>
     </v-layout>
   </v-container>
 </template>

@@ -7,7 +7,7 @@
 
       <v-menu offset-y>
         <template v-slot:activator="{ on }">
-          <v-btn text class="subheading" dark v-on="on">
+          <v-btn text class="pl-0 subheading" dark v-on="on">
             {{ budget ? budget.name : '' }}<v-icon>{{ mdiChevronDown }}</v-icon>
           </v-btn>
         </template>
