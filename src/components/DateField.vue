@@ -25,6 +25,7 @@
       ></v-text-field>
     </template>
     <v-date-picker
+      v-if="!isMobile"
       v-model="date"
       :readonly="readonly"
       :type="pickerType"
@@ -72,6 +73,10 @@ export default class DateField extends Vue {
 
   get dateFormat() {
     return this.pickerType == 'date' ? 'yyyy-MM-dd' : 'yyyy-MM';
+  }
+
+  get isMobile() {
+    return !this.$vuetify.breakpoint.smAndUp;
   }
 
   @Watch('date')
