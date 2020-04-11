@@ -12,7 +12,7 @@ function logout() {
   localStorage.removeItem('token');
 }
 
-function fetchAuthorized<T>(url, options): Promise<TypedResponse<T>> {
+function fetchAuthorized<T>(url: string, options: RequestInit): Promise<TypedResponse<T>> {
   const jwtToken = getAccessToken();
   options = options || {};
   options.headers = options.headers || {};

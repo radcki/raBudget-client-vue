@@ -1,5 +1,5 @@
 export interface AmountConfig {
-  amount: number;
+  monthlyAmount: number;
   validFrom: Date;
   validTo?: Date | null;
 }

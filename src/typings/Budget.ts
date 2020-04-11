@@ -17,10 +17,3 @@ export interface Budget {
   savingCategoriesBalance?: any[];
   incomeCategoriesBalance?: any[];
 }
-
-export interface CreateBudgetCommand {
-  name: string;
-  currency: Currency;
-  budgetCategories: BudgetCategory[];
-  startingDate: Date;
-}

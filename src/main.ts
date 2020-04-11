@@ -8,8 +8,11 @@ import App from './App.vue';
 import VueCurrencyFilter from 'vue-currency-filter';
 import VueWait from 'vue-wait';
 import vuetify from './plugins/vuetify';
+import { Copy } from './plugins/copy';
 import i18n from './plugins/i18n';
 import VueKeycloakJs from '@dsb-norge/vue-keycloak-js';
+import VueMarkdown from 'vue-markdown';
+import VueCurrencyInput from 'vue-currency-input';
 
 import {
   mdiCar,
@@ -64,6 +67,8 @@ import { eCategoryType } from './typings/enums/eCategoryType';
 import { NumberFormatInfo } from './typings/Currency';
 
 Vue.use(signalrPlugin);
+Vue.use(Copy);
+Vue.use(VueCurrencyInput, {});
 
 Vue.filter('dateFormat', (value, formatString, locale) => {
   return !value ? '-' : format(value, formatString || 'yyyy-MM-dd', { locale: locale });
@@ -160,6 +165,7 @@ Vue.prototype.$categoryColor = function (categoryType: eCategoryType) {
 };
 
 Vue.use(VueCurrencyFilter);
+Vue.use(VueMarkdown);
 
 Vue.filter('percentage', (value, decimals) => {
   if (!value) {
@@ -199,6 +205,7 @@ Vue.use(VueKeycloakJs, {
   },
   onReady: () => {
     Vue.use(VueWait);
+    Vue.component('money-field', () => import('@/components/MoneyField.vue'));
 
     new Vue({
       el: '#app',

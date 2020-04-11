@@ -209,6 +209,8 @@ import { Budget } from '@/typings/Budget';
 import { TransactionSchedule } from '@/typings/TransactionSchedule';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 import { ErrorMessage } from '@/typings/TypedResponse';
+import { CreateTransactionScheduleCommand } from '../../typings/api/transactionSchedule/CreateTransactionSchedule';
+import { UpdateTransactionScheduleCommand } from '../../typings/api/transactionSchedule/UpdateTransactionSchedule';
 
 interface Filters {
   startDate: Date | null;
@@ -350,7 +352,7 @@ export default class TransactionSchedules extends Vue {
     }
   }
 
-  createSchedule(scheduleData) {
+  createSchedule(scheduleData: CreateTransactionScheduleCommand) {
     if (!this.budget) {
       return;
     }
@@ -377,7 +379,7 @@ export default class TransactionSchedules extends Vue {
       });
   }
 
-  updateSchedule(scheduleData) {
+  updateSchedule(scheduleData: UpdateTransactionScheduleCommand) {
     if (!this.budget) {
       return;
     }

@@ -23,7 +23,7 @@
         <v-btn v-if="!mobile" text icon @click="dialog = false">
           <v-icon light>{{ mdiClose }}</v-icon>
         </v-btn>
-        <v-btn v-if="mobile" text="flat" @click.native="save">{{ $t('general.save') }}</v-btn>
+        <v-btn v-if="mobile" text @click.native="save">{{ $t('general.save') }}</v-btn>
       </v-toolbar>
 
       <v-card-text>
@@ -73,21 +73,28 @@
                       </v-flex>
 
                       <v-flex :xs4="!mobile" :xs9="mobile">
-                        <v-text-field
-                          v-model="amountConfig.amount"
+                        <money-field
+                          v-model="amountConfig.monthlyAmount"
+                          :currency="dataBudget.currency"
                           :rules="requiredRule"
                           :label="$t('categories.monthlyAmount')"
-                        ></v-text-field>
+                        />
                       </v-flex>
 
                       <v-flex v-if="!mobile" xs3>
                         <div>
                           {{ $t('categories.daily') }}:
-                          {{ (amountConfig.amount / 30) | currency($currencyConfig(dataBudget)) }}
+                          {{
+                            (amountConfig.monthlyAmount / 30)
+                              | currency($currencyConfig(dataBudget))
+                          }}
                         </div>
                         <div>
                           {{ $t('categories.annual') }}:
-                          {{ (amountConfig.amount * 12) | currency($currencyConfig(dataBudget)) }}
+                          {{
+                            (amountConfig.monthlyAmount * 12)
+                              | currency($currencyConfig(dataBudget))
+                          }}
                         </div>
                       </v-flex>
 
@@ -107,11 +114,17 @@
                       <v-flex v-if="mobile" xs9 class="pb-3">
                         <div>
                           {{ $t('categories.daily') }}:
-                          {{ (amountConfig.amount / 30) | currency($currencyConfig(dataBudget)) }}
+                          {{
+                            (amountConfig.monthlyAmount / 30)
+                              | currency($currencyConfig(dataBudget))
+                          }}
                         </div>
                         <div>
                           {{ $t('categories.annual') }}:
-                          {{ (amountConfig.amount * 12) | currency($currencyConfig(dataBudget)) }}
+                          {{
+                            (amountConfig.monthlyAmount * 12)
+                              | currency($currencyConfig(dataBudget))
+                          }}
                         </div>
                       </v-flex>
                     </v-layout>
@@ -155,16 +168,19 @@ export default class CategoryEditor extends Vue {
   requiredRule: ((v) => boolean | string)[] = [];
   icons: string[] = Object.keys(this.$categoryIcons);
 
-  category: BudgetCategory = {
-    ...{
-      categoryId: null,
-      name: null,
-      icon: null,
-      type: null,
-      amountConfigs: [],
-    },
-    ...Object.assign({}, this.value),
-  };
+  category: BudgetCategory = this.$copy<BudgetCategory>(
+    Object.assign(
+      {
+        categoryId: null,
+        name: null,
+        icon: null,
+        type: null,
+        amountConfigs: [],
+      },
+      this.value,
+    ),
+  );
+
   mdiCreditCard = mdiCreditCard;
   mdiClose = mdiClose;
 
@@ -179,12 +195,7 @@ export default class CategoryEditor extends Vue {
     } else {
       this.$wait.end('dialog');
     }
-    setTimeout(() => {
-      this.category = {
-        ...this.category,
-        ...Object.assign({}, this.value),
-      };
-    }, 500);
+    this.category = this.$copy<BudgetCategory>(Object.assign(this.category, this.value));
   }
 
   beforeDestroy() {
@@ -200,7 +211,7 @@ export default class CategoryEditor extends Vue {
   addPeriod() {
     this.category.amountConfigs.push({
       validFrom: new Date(),
-      amount: 0,
+      monthlyAmount: 0,
     });
   }
   save() {

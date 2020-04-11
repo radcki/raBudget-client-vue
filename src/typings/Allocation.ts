@@ -1,7 +1,7 @@
 import { eCategoryType } from './enums/eCategoryType';
 
 export interface Allocation {
-  allocationId?: number;
+  allocationId: number;
   amount: number;
   description: string;
   targetBudgetCategoryId: number;

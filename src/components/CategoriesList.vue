@@ -20,7 +20,19 @@
     </v-subheader>
 
     <v-list-item v-for="(category, i) in items" :key="i" :data="category">
-      <v-list-item-avatar :color="color" size="40">
+      <v-list-item-action class="pa-0 ma-0" style="width: 36px;">
+        <v-row no-gutters>
+          <v-col :cols="12">
+            <v-icon v-show="i != 0" @click="moveCategoryUp(category)">{{ mdiChevronUp }}</v-icon>
+          </v-col>
+          <v-col :cols="12">
+            <v-icon v-show="i != items.length - 1" @click="moveCategoryDown(category)">
+              {{ mdiChevronDown }}
+            </v-icon>
+          </v-col>
+        </v-row>
+      </v-list-item-action>
+      <v-list-item-avatar :color="color" size="40" class="mr-4">
         <v-icon dark size="24">{{ $categoryIcons[category.icon] }}</v-icon>
       </v-list-item-avatar>
 
@@ -85,6 +97,8 @@ import {
   mdiPencil,
   mdiTrashCan,
   mdiReplyAll,
+  mdiChevronDown,
+  mdiChevronUp,
 } from '@mdi/js';
 
 import { startOfMonth } from 'date-fns';
@@ -103,7 +117,7 @@ export default class CategoriesList extends Vue {
   @Prop(Object) dataBudget?: Budget;
   @Prop(String) title?: string;
   @Prop(String) color?: string;
-  @Prop(String) categoriesType?: eCategoryType;
+  @Prop(Number) categoriesType?: eCategoryType;
   @Prop(String) colorSecondary?: string;
   @Prop(Boolean) hideActions?: boolean;
 
@@ -113,16 +127,52 @@ export default class CategoriesList extends Vue {
   mdiPencil = mdiPencil;
   mdiTrashCan = mdiTrashCan;
   mdiReplyAll = mdiReplyAll;
+  mdiChevronDown = mdiChevronDown;
+  mdiChevronUp = mdiChevronUp;
 
   get itemsSum() {
     if (this.items && this.items.length > 0) {
       return this.items
         .map(v => this.readCurrentAmount(v))
         .reduce(function (a, b) {
-          return 1 * a + 1 * b;
+          return 1 * (a || 0) + 1 * (b || 0);
         });
     }
     return 0;
+  }
+
+  swapArrayElements(array, a, b) {
+    const _arr = [...array];
+    const temp = _arr[a];
+    _arr[a] = _arr[b];
+    _arr[b] = temp;
+    return _arr;
+  }
+
+  moveCategoryUp(category: BudgetCategory) {
+    if (!this.items) {
+      return;
+    }
+    const categoryIds = this.items.map(v => v.budgetCategoryId);
+    const categoryIndex = categoryIds.indexOf(category.budgetCategoryId);
+    if (categoryIndex == 0 || this.items.length == 1) {
+      return;
+    }
+    const newOrder = this.swapArrayElements(categoryIds, categoryIndex, categoryIndex - 1);
+    this.$emit('reorder', newOrder);
+  }
+
+  moveCategoryDown(category: BudgetCategory) {
+    if (!this.items) {
+      return;
+    }
+    const categoryIds = this.items.map(v => v.budgetCategoryId);
+    const categoryIndex = categoryIds.indexOf(category.budgetCategoryId);
+    if (categoryIndex == this.items.length - 1 || this.items.length == 1) {
+      return;
+    }
+    const newOrder = this.swapArrayElements(categoryIds, categoryIndex, categoryIndex + 1);
+    this.$emit('reorder', newOrder);
   }
 
   emitSave(payload) {
@@ -131,14 +181,14 @@ export default class CategoriesList extends Vue {
   emitCreate(payload) {
     this.$emit('create', payload);
   }
-  readCurrentAmount(category) {
+  readCurrentAmount(category: BudgetCategory) {
     const matching = category.amountConfigs.filter(v => {
       return (
         startOfMonth(new Date()) >= v.validFrom &&
         (!v.validTo || v.validTo >= startOfMonth(new Date()))
       );
     });
-    return matching && matching.length > 0 ? matching[0].amount : null;
+    return matching && matching.length > 0 ? matching[0].monthlyAmount : null;
   }
   start(method) {
     setTimeout(() => method());

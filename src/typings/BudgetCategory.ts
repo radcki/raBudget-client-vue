@@ -3,7 +3,7 @@ import { Budget } from './Budget';
 import { AmountConfig } from './AmountConfig';
 
 export interface BudgetCategory {
-  budgetCategoryId?: number;
+  budgetCategoryId: number;
   type: eCategoryType;
   name: string;
   budget?: Budget;

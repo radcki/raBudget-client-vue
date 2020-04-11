@@ -1,15 +1,17 @@
 import { apiHandler } from './apiHandler';
 import { Allocation } from '@/typings/Allocation';
 import { BudgetCategory } from '@/typings/BudgetCategory';
+import { CreateAllocationCommand } from '@/typings/api/allocation/CreateAllocation';
+import { UpdateAllocationCommand } from '@/typings/api/allocation/UpdateAllocation';
 
-function createAllocation(budgetId: number, allocationData: Allocation) {
-  allocationData.amount = +allocationData.amount; //ensure number
-  const requestOptions = {
+function createAllocation(budgetId: number, command: CreateAllocationCommand) {
+  command.amount = +command.amount; //ensure number
+  const requestOptions: RequestInit = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(allocationData),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized(
     `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/allocations`,
@@ -18,7 +20,7 @@ function createAllocation(budgetId: number, allocationData: Allocation) {
 }
 
 function deleteAllocation(budgetId, id) {
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: 'DELETE',
   };
   return apiHandler.fetchAuthorized(
@@ -27,22 +29,16 @@ function deleteAllocation(budgetId, id) {
   );
 }
 
-function updateAllocation(budgetId, allocationData: Allocation) {
-  const requestOptions = {
+function updateAllocation(budgetId, command: UpdateAllocationCommand) {
+  const requestOptions: RequestInit = {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      description: allocationData.description,
-      amount: +allocationData.amount,
-      allocationDate: allocationData.allocationDate,
-      targetBudgetCategoryId: allocationData.targetBudgetCategoryId,
-      sourceBudgetCategoryId: allocationData.sourceBudgetCategoryId,
-    } as Allocation),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/allocations/${allocationData.allocationId}`,
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/allocations/${command.allocationId}`,
     requestOptions,
   );
 }
@@ -54,7 +50,7 @@ function listAllocations(
   endDate: Date,
   categories: BudgetCategory[],
 ) {
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -73,7 +69,7 @@ function listAllocations(
 }
 
 function getAllocation(budgetId, allocationId) {
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: 'GET',
   };
   return apiHandler.fetchAuthorized<Allocation>(
