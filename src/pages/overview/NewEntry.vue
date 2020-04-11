@@ -48,13 +48,12 @@
                 </v-flex>
 
                 <v-flex xs7>
-                  <v-text-field
+                  <money-field
                     v-model="editor.amount"
+                    :currency="dataBudget.currency"
                     :rules="requiredRule"
                     :label="$t('general.amount')"
-                    type="number"
-                    step="0.01"
-                  ></v-text-field>
+                  />
                 </v-flex>
                 <v-flex v-if="tab != 3" xs12>
                   <v-checkbox
@@ -181,13 +180,12 @@
                 ></v-text-field>
               </v-flex>
               <v-flex xs12>
-                <v-text-field
+                <money-field
                   v-model="editor.amount"
+                  :currency="dataBudget.currency"
                   :rules="requiredRule"
                   :label="$t('general.amount')"
-                  type="number"
-                  step="0.01"
-                ></v-text-field>
+                />
               </v-flex>
               <v-flex v-if="tab != 3" xs12>
                 <v-checkbox
@@ -249,14 +247,14 @@ import { transactionSchedulesService } from '@/_services/transactionSchedules.se
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import { namespace } from 'vuex-class';
-import { Transaction } from '@/typings/Transaction';
 import { BudgetCategory } from '@/typings/BudgetCategory';
-import { TransactionSchedule } from '@/typings/TransactionSchedule';
 import { eFrequency } from '@/typings/enums/eFrequency';
-import { Allocation } from '@/typings/Allocation';
 import { ErrorMessage } from '@/typings/TypedResponse';
 import { mdiClose } from '@mdi/js';
 import { Budget } from '@/typings/Budget';
+import { CreateTransactionCommand } from '../../typings/api/transaction/CreateTransaction';
+import { CreateAllocationCommand } from '@/typings/api/allocation/CreateAllocation';
+import { CreateTransactionScheduleCommand } from '@/typings/api/transactionSchedule/CreateTransactionSchedule';
 
 interface EntryEditor {
   category: BudgetCategory | null;
@@ -393,8 +391,7 @@ export default class NewEntry extends Vue {
       this.editor.category &&
       this.editor.category.budgetCategoryId
     ) {
-      const transaction: Transaction = {
-        transactionId: undefined,
+      const transaction: CreateTransactionCommand = {
         amount: this.editor.amount || 0,
         description: this.editor.description,
         budgetCategoryId: this.editor.category.budgetCategoryId,
@@ -424,12 +421,13 @@ export default class NewEntry extends Vue {
   createTransactionSchedule(data: EntryEditor) {
     this.$wait.start('saving.transactionSchedules');
     if (this.editorForm.validate() && data.category && data.category.budgetCategoryId) {
-      const schedule: TransactionSchedule = {
+      const schedule: CreateTransactionScheduleCommand = {
         amount: data.amount || 0,
         description: data.description,
         budgetCategoryId: data.category.budgetCategoryId,
         frequency: data.frequency,
         startDate: data.date,
+        endDate: null,
         periodStep: data.periodStep,
       };
       transactionSchedulesService
@@ -453,7 +451,7 @@ export default class NewEntry extends Vue {
       this.editor.category &&
       this.editor.category.budgetCategoryId
     ) {
-      const allocation: Allocation = {
+      const allocation: CreateAllocationCommand = {
         amount: this.editor.amount || 0,
         description: this.editor.description,
         targetBudgetCategoryId: this.editor.category.budgetCategoryId,

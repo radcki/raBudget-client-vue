@@ -1,12 +1,16 @@
 import { apiHandler } from './apiHandler';
-import { BudgetCategory } from '@/typings/BudgetCategory';
-import { Budget, CreateBudgetCommand } from '@/typings/Budget';
+import { Budget } from '@/typings/Budget';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { format } from 'date-fns';
 import { PeriodBudgetReport } from '@/typings/PeriodBudgetReport';
 import { MonthlyBudgetReport } from '@/typings/MonthlyBudgetReport';
 import { Currency } from '@/typings/Currency';
 import { BudgetCategoryBalance } from '@/typings/BudgetCategoryBalance';
+import { CreateBudgetCommand } from '@/typings/api/budget/CreateBudget';
+import { UpdateBudgetCommand } from '@/typings/api/budget/UpdateBudget';
+import { CreateBudgetCategoryCommand } from '@/typings/api/budgetCategory/CreateBudgetCategory';
+import { UpdateBudgetCategoryCommand } from '@/typings/api/budgetCategory/UpdateBudgetCategory';
+import { SaveBudgetCategoriesCommand } from '@/typings/api/budget/SaveBudgetCategoriesOrder';
 
 function supportedCurrencies() {
   const requestOptions = {
@@ -34,10 +38,11 @@ function userBudgets() {
   );
 }
 
-function createBudget(budgetData: CreateBudgetCommand) {
-  budgetData.budgetCategories.map(category => {
+function createBudget(command: CreateBudgetCommand) {
+  command.budgetCategories.map(category => {
+    category.type = +category.type;
     category.amountConfigs = category.amountConfigs.map(v => {
-      v.amount = +v.amount;
+      v.monthlyAmount = +v.monthlyAmount;
       return v;
     });
     return category;
@@ -48,30 +53,25 @@ function createBudget(budgetData: CreateBudgetCommand) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: budgetData.name,
-      currency: budgetData.currency,
-      startingDate: format(budgetData.startingDate, 'yyyy-MM-dd'),
-      budgetCategories: budgetData.budgetCategories,
+      name: command.name,
+      currency: command.currency,
+      startingDate: format(command.startingDate, 'yyyy-MM-dd'),
+      budgetCategories: command.budgetCategories,
     }),
   };
   return apiHandler.fetchAuthorized<any>(`${process.env.VUE_APP_APIURL}/budgets`, requestOptions);
 }
 
-function saveBudget(budgetId, budgetData: Budget) {
+function saveBudget(command: UpdateBudgetCommand) {
   const requestOptions = {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      name: budgetData.name,
-      startingDate: format(budgetData.startingDate, 'yyyy-MM-dd'),
-      currency: budgetData.currency,
-      ownedByUser: budgetData.ownedByUser,
-    }),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized<any>(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}`,
+    `${process.env.VUE_APP_APIURL}/budgets/${command.budgetId}`,
     requestOptions,
   );
 }
@@ -160,10 +160,10 @@ function getMonthlyReport(budgetId: number, startDate, endDate) {
   );
 }
 
-function createCategory(budgetId, category: BudgetCategory) {
-  category.budgetCategoryId = 0;
-  category.amountConfigs.map(v => {
-    v.amount = +v.amount;
+function createCategory(budgetId: number, command: CreateBudgetCategoryCommand) {
+  //command.type = +command.type;
+  command.amountConfigs.map(v => {
+    v.monthlyAmount = +v.monthlyAmount;
     return v;
   });
   const requestOptions = {
@@ -171,7 +171,7 @@ function createCategory(budgetId, category: BudgetCategory) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(category),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized<any>(
     `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/budgetcategories/`,
@@ -179,9 +179,9 @@ function createCategory(budgetId, category: BudgetCategory) {
   );
 }
 
-function updateCategory(budgetId: number, category: BudgetCategory) {
-  category.amountConfigs.map(v => {
-    v.amount = +v.amount;
+function updateCategory(budgetId: number, command: UpdateBudgetCategoryCommand) {
+  command.amountConfigs.map(v => {
+    v.monthlyAmount = +v.monthlyAmount;
     return v;
   });
   const requestOptions = {
@@ -189,10 +189,10 @@ function updateCategory(budgetId: number, category: BudgetCategory) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(category),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized<any>(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/budgetcategories/${category.budgetCategoryId}`,
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/budgetcategories/${command.budgetCategoryId}`,
     requestOptions,
   );
 }
@@ -203,6 +203,24 @@ function deleteCategory(budgetId, categoryId) {
   };
   return apiHandler.fetchAuthorized<any>(
     `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/budgetcategories/${categoryId}`,
+    requestOptions,
+  );
+}
+
+function saveBudgetCategoriesOrder(budgetId: number, command: SaveBudgetCategoriesCommand) {
+  command.budgetCategoryOrder.map(v => {
+    v.budgetCategoryId = +v.budgetCategoryId;
+    return v;
+  });
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(command),
+  };
+  return apiHandler.fetchAuthorized<any>(
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/save-categories-order`,
     requestOptions,
   );
 }
@@ -222,4 +240,5 @@ export const budgetService = {
   setDefault,
   getPeriodReport,
   getMonthlyReport,
+  saveBudgetCategoriesOrder,
 };

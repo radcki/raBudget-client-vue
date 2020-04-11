@@ -55,21 +55,21 @@
               </v-flex>
 
               <v-flex xs12>
-                <v-text-field
+                <money-field
                   v-model="editor.modifyAmount"
-                  type="number"
-                  step="0.01"
+                  :currency="dataBudget.currency"
+                  :rules="requiredRule"
                   :label="$t('transactions.addOrDelete')"
-                ></v-text-field>
+                />
               </v-flex>
 
               <v-flex xs12>
-                <v-text-field
+                <money-field
                   v-model="editor.amount"
-                  type="number"
-                  step="0.01"
+                  :currency="dataBudget.currency"
+                  :rules="requiredRule"
                   :label="$t('transactions.baseAmount')"
-                ></v-text-field>
+                />
               </v-flex>
             </v-layout>
           </v-container>

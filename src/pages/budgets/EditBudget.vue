@@ -127,16 +127,25 @@ export default class EditBudget extends Vue {
     if (!this.budget) {
       return;
     }
-    budgetService.saveBudget(this.$route.params.id, this.budget).then(response => {
-      if (response.ok) {
-        this.budgetsFetch();
-        this.dispatchSuccess('general.changesSaved');
-      } else {
-        response.json().then(data => {
-          this.dispatchError(data.message);
-        });
-      }
-    });
+    //this.$route.params.id, this.budget
+    budgetService
+      .saveBudget({
+        budgetId: parseInt(this.$route.params.id),
+        name: this.budget.name,
+        currency: this.budget.currency,
+        startingDate: this.budget.startingDate,
+        ownedByUserId: this.budget.ownedByUser.userId,
+      })
+      .then(response => {
+        if (response.ok) {
+          this.budgetsFetch();
+          this.dispatchSuccess('general.changesSaved');
+        } else {
+          response.json().then(data => {
+            this.dispatchError(data.message);
+          });
+        }
+      });
   }
 
   setDefault() {

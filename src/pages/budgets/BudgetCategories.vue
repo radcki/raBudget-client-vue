@@ -35,12 +35,13 @@
                 color-secondary="amber darken-3"
                 :items="categories.spending"
                 :data-budget="budget"
-                categories-type="0"
+                :categories-type="eCategoryType.Spending"
                 :title="$t('categories.spendingCategories')"
                 @edit="editCategory"
                 @create="createCategory"
                 @transfer="transferTransactions"
                 @delete="deleteCategory"
+                @reorder="saveCategoriesOrder"
               ></categories-list>
             </v-flex>
 
@@ -50,12 +51,13 @@
                 color-secondary="light-green darken-4"
                 :items="categories.income"
                 :data-budget="budget"
-                categories-type="1"
+                :categories-type="eCategoryType.Icome"
                 :title="$t('categories.incomeCategories')"
                 @edit="editCategory"
                 @create="createCategory"
                 @transfer="transferTransactions"
                 @delete="deleteCategory"
+                @reorder="saveCategoriesOrder"
               ></categories-list>
             </v-flex>
 
@@ -65,12 +67,13 @@
                 color-secondary="indigo darken-2"
                 :items="categories.saving"
                 :data-budget="budget"
-                categories-type="2"
+                :categories-type="eCategoryType.Saving"
                 :title="$t('categories.savingCategories')"
                 @edit="editCategory"
                 @create="createCategory"
                 @transfer="transferTransactions"
                 @delete="deleteCategory"
+                @reorder="saveCategoriesOrder"
               ></categories-list>
             </v-flex>
           </v-layout>
@@ -89,6 +92,7 @@ import { Budget } from '@/typings/Budget';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { startOfMonth } from 'date-fns';
+import { SaveBudgetCategoriesCommand } from '../../typings/api/budget/SaveBudgetCategoriesOrder';
 
 const alertModule = namespace('alert');
 const budgetsModule = namespace('budgets');
@@ -109,6 +113,8 @@ export default class BudgetCategories extends Vue {
   @budgetsModule.Action('activeBudgetChange') activeBudgetChange?: (
     budgetId: number | string,
   ) => void;
+
+  eCategoryType = eCategoryType;
 
   get budget(): Budget | undefined {
     return this.budgets
@@ -188,7 +194,7 @@ export default class BudgetCategories extends Vue {
   }
 
   @Watch('$route')
-  RouteChange(to, from) {
+  onRouteChange(to, from) {
     if (from.params.id != to.params.id && this.activeBudgetChange && this.reloadInitialized) {
       this.activeBudgetChange(to.params.id);
       this.reloadInitialized();
@@ -307,7 +313,26 @@ export default class BudgetCategories extends Vue {
         (!v.validTo || v.validTo >= startOfMonth(new Date()))
       );
     });
-    return matching && matching.length > 0 ? matching[0].amount : null;
+    return matching && matching.length > 0 ? matching[0].monthlyAmount : null;
+  }
+
+  async saveCategoriesOrder(categoriesOrder: number[]) {
+    if (!this.budget) {
+      return;
+    }
+    const command: SaveBudgetCategoriesCommand = {
+      budgetCategoryOrder: categoriesOrder.map(v => {
+        return { budgetCategoryId: v };
+      }),
+    };
+
+    const response = await budgetService.saveBudgetCategoriesOrder(this.budget.budgetId, command);
+    if (response.ok && this.reloadInitialized) {
+      this.reloadInitialized();
+      if (this.dispatchSuccess) this.dispatchSuccess('general.changesSaved');
+    } else {
+      if (this.dispatchError) this.dispatchError((await response.json()).message);
+    }
   }
 }
 </script>

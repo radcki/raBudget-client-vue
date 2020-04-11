@@ -5,7 +5,7 @@
         <v-toolbar-title class="white--text">{{ $t(title) }}</v-toolbar-title>
       </v-toolbar>
       <v-card-text v-if="!options.input && !options.select" v-show="!!message" class="pa-3">
-        {{ $t(message) }}
+        <vue-markdown>{{ $t(message) }}</vue-markdown>
       </v-card-text>
       <v-card-text v-if="options.input">
         <v-text-field v-model="input" :type="options.input" :label="$t(message)"></v-text-field>
@@ -43,8 +43,13 @@
 <script lang="ts">
 import { ConfirmDialogOptions } from './types';
 import { Vue, Component } from 'vue-property-decorator';
+import VueMarkdown from 'vue-markdown';
 
-@Component
+@Component({
+  components: {
+    'vue-markdown': VueMarkdown,
+  },
+})
 export default class VueConfirm extends Vue {
   options: ConfirmDialogOptions = {
     color: 'primary',

@@ -2,6 +2,8 @@ import { apiHandler } from './apiHandler';
 import { Transaction } from '@/typings/Transaction';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
+import { CreateTransactionCommand } from '@/typings/api/transaction/CreateTransaction';
+import { UpdateTransactionCommand } from '@/typings/api/transaction/UpdateTransaction';
 
 function transferTransactions(
   budgetId: number,
@@ -25,14 +27,14 @@ function transferTransactions(
   );
 }
 
-function createTransaction(budgetId: number, transactionData: Transaction) {
-  transactionData.amount = +transactionData.amount; //ensure number
+function createTransaction(budgetId: number, command: CreateTransactionCommand) {
+  command.amount = +command.amount; //ensure number
   const requestOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(transactionData),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized(
     `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactions`,
@@ -50,21 +52,16 @@ function deleteTransaction(budgetId, id) {
   );
 }
 
-function updateTransaction(budgetId, transactionData: Transaction) {
+function updateTransaction(budgetId, command: UpdateTransactionCommand) {
   const requestOptions = {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      description: transactionData.description,
-      amount: +transactionData.amount,
-      transactionDate: transactionData.transactionDate,
-      budgetCategoryId: transactionData.budgetCategoryId,
-    } as Transaction),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized<any>(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactions/${transactionData.transactionId}`,
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactions/${command.transactionId}`,
     requestOptions,
   );
 }

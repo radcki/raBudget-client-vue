@@ -200,7 +200,7 @@ import { Vue, Component } from 'vue-property-decorator';
 import { Currency } from '@/typings/Currency';
 import { BudgetCategory } from '@/typings/BudgetCategory';
 import { namespace } from 'vuex-class';
-import { CreateBudgetCommand } from '@/typings/Budget';
+import { CreateBudgetCommand } from '@/typings/api/budget/CreateBudget';
 
 interface BudgetEditor {
   name: string;
@@ -249,6 +249,7 @@ export default class NewBudget extends Vue {
   @budgetsModule.Action('fetchBudgets') budgetsFetch?: () => Promise<void>;
 
   mounted() {
+    this.getCurrencies();
     this.requiredRule.push(v => !!v || this.$t('forms.requiredField').toString());
   }
 

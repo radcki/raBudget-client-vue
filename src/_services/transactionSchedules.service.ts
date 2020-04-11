@@ -1,21 +1,18 @@
 import { apiHandler } from './apiHandler';
 import { TransactionSchedule } from '@/typings/TransactionSchedule';
+import { UpdateTransactionScheduleCommand } from '@/typings/api/transactionSchedule/UpdateTransactionSchedule';
+import { CreateTransactionScheduleCommand } from '@/typings/api/transactionSchedule/CreateTransactionSchedule';
 
-function createTransactionSchedule(budgetId: number, data: TransactionSchedule) {
+function createTransactionSchedule(budgetId: number, command: CreateTransactionScheduleCommand) {
+  command.amount = +command.amount;
+  command.budgetCategoryId = +command.budgetCategoryId;
+  command.periodStep = +command.periodStep;
   const requestOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      description: data.description,
-      amount: +data.amount,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      budgetCategoryId: data.budgetCategoryId,
-      frequency: data.frequency || 0,
-      periodStep: data.periodStep || 1,
-    }),
+    body: JSON.stringify(command),
   };
 
   return apiHandler.fetchAuthorized<any>(
@@ -24,25 +21,20 @@ function createTransactionSchedule(budgetId: number, data: TransactionSchedule) 
   );
 }
 
-function updateTransactionSchedule(budgetId: number, data: TransactionSchedule) {
+function updateTransactionSchedule(budgetId: number, command: UpdateTransactionScheduleCommand) {
+  command.amount = +command.amount;
+  command.budgetCategoryId = +command.budgetCategoryId;
+  command.periodStep = +command.periodStep;
+  command.transactionScheduleId = +command.transactionScheduleId;
   const requestOptions = {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      description: data.description,
-      amount: +data.amount,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      budgetCategoryId: data.budgetCategoryId,
-      frequency: data.frequency || 0,
-      periodStep: data.periodStep || 1,
-      transactionScheduleId: data.transactionScheduleId,
-    }),
+    body: JSON.stringify(command),
   };
   return apiHandler.fetchAuthorized<any>(
-    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactionSchedules/${data.transactionScheduleId}`,
+    `${process.env.VUE_APP_APIURL}/budgets/${budgetId}/transactionSchedules/${command.transactionScheduleId}`,
     requestOptions,
   );
 }
@@ -98,7 +90,7 @@ function listClosestOccurrences(budgetId, endDate) {
 
   url.search = new URLSearchParams(params).toString();
 
-  return apiHandler.fetchAuthorized<any>(url, requestOptions);
+  return apiHandler.fetchAuthorized<any>(url.toString(), requestOptions);
 }
 
 export const transactionSchedulesService = {

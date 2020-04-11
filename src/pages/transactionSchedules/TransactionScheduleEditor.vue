@@ -116,13 +116,12 @@
                 </v-layout>
               </v-flex>
               <v-flex xs12>
-                <v-text-field
+                <money-field
                   v-model="editor.amount"
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  :currency="dataBudget.currency"
+                  :rules="requiredRule"
                   :label="$t('transactions.baseAmount')"
-                ></v-text-field>
+                />
               </v-flex>
             </v-layout>
           </v-container>
@@ -163,14 +162,14 @@ const budgetsModule = namespace('budgets');
 
 interface EntryEditor {
   budgetCategory: BudgetCategory | null;
-  budgetCategoryId: number | null;
-  description: string | null;
+  budgetCategoryId: number;
+  description: string;
   amount: number | null;
   startDate: Date;
   endDate?: Date | null;
   frequency: eFrequency;
   periodStep: number | null;
-  transactionScheduleId?: number | null;
+  transactionScheduleId?: number;
 }
 
 @Component({
@@ -211,10 +210,9 @@ export default class TransactionScheduleEditor extends Vue {
 
   editor: EntryEditor = {
     ...{
-      transactionScheduleId: null,
-      description: null,
+      description: '',
       budgetCategory: null,
-      budgetCategoryId: null,
+      budgetCategoryId: 0,
       amount: null,
       startDate: new Date(),
       endDate: null,
@@ -284,10 +282,9 @@ export default class TransactionScheduleEditor extends Vue {
       this.$wait.start('dialog');
       this.editor = {
         ...{
-          transactionScheduleId: null,
-          description: null,
+          description: '',
           budgetCategory: null,
-          budgetCategoryId: null,
+          budgetCategoryId: 0,
           amount: null,
           startDate: new Date(),
           endDate: null,
@@ -350,6 +347,9 @@ export default class TransactionScheduleEditor extends Vue {
   save() {
     if ((this.$refs.editor as Vue & { validate: () => boolean }).validate()) {
       this.dialog = false;
+      if (this.editor.budgetCategory) {
+        this.editor.budgetCategoryId = this.editor.budgetCategory.budgetCategoryId;
+      }
       this.$emit('save', this.editor);
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <v-list two-line subheader>
+  <v-list two-line subheader class="cardBackground">
     <v-form ref="formCategory" v-model="valid">
       <v-container grid-list-md>
         <v-layout row wrap>
@@ -22,15 +22,13 @@
             ></v-text-field>
           </v-flex>
           <v-flex xs12 md4>
-            <v-text-field
-              v-model="newBudgetCategory.amountConfigs[0].amount"
+            <money-field
+              v-model="newBudgetCategory.amountConfigs[0].monthlyAmount"
               :prepend-icon="mdiCash"
-              type="number"
-              step="0.01"
+              :currency="budget.currency"
               :rules="requiredRule"
-              min="0"
               :label="$t('categories.monthlyAmount')"
-            ></v-text-field>
+            />
           </v-flex>
           <v-flex xs12 md2>
             <v-btn color="primary" class="white--text" @click="addCategory">
@@ -52,7 +50,7 @@
 
         <v-list-item-subtitle>
           {{ $t('categories.monthlyAmount') }}:
-          {{ category.amountConfigs[0].amount | currency($currencyConfig(budget)) }}
+          {{ category.amountConfigs[0].monthlyAmount | currency($currencyConfig(budget)) }}
         </v-list-item-subtitle>
       </v-list-item-content>
 
@@ -82,6 +80,7 @@ import { Budget } from '@/typings/Budget';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { mdiCash, mdiPlus, mdiPencil, mdiCancel } from '@mdi/js';
 import { BudgetCategory } from '@/typings/BudgetCategory';
+import { CreateBudgetCategoryCommand } from '../../typings/api/budgetCategory/CreateBudgetCategory';
 
 @Component
 export default class NewBudgetCategoryEditor extends Vue {
@@ -90,14 +89,16 @@ export default class NewBudgetCategoryEditor extends Vue {
   @Prop(Array) value?: BudgetCategory[];
 
   valid = true;
-  newBudgetCategory: BudgetCategory = {
+  newBudgetCategory: CreateBudgetCategoryCommand = {
     type: this.categoryType ? this.categoryType : 0,
     budgetId: this.budget ? this.budget.budgetId : -1,
     name: '',
     icon: '',
-    amountConfigs: [{ amount: 0, validFrom: this.budget ? this.budget.startingDate : new Date() }],
+    amountConfigs: [
+      { monthlyAmount: 0, validFrom: this.budget ? this.budget.startingDate : new Date() },
+    ],
   };
-  categories: BudgetCategory[] = this.value || [];
+  categories: CreateBudgetCategoryCommand[] = this.value || [];
   requiredRule: ((v: string) => boolean | string)[] = [];
 
   mdiCash = mdiCash;
@@ -141,7 +142,7 @@ export default class NewBudgetCategoryEditor extends Vue {
     }
     for (const category of this.categories) {
       for (const ammountconfig of category.amountConfigs) {
-        sum += ammountconfig.amount;
+        sum += ammountconfig.monthlyAmount;
       }
     }
     return sum;
@@ -161,7 +162,7 @@ export default class NewBudgetCategoryEditor extends Vue {
         icon: '',
         name: '',
         amountConfigs: [
-          { amount: 0, validFrom: this.budget ? this.budget.startingDate : new Date() },
+          { monthlyAmount: 0, validFrom: this.budget ? this.budget.startingDate : new Date() },
         ],
       };
       (this.$refs.formCategory as Vue & { reset: () => any }).reset();

@@ -1,12 +1,12 @@
-import { eFrequency } from './enums/eFrequency';
+import { eFrequency } from '@/typings/enums/eFrequency';
 
-export interface TransactionSchedule {
+export interface UpdateTransactionScheduleCommand {
   transactionScheduleId: number;
-  amount: number;
   description: string;
+  amount: number;
   budgetCategoryId: number;
   frequency: eFrequency;
   periodStep: number;
   startDate: Date;
-  endDate?: Date | null;
+  endDate: Date | null;
 }
