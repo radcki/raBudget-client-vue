@@ -77,6 +77,7 @@
           :icon="item.icon"
           :to="item.to"
           :children="item.children"
+          :collapsed="minNav"
         ></menu-item>
       </v-list>
 
