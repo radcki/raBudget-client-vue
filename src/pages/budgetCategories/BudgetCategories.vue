@@ -99,7 +99,7 @@ const budgetsModule = namespace('budgets');
 
 @Component({
   components: {
-    'categories-list': () => import('@/components/CategoriesList.vue'),
+    'categories-list': () => import('./components/CategoriesList.vue'),
   },
 })
 export default class BudgetCategories extends Vue {

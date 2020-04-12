@@ -3,7 +3,7 @@ import Router from 'vue-router';
 
 const HomePage = () => import('../pages/home/HomePage.vue');
 const NewBudget = () => import('../pages/budgets/NewBudget.vue');
-const BudgetCategories = () => import('../pages/budgets/BudgetCategories.vue');
+const BudgetCategories = () => import('../pages/budgetCategories/BudgetCategories.vue');
 const EditBudget = () => import('../pages/budgets/EditBudget.vue');
 const Overview = () => import('../pages/overview/Overview.vue');
 const Transactions = () => import('../pages/history/Transactions.vue');
