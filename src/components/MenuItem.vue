@@ -5,11 +5,16 @@
       class="grey--text text--darken-1"
       :to="to"
     >
-      <v-list-item-icon v-if="icon">
-        <v-icon>{{ icon }}</v-icon>
-      </v-list-item-icon>
+      <v-tooltip bottom :disabled="!collapsed">
+        <template v-slot:activator="{ on }">
+          <v-list-item-icon v-if="icon" v-on="on">
+            <v-icon>{{ icon }}</v-icon>
+          </v-list-item-icon>
+        </template>
+        <span>{{ name || '' }}</span>
+      </v-tooltip>
 
-      <v-list-item-content>
+      <v-list-item-content v-show="!collapsed">
         <v-list-item-title>{{ name || '' }}</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
@@ -50,5 +55,6 @@ export default class MenuItemComponent extends Vue {
   @Prop(String) icon?: string;
   @Prop({ type: [Object, String] }) to?: string | { name: string; params: {} | null };
   @Prop(Array) children?: MenuItem[];
+  @Prop(Boolean) collapsed?: boolean;
 }
 </script>
