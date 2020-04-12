@@ -217,50 +217,50 @@ export default class BudgetCategories extends Vue {
     });
   }
 
-  editCategory(category: BudgetCategory) {
+  async editCategory(category: BudgetCategory) {
     if (!this.budget) {
       return;
     }
-    budgetService.updateCategory(this.budget.budgetId, category).then(response => {
-      if (response.ok && this.reloadInitialized) {
-        this.reloadInitialized();
-      } else {
-        response.json().then(data => {
-          if (this.dispatchError) this.dispatchError(data.message);
-          if (this.reloadInitialized) this.reloadInitialized();
-        });
-      }
-    });
+    this.$wait.start(`saving.category${category.budgetCategoryId}`);
+    const response = await budgetService.updateCategory(this.budget.budgetId, category);
+    if (response.ok && this.reloadInitialized) {
+      this.reloadInitialized();
+    } else {
+      const errorData = await response.json();
+      if (this.dispatchError) this.dispatchError(errorData.message);
+      if (this.reloadInitialized) this.reloadInitialized();
+    }
+    this.$wait.end(`saving.category${category.budgetCategoryId}`);
   }
 
-  deleteCategory(category: BudgetCategory) {
-    this.$confirm({
+  async deleteCategory(category: BudgetCategory) {
+    const confirm = await this.$confirm({
       title: 'general.remove',
       message: 'categories.deleteConfirm',
       options: {
         color: 'red',
         buttons: { yes: true, no: true, cancel: false, ok: false },
       },
-    }).then(confirm => {
-      if (confirm) {
-        const type = category.type == 0 ? 'spending' : category.type == 1 ? 'income' : 'saving';
-        if (this.categories[type].length == 1 && this.dispatchError) {
-          this.dispatchError('categories.oneRequired');
-          return;
-        }
-        budgetService
-          .deleteCategory(this.$route.params.id, category.budgetCategoryId)
-          .then(response => {
-            if (response.ok && this.reloadInitialized) {
-              this.reloadInitialized();
-            } else {
-              response.json().then(data => {
-                if (this.dispatchError) this.dispatchError(data.message);
-              });
-            }
-          });
-      }
     });
+
+    if (!confirm) return;
+    this.$wait.start(`saving.category${category.budgetCategoryId}`);
+
+    const type = category.type == 0 ? 'spending' : category.type == 1 ? 'income' : 'saving';
+    if (this.categories[type].length == 1 && this.dispatchError) {
+      this.dispatchError('categories.oneRequired');
+      return;
+    }
+    const response = await budgetService.deleteCategory(
+      this.$route.params.id,
+      category.budgetCategoryId,
+    );
+    if (response.ok && this.reloadInitialized) {
+      this.reloadInitialized();
+    } else {
+      if (this.dispatchError) this.dispatchError((await response.json()).message);
+    }
+    this.$wait.end(`saving.category${category.budgetCategoryId}`);
   }
 
   transferTransactions(category: BudgetCategory) {
@@ -316,12 +316,15 @@ export default class BudgetCategories extends Vue {
     return matching && matching.length > 0 ? matching[0].monthlyAmount : null;
   }
 
-  async saveCategoriesOrder(categoriesOrder: number[]) {
+  async saveCategoriesOrder(categoriesOrder: { newOrder: number[]; movedCategoryId: number }) {
+    console.log(categoriesOrder);
     if (!this.budget) {
       return;
     }
+    this.$wait.start(`saving.category${categoriesOrder.movedCategoryId}`);
+    console.log(categoriesOrder.movedCategoryId);
     const command: SaveBudgetCategoriesCommand = {
-      budgetCategoryOrder: categoriesOrder.map(v => {
+      budgetCategoryOrder: categoriesOrder.newOrder.map(v => {
         return { budgetCategoryId: v };
       }),
     };
@@ -333,6 +336,7 @@ export default class BudgetCategories extends Vue {
     } else {
       if (this.dispatchError) this.dispatchError((await response.json()).message);
     }
+    this.$wait.end(`saving.category${categoriesOrder.movedCategoryId}`);
   }
 }
 </script>

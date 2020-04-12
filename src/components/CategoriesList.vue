@@ -33,7 +33,12 @@
         </v-row>
       </v-list-item-action>
       <v-list-item-avatar :color="color" size="40" class="mr-4">
-        <v-icon dark size="24">{{ $categoryIcons[category.icon] }}</v-icon>
+        <v-progress-circular
+          v-if="$wait.is(`saving.category${category.budgetCategoryId}`)"
+          :color="white"
+          indeterminate
+        ></v-progress-circular>
+        <v-icon v-else dark size="24">{{ $categoryIcons[category.icon] }}</v-icon>
       </v-list-item-avatar>
 
       <v-list-item-content>
@@ -159,7 +164,7 @@ export default class CategoriesList extends Vue {
       return;
     }
     const newOrder = this.swapArrayElements(categoryIds, categoryIndex, categoryIndex - 1);
-    this.$emit('reorder', newOrder);
+    this.$emit('reorder', { newOrder: newOrder, movedCategoryId: category.budgetCategoryId });
   }
 
   moveCategoryDown(category: BudgetCategory) {
@@ -172,7 +177,7 @@ export default class CategoriesList extends Vue {
       return;
     }
     const newOrder = this.swapArrayElements(categoryIds, categoryIndex, categoryIndex + 1);
-    this.$emit('reorder', newOrder);
+    this.$emit('reorder', { newOrder: newOrder, movedCategoryId: category.budgetCategoryId });
   }
 
   emitSave(payload) {
