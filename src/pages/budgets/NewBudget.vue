@@ -214,9 +214,9 @@ const alertModule = namespace('alert');
 
 @Component({
   components: {
-    'categories-list': () => import('@/components/CategoriesList.vue'),
+    'categories-list': () => import('../budgetCategories/components/CategoriesList.vue'),
     'v-date-field': () => import('@/components/DateField.vue'),
-    'v-new-budget-category-editor': () => import('./NewBudgetCategoryEditor.vue'),
+    'v-new-budget-category-editor': () => import('./components/NewBudgetCategoryEditor.vue'),
   },
 })
 export default class NewBudget extends Vue {

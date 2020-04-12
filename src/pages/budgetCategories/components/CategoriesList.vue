@@ -41,9 +41,9 @@
             <v-progress-circular
               v-if="
                 $wait.is(`saving.category${category.budgetCategoryId}`) ||
-                $wait.is(`loading.budget `)
+                $wait.is(`loading.budget`)
               "
-              :color="white"
+              color="white"
               indeterminate
             ></v-progress-circular>
             <v-icon v-else dark size="24">{{ $categoryIcons[category.icon] }}</v-icon>
@@ -118,9 +118,9 @@ import {
 
 import { startOfMonth } from 'date-fns';
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import { BudgetCategory } from '../typings/BudgetCategory';
-import { eCategoryType } from '../typings/enums/eCategoryType';
 import { Budget } from '@/typings/Budget';
+import { BudgetCategory } from '@/typings/BudgetCategory';
+import { eCategoryType } from '@/typings/enums/eCategoryType';
 
 @Component({
   components: {

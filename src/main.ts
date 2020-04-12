@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import './registerServiceWorker';
 import store from './_store';
-import { router } from './_helpers';
+import { router } from './_router/router';
 import signalrPlugin from './plugins/signalr.plugin';
 
 import App from './App.vue';

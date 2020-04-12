@@ -80,7 +80,7 @@ import { Budget } from '@/typings/Budget';
 import { eCategoryType } from '@/typings/enums/eCategoryType';
 import { mdiCash, mdiPlus, mdiPencil, mdiCancel } from '@mdi/js';
 import { BudgetCategory } from '@/typings/BudgetCategory';
-import { CreateBudgetCategoryCommand } from '../../typings/api/budgetCategory/CreateBudgetCategory';
+import { CreateBudgetCategoryCommand } from '@/typings/api/budgetCategory/CreateBudgetCategory';
 
 @Component
 export default class NewBudgetCategoryEditor extends Vue {
