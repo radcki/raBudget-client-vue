@@ -15,7 +15,7 @@
             <div>
               Plan oszczędności: {{ savingsCategoriesSum | currency($currencyConfig(budget)) }}
             </div>
-            <v-divider></v-divider>
+            <v-divider class="my-2"></v-divider>
             <div>
               Bilans:
               <v-chip :color="categoriesBalance >= 0 ? 'green lighten-2' : 'red lighten-2'">
@@ -317,12 +317,10 @@ export default class BudgetCategories extends Vue {
   }
 
   async saveCategoriesOrder(categoriesOrder: { newOrder: number[]; movedCategoryId: number }) {
-    console.log(categoriesOrder);
     if (!this.budget) {
       return;
     }
     this.$wait.start(`saving.category${categoriesOrder.movedCategoryId}`);
-    console.log(categoriesOrder.movedCategoryId);
     const command: SaveBudgetCategoriesCommand = {
       budgetCategoryOrder: categoriesOrder.newOrder.map(v => {
         return { budgetCategoryId: v };
