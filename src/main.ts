@@ -2,7 +2,7 @@ import Vue from 'vue';
 import './registerServiceWorker';
 import store from './_store';
 import { router } from './_router/router';
-import signalrPlugin from './plugins/signalr.plugin';
+import signalrPlugin from './plugins/signalr';
 
 import App from './App.vue';
 import VueCurrencyFilter from 'vue-currency-filter';
@@ -66,7 +66,6 @@ import enDateLocale from 'date-fns/locale/en-GB';
 import { eCategoryType } from './typings/enums/eCategoryType';
 import { NumberFormatInfo } from './typings/Currency';
 
-Vue.use(signalrPlugin);
 Vue.use(Copy);
 Vue.use(VueCurrencyInput, {});
 
@@ -205,6 +204,7 @@ Vue.use(VueKeycloakJs, {
   },
   onReady: () => {
     Vue.use(VueWait);
+    Vue.use(signalrPlugin);
     Vue.component('money-field', () => import('@/components/MoneyField.vue'));
 
     new Vue({

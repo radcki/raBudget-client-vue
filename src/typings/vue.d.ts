@@ -8,6 +8,7 @@ declare module 'vue/types/vue' {
     $keycloak: any;
     $currencyConfig: any;
     $categoryIcons: object;
+    $notificationHub: Vue;
   }
 }
 

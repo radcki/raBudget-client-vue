@@ -1,5 +1,3 @@
-import { AmountConfig } from '@/typings/AmountConfig';
-
 export interface UpdateBudgetCategoryCommand {
   budgetCategoryId: number;
   name: string;
