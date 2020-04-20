@@ -211,10 +211,12 @@ import {
 import { Budget } from './typings/Budget';
 import MenuItem from './typings/MenuItem';
 import { Route } from 'vue-router';
+import { eTransactionHubEvent, eBudgetHubEvent } from './plugins/signalr/types';
 
 const budgetsStore = namespace('budgets');
 const alertStore = namespace('alert');
 const accountStore = namespace('account');
+const transactionsModule = namespace('transactions');
 
 @Component({
   components: {
@@ -267,6 +269,10 @@ export default class App extends Vue {
 
   get user() {
     return this.$store.getters['account/currentUser'];
+  }
+
+  get budgetId() {
+    return this.$route.params.id;
   }
 
   get isAdmin() {
@@ -396,7 +402,7 @@ export default class App extends Vue {
 
     this.drawer = this.$vuetify.breakpoint.lgAndUp;
 
-    if (this.$keycloak.authenticated) {
+    if (this.$keycloak.authenticated && this.initializeBudgets) {
       this.initializeBudgets().then(() => {
         if (this.$route.params.id && this.activeBudgetChange) {
           this.activeBudgetChange(this.$route.params.id);
@@ -404,17 +410,85 @@ export default class App extends Vue {
         this.noBudgetsGuard();
       });
     }
+
+    this.registerNotificationHandlers();
   }
 
-  @alertStore.Action('clear') clearAlert;
-  @accountStore.Action('logout') logout;
-  @budgetsStore.Action('initializeBudgets') initializeBudgets;
-  @budgetsStore.Action('fetchBudgets') fetchBudgets;
+  @alertStore.Action('clear') clearAlert?: () => Promise<void>;
+  @accountStore.Action('logout') logout?: () => Promise<void>;
+  @budgetsStore.Action('initializeBudgets') initializeBudgets?: () => Promise<void>;
+  @budgetsStore.Action('reloadInitialized') reloadInitialized?: () => Promise<void>;
+  @budgetsStore.Action('fetchBudgets') fetchBudgets?: () => Promise<void>;
+  @transactionsModule.Action('fetchTransactions') fetchTransactions?: () => Promise<void>;
+
+  async registerNotificationHandlers() {
+    this.$notificationHub.$on(
+      eTransactionHubEvent[eTransactionHubEvent.TransactionAdded],
+      payload => {
+        if (this.budget && this.budgetId == payload.budgetId) {
+          if (this.reloadInitialized) this.reloadInitialized();
+          if (this.fetchTransactions) this.fetchTransactions();
+        }
+      },
+    );
+    this.$notificationHub.$on(
+      eTransactionHubEvent[eTransactionHubEvent.TransactionUpdated],
+      payload => {
+        if (this.budget && this.budgetId == payload.budgetId) {
+          if (this.reloadInitialized) this.reloadInitialized();
+          if (this.fetchTransactions) this.fetchTransactions();
+        }
+      },
+    );
+    this.$notificationHub.$on(
+      eTransactionHubEvent[eTransactionHubEvent.TransactionRemoved],
+      payload => {
+        if (this.budget && this.budgetId == payload.budgetId) {
+          if (this.reloadInitialized) this.reloadInitialized();
+          if (this.fetchTransactions) this.fetchTransactions();
+        }
+      },
+    );
+    this.$notificationHub.$on(eBudgetHubEvent[eBudgetHubEvent.BudgetAdded], payload => {
+      if (this.budget && this.budgetId == payload.budgetId) {
+        if (this.reloadInitialized) this.reloadInitialized();
+      }
+    });
+    this.$notificationHub.$on(eBudgetHubEvent[eBudgetHubEvent.BudgetRemoved], payload => {
+      if (this.budget && this.budgetId == payload.budgetId) {
+        if (this.reloadInitialized) this.reloadInitialized();
+        this.$router.push('/');
+      }
+    });
+    this.$notificationHub.$on(eBudgetHubEvent[eBudgetHubEvent.BudgetUpdated], payload => {
+      if (this.budget && this.budgetId == payload.budgetId) {
+        if (this.reloadInitialized) this.reloadInitialized();
+      }
+    });
+
+    this.$notificationHub.$on(eBudgetHubEvent[eBudgetHubEvent.BudgetCategoryAdded], payload => {
+      if (this.budget && this.budgetId == payload.budgetId) {
+        if (this.reloadInitialized) this.reloadInitialized();
+      }
+    });
+    this.$notificationHub.$on(eBudgetHubEvent[eBudgetHubEvent.BudgetCategoryRemoved], payload => {
+      if (this.budget && this.budgetId == payload.budgetId) {
+        if (this.reloadInitialized) this.reloadInitialized();
+      }
+    });
+    this.$notificationHub.$on(eBudgetHubEvent[eBudgetHubEvent.BudgetCategoryUpdated], payload => {
+      if (this.budget && this.budgetId == payload.budgetId) {
+        if (this.reloadInitialized) this.reloadInitialized();
+      }
+    });
+  }
 
   signOut() {
-    this.logout().then(() => {
-      this.$router.push('/');
-    });
+    if (this.logout) {
+      this.logout().then(() => {
+        this.$router.push('/');
+      });
+    }
   }
 
   switchLocale(locale): void {

@@ -47,7 +47,7 @@
                   ></v-category-select>
                 </v-flex>
 
-                <v-flex xs7>
+                <v-flex v-if="dataBudget" xs7>
                   <money-field
                     v-model="editor.amount"
                     :currency="dataBudget.currency"
@@ -179,7 +179,7 @@
                   :label="$t('general.description')"
                 ></v-text-field>
               </v-flex>
-              <v-flex xs12>
+              <v-flex v-if="dataBudget" xs12>
                 <money-field
                   v-model="editor.amount"
                   :currency="dataBudget.currency"
