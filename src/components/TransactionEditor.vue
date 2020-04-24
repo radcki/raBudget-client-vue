@@ -58,7 +58,6 @@
                 <money-field
                   v-model="editor.modifyAmount"
                   :currency="dataBudget.currency"
-                  :rules="requiredRule"
                   :label="$t('transactions.addOrDelete')"
                 />
               </v-flex>
