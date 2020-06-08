@@ -5,7 +5,7 @@ import i18n from '@/plugins/i18n';
 import { ConfirmOptions } from './types';
 
 export const VueConfirm = {
-  install(Vue: VueConstructor) {
+  install(Vue: VueConstructor): void {
     const vueConstructor = Vue.extend(Confirm);
     const ConfirmInstance = new vueConstructor({
       vuetify: new Vuetify(),

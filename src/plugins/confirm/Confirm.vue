@@ -72,7 +72,7 @@ export default class VueConfirm extends Vue {
   message = '';
   title = '';
 
-  beforeDestroy() {
+  beforeDestroy(): void {
     this.$wait.end('dialog');
   }
 

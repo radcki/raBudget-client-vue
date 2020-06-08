@@ -323,7 +323,7 @@ export default class TransactionSchedules extends Vue {
     }
   }
 
-  async fetchTransactionSchedules() {
+  async fetchTransactionSchedules(): Promise<void> {
     if (!this.budget) {
       return;
     }
@@ -352,7 +352,7 @@ export default class TransactionSchedules extends Vue {
     }
   }
 
-  createSchedule(scheduleData: CreateTransactionScheduleCommand) {
+  createSchedule(scheduleData: CreateTransactionScheduleCommand): void {
     if (!this.budget) {
       return;
     }
@@ -379,7 +379,7 @@ export default class TransactionSchedules extends Vue {
       });
   }
 
-  updateSchedule(scheduleData: UpdateTransactionScheduleCommand) {
+  updateSchedule(scheduleData: UpdateTransactionScheduleCommand): void {
     if (!this.budget) {
       return;
     }
@@ -412,7 +412,7 @@ export default class TransactionSchedules extends Vue {
       : null;
   }
 
-  deleteSchedule(scheduleId) {
+  deleteSchedule(scheduleId: number): void {
     if (!this.budget) {
       return;
     }

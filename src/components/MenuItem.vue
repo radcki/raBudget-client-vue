@@ -44,6 +44,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import MenuItem from '@/typings/MenuItem';
+import { Dictionary } from 'vue-router/types/router';
 
 @Component({
   components: {
@@ -53,7 +54,9 @@ import MenuItem from '@/typings/MenuItem';
 export default class MenuItemComponent extends Vue {
   @Prop(String) name?: string;
   @Prop(String) icon?: string;
-  @Prop({ type: [Object, String] }) to?: string | { name: string; params: {} | null };
+  @Prop({ type: [Object, String] }) to?:
+    | string
+    | { name: string; params: Dictionary<string> | null };
   @Prop(Array) children?: MenuItem[];
   @Prop(Boolean) collapsed?: boolean;
 }
