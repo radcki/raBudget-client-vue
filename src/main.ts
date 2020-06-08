@@ -105,7 +105,6 @@ Vue.prototype.$currencies = {
     symbolSpacing: true,
   },
 };
-/* eslint-disable @typescript-eslint/camelcase */
 Vue.prototype.$categoryIcons = {
   directions_car: mdiCar,
   local_grocery_store: mdiCart,
@@ -150,7 +149,6 @@ Vue.prototype.$categoryIcons = {
   motorbike: mdiMotorbike,
   card_giftcard: mdiWalletGiftcard,
 };
-/* eslint-enable @typescript-eslint/camelcase */
 
 Vue.prototype.$categoryColor = function (categoryType: eCategoryType) {
   switch (categoryType) {
