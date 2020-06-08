@@ -1,5 +1,5 @@
 FROM node:latest
-COPY ./raHome.Ui/ /app
+COPY ./ /app
 WORKDIR /app
 RUN npm install && npm run build
 
