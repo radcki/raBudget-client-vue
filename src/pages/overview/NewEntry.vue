@@ -39,11 +39,12 @@
                   ></v-text-field>
                 </v-flex>
 
-                <v-flex v-if="tab == 3" xs7>
+                <v-flex v-show="tab == 3" xs7>
                   <v-category-select
                     v-model="editor.sourceCategory"
                     :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
                     :label="$t('categories.sourceCategory')"
+                    clearable
                   ></v-category-select>
                 </v-flex>
 
@@ -167,7 +168,7 @@
                 <v-category-select
                   v-model="editor.sourceCategory"
                   :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
-                  :label="$t('general.category')"
+                  :label="$t('categories.sourceCategory')"
                   clearable
                 ></v-category-select>
               </v-flex>

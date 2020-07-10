@@ -46,7 +46,7 @@
       v-model="drawer"
       width="260"
       enable-resize-watcher
-      mobile-break-point="960"
+      mobile-breakpoint="960"
       color="navigationBar"
       class="elevation-2"
       :floating="!mobile"
@@ -156,9 +156,9 @@
       </v-btn>
     </v-snackbar>
 
-    <v-content class="contentBackground">
+    <v-main class="contentBackground">
       <router-view></router-view>
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 

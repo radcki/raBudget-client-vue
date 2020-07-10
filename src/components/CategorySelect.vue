@@ -11,7 +11,7 @@
     :clearable="clearable"
     :disabled="disabled"
     :class="!multiple ? '' : 'caption'"
-    :rules="rules && rules.length > 0 ? rules : []"
+    :rules="rules"
     :persistent-hint="persistentHint"
     :hint="hint"
   >
