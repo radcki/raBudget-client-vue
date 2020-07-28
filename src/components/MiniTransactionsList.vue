@@ -59,14 +59,26 @@
                 @save="updateTransaction"
               >
                 <template v-slot:activator="{ on }">
-                  <v-icon v-on="on">{{ mdiPencil }}</v-icon>
+                  <v-btn
+                    icon
+                    small
+                    :loading="$wait.is(`saving.transaction_${transaction.transactionId}`)"
+                    v-on="on"
+                  >
+                    <v-icon v-on="on">{{ mdiPencil }}</v-icon>
+                  </v-btn>
                 </template>
               </v-transaction-editor>
             </v-list-item-action>
             <v-list-item-action>
-              <v-icon @click="deleteTransaction(transaction.transactionId)">{{
-                mdiTrashCan
-              }}</v-icon>
+              <v-btn
+                icon
+                small
+                :loading="$wait.is(`deleting.transaction_${transaction.transactionId}`)"
+                @click="deleteTransaction(transaction.transactionId)"
+              >
+                <v-icon>{{ mdiTrashCan }}</v-icon>
+              </v-btn>
             </v-list-item-action>
           </v-list-item>
         </template>
@@ -130,24 +142,23 @@ export default class MiniTransactionsList extends Vue {
   }
 
   async updateTransaction(transaction: Transaction) {
-    this.$wait.start('saving.transaction');
+    this.$wait.start(`saving.transaction_${transaction.transactionId}`);
     try {
       const response = await transactionsService.updateTransaction(
         this.budget.budgetId,
         transaction,
       );
       if (response.ok) {
-        this.$wait.end('saving.transaction');
         this.$emit('updated');
       } else {
-        this.$wait.end('saving.transaction');
         const errorData = await response.json();
         this.dispatchError(errorData.message);
       }
     } catch (error) {
-      this.$wait.end('saving.transaction');
       const errorData = await error.json();
       this.dispatchError(errorData.message);
+    } finally {
+      this.$wait.end(`saving.transaction_${transaction.transactionId}`);
     }
   }
 
@@ -162,6 +173,7 @@ export default class MiniTransactionsList extends Vue {
     });
 
     if (confirmation) {
+      this.$wait.start(`deleting.transaction_${transactionId}`);
       const response = await transactionsService.deleteTransaction(
         this.budget.budgetId,
         transactionId,
@@ -174,6 +186,7 @@ export default class MiniTransactionsList extends Vue {
           this.dispatchError(data.message);
         });
       }
+      this.$wait.end(`deleting.transaction_${transactionId}`);
     }
   }
 }
