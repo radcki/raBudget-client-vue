@@ -1,41 +1,10 @@
 <template>
   <v-app>
-    <v-app-bar dense fixed app :collapse="!mobile" dark color="navigationBarHeader">
+    <v-app-bar v-if="mobile" dense fixed app dark color="navigationBarHeader">
       <v-app-bar-nav-icon v-if="$keycloak.authenticated && mobile" @click.stop="drawer = !drawer">
         <v-icon>{{ mdiMenu }}</v-icon>
       </v-app-bar-nav-icon>
 
-      <v-menu offset-y>
-        <template v-slot:activator="{ on }">
-          <v-btn text class="pl-0 subheading" dark v-on="on">
-            {{ budget ? budget.name : '' }}<v-icon>{{ mdiChevronDown }}</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item :to="{ name: 'newBudget' }">
-            <v-list-item-title>{{ $t('budgets.new') }}</v-list-item-title>
-            <v-list-item-action>
-              <v-icon>{{ mdiPlusCircleOutline }}</v-icon>
-            </v-list-item-action>
-          </v-list-item>
-          <v-divider></v-divider>
-          <v-list-item
-            v-for="(budget, index) in budgets"
-            :key="index"
-            :to="{
-              name: $route.params.id ? $route.name : 'overview',
-              params: { id: budget.budgetId },
-            }"
-          >
-            <v-list-item-title>{{ budget.name }}</v-list-item-title>
-            <v-list-item-action>
-              <v-btn icon :to="{ name: 'editBudget', params: { id: budget.budgetId } }">
-                <v-icon>{{ mdiPencil }}</v-icon>
-              </v-btn>
-            </v-list-item-action>
-          </v-list-item>
-        </v-list>
-      </v-menu>
       <template v-if="mobile">
         <v-spacer></v-spacer>
         <span class="title white--text">raBudget</span>
@@ -66,6 +35,41 @@
               <v-icon>{{ mdiChevronLeft }}</v-icon>
             </v-btn>
           </v-list-item-action>
+        </v-list-item>
+
+        <v-list-item v-if="!minNav">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on }">
+              <v-btn text class="pl-0 subheading" v-on="on">
+                <span>{{ budget ? budget.name : '' }}</span>
+                <v-icon>{{ mdiChevronDown }}</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item :to="{ name: 'newBudget' }">
+                <v-list-item-title>{{ $t('budgets.new') }}</v-list-item-title>
+                <v-list-item-action>
+                  <v-icon>{{ mdiPlusCircleOutline }}</v-icon>
+                </v-list-item-action>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item
+                v-for="(budget, index) in budgets"
+                :key="index"
+                :to="{
+                  name: $route.params.id ? $route.name : 'overview',
+                  params: { id: budget.budgetId },
+                }"
+              >
+                <v-list-item-title>{{ budget.name }}</v-list-item-title>
+                <v-list-item-action>
+                  <v-btn icon :to="{ name: 'editBudget', params: { id: budget.budgetId } }">
+                    <v-icon>{{ mdiPencil }}</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </v-list-item>
 
         <v-divider class="mb-5"></v-divider>

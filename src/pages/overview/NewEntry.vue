@@ -25,7 +25,7 @@
                 <v-flex v-if="dataBudget" xs7>
                   <v-category-select
                     v-model="editor.category"
-                    :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
+                    :items="availableCategories"
                     :label="$t('general.category')"
                     :rules="requiredRule"
                   ></v-category-select>
@@ -42,7 +42,7 @@
                 <v-flex v-show="tab == 3" xs7>
                   <v-category-select
                     v-model="editor.sourceCategory"
-                    :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
+                    :items="availableCategories"
                     :label="$t('categories.sourceCategory')"
                     clearable
                   ></v-category-select>
@@ -142,10 +142,10 @@
           <v-btn v-if="tab == 3" dark text @click="createAllocation">{{ $t('general.add') }}</v-btn>
           <v-tabs slot="extension" v-model="tab" :background-color="color[tab]" grow>
             <v-tabs-slider></v-tabs-slider>
-            <v-tab class="white--text" ripple>Wydatki</v-tab>
-            <v-tab class="white--text" ripple>Wpływy</v-tab>
-            <v-tab class="white--text" ripple>Oszczędzności</v-tab>
-            <v-tab class="white--text" ripple>Alokacje</v-tab>
+            <v-tab class="white--text" ripple>{{ $t('general.spendings') }}</v-tab>
+            <v-tab class="white--text" ripple>{{ $t('general.incomes') }}</v-tab>
+            <v-tab class="white--text" ripple>{{ $t('general.savings') }}</v-tab>
+            <v-tab class="white--text" ripple>{{ $t('general.allocations') }}</v-tab>
           </v-tabs>
         </v-toolbar>
         <v-form ref="editorForm" v-model="valid" class="px-2" lazy-validation>
@@ -158,16 +158,16 @@
               <v-flex v-if="dataBudget" xs12>
                 <v-category-select
                   v-model="editor.category"
-                  :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
+                  :items="availableCategories"
                   :label="$t('general.category')"
                   :rules="requiredRule"
                 ></v-category-select>
               </v-flex>
 
-              <v-flex v-if="tab == 3 && dataBudget" xs12>
+              <v-flex v-show="tab == 3 && dataBudget" xs12>
                 <v-category-select
                   v-model="editor.sourceCategory"
-                  :items="dataBudget.budgetCategories.filter(v => v.type == selectedType)"
+                  :items="availableCategories"
                   :label="$t('categories.sourceCategory')"
                   clearable
                 ></v-category-select>
@@ -318,6 +318,13 @@ export default class NewEntry extends Vue {
       : eCategoryType.Saving;
   }
 
+  get availableCategories() {
+    if (!this.dataBudget) {
+      return [];
+    }
+    return this.dataBudget.budgetCategories.filter(v => v.type == this.selectedType);
+  }
+
   @Watch('tab')
   OnTabChange() {
     (this.$refs.editorForm as Vue & { resetValidation: () => any }).resetValidation();
@@ -398,6 +405,9 @@ export default class NewEntry extends Vue {
         budgetCategoryId: this.editor.category.budgetCategoryId,
         transactionDate: this.editor.date,
       };
+      if (this.editor.transactionScheduleId) {
+        transaction.transactionScheduleId = this.editor.transactionScheduleId;
+      }
 
       if (this.createSchedule && !this.editor.transactionScheduleId) {
         this.createTransactionSchedule(this.editor);

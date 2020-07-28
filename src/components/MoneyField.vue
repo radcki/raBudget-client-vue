@@ -95,10 +95,11 @@ export default class MoneyField extends Vue {
 
   validate() {
     const errors: string[] = [];
-    if (!this.rules) {
-      this.rules = [];
+    let rules: ((v) => boolean | string)[] = [];
+    if (this.rules) {
+      rules = [...this.rules];
     }
-    for (const test of this.rules) {
+    for (const test of rules) {
       if (typeof test(this.innerValue) == 'string') {
         errors.push(test(this.innerValue) as string);
       }

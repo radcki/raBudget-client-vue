@@ -9,6 +9,7 @@ import VueCurrencyFilter from 'vue-currency-filter';
 import VueWait from 'vue-wait';
 import vuetify from './plugins/vuetify';
 import { Copy } from './plugins/copy';
+import { DatePlugin } from './plugins/date';
 import i18n from './plugins/i18n';
 import VueKeycloakJs from '@dsb-norge/vue-keycloak-js';
 import VueMarkdown from 'vue-markdown';
@@ -67,6 +68,7 @@ import { eCategoryType } from './typings/enums/eCategoryType';
 import { NumberFormatInfo } from './typings/Currency';
 
 Vue.use(Copy);
+Vue.use(DatePlugin);
 Vue.use(VueCurrencyInput, {});
 
 Vue.filter('dateFormat', (value, formatString, locale) => {
