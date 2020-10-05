@@ -11,7 +11,7 @@
           <label
             v-if="label"
             :class="labelClass"
-            style="left: 0px; right: auto; position: absolute;"
+            style="left: 0px; right: auto; position: absolute"
           >
             {{ label }}
           </label>

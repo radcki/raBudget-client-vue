@@ -1,4 +1,3 @@
-import { VueConstructor } from 'vue';
 import { format } from 'date-fns';
 
 export const DatePlugin = {

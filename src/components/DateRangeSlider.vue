@@ -33,7 +33,7 @@
       <v-flex xs12 :md6="!!chips">
         <v-container fluid grid-list-sm class="pa-0">
           <v-layout row wrap>
-            <v-flex xs6 style="width: 120px;">
+            <v-flex xs6 style="width: 120px">
               <v-date-field
                 v-model="selectedMin"
                 :type="step === 'month' ? 'month' : 'day'"
@@ -41,7 +41,7 @@
               ></v-date-field>
             </v-flex>
 
-            <v-flex xs6 style="width: 120px;">
+            <v-flex xs6 style="width: 120px">
               <v-date-field
                 v-model="selectedMax"
                 :type="step === 'month' ? 'month' : 'day'"
