@@ -23,7 +23,7 @@
     <v-card-text class="px-0 pb-0">
       <v-list subheader class="cardBackground">
         <v-list-item v-for="(category, i) in items" :key="i" :data="category">
-          <v-list-item-action class="pa-0 ma-0" style="width: 36px;">
+          <v-list-item-action class="pa-0 ma-0" style="width: 36px">
             <v-row no-gutters>
               <v-col :cols="12">
                 <v-icon v-show="i != 0" @click="moveCategoryUp(category)">{{

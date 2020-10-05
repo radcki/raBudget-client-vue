@@ -89,7 +89,7 @@
         ></v-progress-circular>
       </v-flex>
 
-      <v-card v-if="transactions" style="width: 100%;" class="elevation-1 cardBackground">
+      <v-card v-if="transactions" style="width: 100%" class="elevation-1 cardBackground">
         <v-card-text>
           <v-layout row justify-end>
             <v-flex xs4>

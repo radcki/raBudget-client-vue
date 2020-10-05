@@ -2,7 +2,7 @@
   <v-card color="cardBackground">
     <v-card-text>
       <v-layout row wrap justify-center>
-        <v-flex v-if="!isMobile" xs3 style="min-height: 18px;">
+        <v-flex v-if="!isMobile" xs3 style="min-height: 18px">
           <v-progress-linear
             v-show="loading"
             class="py-0 my-0"

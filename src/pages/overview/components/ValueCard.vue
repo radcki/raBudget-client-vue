@@ -5,7 +5,7 @@
       <animated-number v-if="value" :value="value" :format-value="formatAmount" :duration="300" />
       <span v-else>-</span>
     </v-card-text>
-    <v-card-actions style="min-height: 7px;" class="pa-0 ma-0">
+    <v-card-actions style="min-height: 7px" class="pa-0 ma-0">
       <v-progress-linear
         v-show="loading"
         class="pa-0 ma-0"

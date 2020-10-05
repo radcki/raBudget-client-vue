@@ -39,7 +39,7 @@
           >{{ $t('reports.monthByMonth') }}</v-chip
         >
       </v-flex>
-      <v-flex xs12 d-flex style="min-height: 500px;">
+      <v-flex xs12 d-flex style="min-height: 500px">
         <v-card class="px-3" color="cardBackground">
           <div class="pt-3 progress-wrapper">
             <v-progress-linear
@@ -136,8 +136,7 @@
                                 </template>
                                 <span>
                                   {{
-                                    (item.reportData.transactionsSum /
-                                      periodTotals.transactionsSum)
+                                    (item.reportData.transactionsSum / periodTotals.transactionsSum)
                                       | percentage
                                   }}
                                 </span>
@@ -212,8 +211,7 @@
                                 </template>
                                 <span>
                                   {{
-                                    (item.reportData.averagePerMonth /
-                                      periodTotals.averagePerMonth)
+                                    (item.reportData.averagePerMonth / periodTotals.averagePerMonth)
                                       | percentage
                                   }}
                                 </span>

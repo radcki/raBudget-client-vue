@@ -1,13 +1,13 @@
 <template>
   <v-card class="cardBackground">
     <v-card-title :class="`${color} py-1 mb-0`">
-      <div style="width: 100%;">
+      <div style="width: 100%">
         <v-row no-gutters>
           <v-col class="pa-0 mt-0">
             <span class="subtitle-2 white--text text-sm-left">{{ title }}</span>
           </v-col>
         </v-row>
-        <v-row no-gutters style="min-height: 5px;">
+        <v-row no-gutters style="min-height: 5px">
           <v-progress-linear
             v-show="loading"
             top
